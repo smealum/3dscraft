@@ -4,6 +4,9 @@
 #include <string.h>
 #include <3ds/3ds.h>
 #include "math.h"
+#include "gs.h"
+#include "world.h"
+#include "player.h"
 #include "test_vsh_shbin.h"
 #include "test_png_bin.h"
 #include "mdl.h"
@@ -95,15 +98,13 @@ void doFrame1()
 		float projection[16];
 
 		loadIdentity44(modelView);
-		loadIdentity44(projection);
-
-		translateMatrix(modelView, tx, ty, tz);
-		rotateMatrixX(modelView, angle);
-		rotateMatrixZ(modelView, angleZ);
-
-		initProjectionMatrix(projection, 1.3962634f, 240.0f/400.0f, 0.01f, 10.0f);
-
+			translateMatrix(modelView, tx, ty, tz);
+			rotateMatrixX(modelView, angle);
+			rotateMatrixZ(modelView, angleZ);
 		setUniformMatrix(0x24, modelView);
+
+		loadIdentity44(projection);
+			initProjectionMatrix(projection, 1.3962634f, 240.0f/400.0f, 0.01f, 10.0f);
 		setUniformMatrix(0x20, projection);
 
 	//draw first model
@@ -112,7 +113,6 @@ void doFrame1()
 
 	//setup matrices
 		loadIdentity44(modelView);
-		loadIdentity44(projection);
 
 		translateMatrix(modelView, tx, -ty, tz);
 		rotateMatrixX(modelView, -angle);
