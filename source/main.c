@@ -15,7 +15,7 @@ DVLB_s* shader;
 float* vertArray;
 u32* texData;
 
-// world_s world;
+worldCluster_s wcl;
 
 void setUniformMatrix(u32 startreg, float* m)
 {
@@ -98,13 +98,15 @@ void doFrame1()
 		float projection[16];
 
 		loadIdentity44(modelView);
-			translateMatrix(modelView, tx, ty, tz);
-			rotateMatrixX(modelView, angle);
-			rotateMatrixZ(modelView, angleZ);
-		setUniformMatrix(0x24, modelView);
-
 		loadIdentity44(projection);
-			initProjectionMatrix(projection, 1.3962634f, 240.0f/400.0f, 0.01f, 10.0f);
+
+		translateMatrix(modelView, tx, ty, tz);
+		rotateMatrixX(modelView, angle);
+		rotateMatrixZ(modelView, angleZ);
+
+		initProjectionMatrix(projection, 1.3962634f, 240.0f/400.0f, 0.01f, 10.0f);
+
+		setUniformMatrix(0x24, modelView);
 		setUniformMatrix(0x20, projection);
 
 	//draw first model
@@ -113,6 +115,7 @@ void doFrame1()
 
 	//setup matrices
 		loadIdentity44(modelView);
+		loadIdentity44(projection);
 
 		translateMatrix(modelView, tx, -ty, tz);
 		rotateMatrixX(modelView, -angle);
@@ -121,9 +124,8 @@ void doFrame1()
 		setUniformMatrix(0x24, modelView);
 
 	//draw second
-		GPU_DrawArray(GPU_TRIANGLES, mdlFaces*3);
-
-	// drawWorld(&world);
+		// GPU_DrawArray(GPU_TRIANGLES, mdlFaces*3);
+		drawWorldCluster(&wcl);
 
 	//finalize stuff ?
 		GPUCMD_AddSingleParam(0x000F0111, 0x00000001);
@@ -164,7 +166,13 @@ int main()
 	
 	GPU_Init(NULL);
 
-	// gsInit();
+	gsInit();
+
+	// world_s* world=malloc(sizeof(world_s));
+	// initWorld(world);
+	initWorldCluster(&wcl, vect3Di(0,8,0));
+	generateWorldClusterData(&wcl);
+	generateWorldClusterGeometry(&wcl);
 
 	u32 gpuCmdSize=0x40000;
 	u32* gpuCmd=(u32*)gfxAllocLinear(gpuCmdSize*4);
@@ -179,9 +187,6 @@ int main()
 
 	tx=ty=0.0f; tz=-0.1f;
 	shader=SHDR_ParseSHBIN((u32*)test_vsh_shbin,test_vsh_shbin_size);
-
-	// initWorld(&world);
-	// generateWorld(&world);
 
 	GX_SetMemoryFill(gxCmdBuf, (u32*)gpuOut, 0x404040FF, (u32*)&gpuOut[0x2EE00], 0x201, (u32*)gpuDOut, 0x00000000, (u32*)&gpuDOut[0x2EE00], 0x201);
 	gfxSwapBuffersGpu();
@@ -206,7 +211,7 @@ int main()
 		gspWaitForVBlank();
 	}
 
-	// gsExit();
+	gsExit();
 	hidExit();
 	gfxExit();
 	aptExit();

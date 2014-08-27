@@ -35,7 +35,7 @@ INCLUDES	:=	include
 ARCH	:=	-march=armv6k -mtune=mpcore
 
 CFLAGS	:=	-g -Wall -O2 -mword-relocations -save-temps \
-			-fomit-frame-pointer -ffast-math \
+			-fomit-frame-pointer -ffast-math -mfloat-abi=softfp \
 			$(ARCH)
 
 CFLAGS	+=	$(INCLUDE) -DARM11 -D_3DS

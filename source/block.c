@@ -47,7 +47,7 @@ void blockGenerateFaceGeometry(blockFace_s* bf, gsVbo_s* vbo)
 	if(!bf || !vbo)return;
 	if(vbo->maxSize-vbo->currentSize < FACE_VBO_SIZE)return;
 
-	const vect3Df_s p=vi2f(vmuli(bf->position, CLUSTER_SIZE));
+	const vect3Df_s p=vi2f(bf->position);
 	const orientation_t o=bf->orientation;
 	const vect3Df_s vertices[]=
 	{
