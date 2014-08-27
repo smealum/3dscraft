@@ -1,4 +1,4 @@
-#include <3ds/3ds.h>
+#include <3ds.h>
 #include "world.h"
 #include "block.h"
 

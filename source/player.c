@@ -1,4 +1,4 @@
-#include <3ds/3ds.h>
+#include <3ds.h>
 #include "player.h"
 
 void initPlayer(player_s* p)

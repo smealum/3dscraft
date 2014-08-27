@@ -1,5 +1,5 @@
 #include <string.h>
-#include <3ds/3ds.h>
+#include <3ds.h>
 
 #include "gs.h"
 #include "world.h"
