@@ -3,6 +3,9 @@
 
 #include <3ds/types.h>
 
+typedef float mtx44[4][4];
+typedef float mtx33[3][3];
+
 typedef struct
 {
 	s32 x, y, z;
@@ -48,6 +51,7 @@ void multMatrix44(float* m1, float* m2, float* m);
 
 void translateMatrix(float* tm, float x, float y, float z);
 void rotateMatrixX(float* tm, float x);
+void rotateMatrixY(float* tm, float x);
 void rotateMatrixZ(float* tm, float x);
 void scaleMatrix(float* tm, float x, float y, float z);
 

@@ -44,6 +44,20 @@ void rotateMatrixX(float* tm, float x)
 	memcpy(tm,m,16*sizeof(float));
 }
 
+void rotateMatrixY(float* tm, float x)
+{
+	float rm[16], m[16];
+	memset(rm, 0x00, 16*4);
+	rm[0]=cos(x);
+	rm[2]=sin(x);
+	rm[5]=1.0f;
+	rm[8]=-sin(x);
+	rm[10]=cos(x);
+	rm[15]=1.0f;
+	multMatrix44(tm,rm,m);
+	memcpy(tm,m,16*sizeof(float));
+}
+
 void rotateMatrixZ(float* tm, float x)
 {
 	float rm[16], m[16];
