@@ -12,6 +12,8 @@ DVLB_s* shader;
 float* vertArray;
 u32* texData;
 
+// world_s world;
+
 void setUniformMatrix(u32 startreg, float* m)
 {
 	float param[16];
@@ -121,6 +123,8 @@ void doFrame1()
 	//draw second
 		GPU_DrawArray(GPU_TRIANGLES, mdlFaces*3);
 
+	// drawWorld(&world);
+
 	//finalize stuff ?
 		GPUCMD_AddSingleParam(0x000F0111, 0x00000001);
 		GPUCMD_AddSingleParam(0x000F0110, 0x00000001);
@@ -160,6 +164,8 @@ int main()
 	
 	GPU_Init(NULL);
 
+	// gsInit();
+
 	u32 gpuCmdSize=0x40000;
 	u32* gpuCmd=(u32*)gfxAllocLinear(gpuCmdSize*4);
 
@@ -173,6 +179,9 @@ int main()
 
 	tx=ty=0.0f; tz=-0.1f;
 	shader=SHDR_ParseSHBIN((u32*)test_vsh_shbin,test_vsh_shbin_size);
+
+	// initWorld(&world);
+	// generateWorld(&world);
 
 	GX_SetMemoryFill(gxCmdBuf, (u32*)gpuOut, 0x404040FF, (u32*)&gpuOut[0x2EE00], 0x201, (u32*)gpuDOut, 0x00000000, (u32*)&gpuDOut[0x2EE00], 0x201);
 	gfxSwapBuffersGpu();
@@ -197,6 +206,7 @@ int main()
 		gspWaitForVBlank();
 	}
 
+	// gsExit();
 	hidExit();
 	gfxExit();
 	aptExit();
