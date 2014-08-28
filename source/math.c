@@ -107,3 +107,15 @@ void initProjectionMatrix(float* m, float fovy, float aspect, float near, float 
 	*(m++) = -1.0f;
 	*(m++) = 0.0f;
 }
+
+vect3Df_s getMatrixColumn(float* m, u8 i)
+{
+	if(!m || i>=4)return vect3Df(0,0,0);
+	return vect3Df(m[i+0*4],m[i+1*4],m[i+2*4]);
+}
+
+vect3Df_s getMatrixRow(float* m, u8 i)
+{
+	if(!m || i>=4)return vect3Df(0,0,0);
+	return vect3Df(m[0+i*4],m[1+i*4],m[2+i*4]);
+}

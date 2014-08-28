@@ -15,7 +15,8 @@ DVLB_s* shader;
 float* vertArray;
 u32* texData;
 
-worldCluster_s wcl;
+player_s player;
+world_s world;
 
 void setUniformMatrix(u32 startreg, float* m)
 {
@@ -123,9 +124,11 @@ void doFrame1()
 
 		setUniformMatrix(0x24, modelView);
 
+		// setCameraPlayer(&player);
+
 	//draw second
 		// GPU_DrawArray(GPU_TRIANGLES, mdlFaces*3);
-		drawWorldCluster(&wcl);
+		drawWorld(&world);
 
 	//finalize stuff ?
 		GPUCMD_AddSingleParam(0x000F0111, 0x00000001);
@@ -152,6 +155,8 @@ void demoControls(void)
 
 	if(PAD&KEY_X)angleZ+=0.1f;
 	if(PAD&KEY_B)angleZ-=0.1f;
+
+	controlsPlayer(&player);
 }
 
 extern u32* gxCmdBuf;
@@ -168,11 +173,9 @@ int main()
 
 	gsInit();
 
-	// world_s* world=malloc(sizeof(world_s));
-	// initWorld(world);
-	initWorldCluster(&wcl, vect3Di(0,8,0));
-	generateWorldClusterData(&wcl);
-	generateWorldClusterGeometry(&wcl);
+	initPlayer(&player);
+	initWorld(&world);
+	generateWorld(&world);
 
 	u32 gpuCmdSize=0x40000;
 	u32* gpuCmd=(u32*)gfxAllocLinear(gpuCmdSize*4);
@@ -197,6 +200,7 @@ int main()
 		if(status==APP_RUNNING)
 		{
 			demoControls();
+			updatePlayer(&player);
 
 			GX_SetMemoryFill(gxCmdBuf, (u32*)gpuOut, 0x404040FF, (u32*)&gpuOut[0x2EE00], 0x201, (u32*)gpuDOut, 0x00000000, (u32*)&gpuDOut[0x2EE00], 0x201);
 

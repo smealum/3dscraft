@@ -2,6 +2,7 @@
 #define MATH_H
 
 #include <3ds/types.h>
+#include <math.h>
 
 typedef float mtx44[4][4];
 typedef float mtx33[3][3];
@@ -41,6 +42,17 @@ static inline vect3Df_s vaddf(vect3Df_s u, vect3Df_s v)
 	return (vect3Df_s){u.x+v.x,u.y+v.y,u.z+v.z};
 }
 
+static inline vect3Df_s vmulf(vect3Df_s v, float f)
+{
+	return (vect3Df_s){v.x*f,v.y*f,v.z*f};
+}
+
+static inline vect3Df_s vnormf(vect3Df_s v)
+{
+	const float l=sqrtf(v.x*v.x+v.y*v.y+v.z*v.z);
+	return (vect3Df_s){v.x/l,v.y/l,v.z/l};
+}
+
 static inline vect3Df_s vi2f(vect3Di_s v)
 {
 	return (vect3Df_s){(float)v.x,(float)v.y,(float)v.z};
@@ -57,6 +69,7 @@ void scaleMatrix(float* tm, float x, float y, float z);
 
 void initProjectionMatrix(float* m, float fovy, float aspect, float near, float far);
 
-
+vect3Df_s getMatrixColumn(float* m, u8 i);
+vect3Df_s getMatrixRow(float* m, u8 i);
 
 #endif
