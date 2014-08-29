@@ -31,6 +31,12 @@ typedef struct
 	worldChunk_s data[WORLD_SIZE][WORLD_SIZE];
 }world_s;
 
+
+void initWorldCluster(worldCluster_s* wcl, vect3Di_s pos);
+void drawWorldCluster(worldCluster_s* wcl);
+void generateWorldClusterGeometry(worldCluster_s* wcl);
+void generateWorldClusterData(worldCluster_s* wcl);
+
 void initWorld(world_s* w);
 void generateWorld(world_s* w);
 void drawWorld(world_s* w);

@@ -40,6 +40,7 @@ int gsMultMatrix(float* data);
 
 int gsVboInit(gsVbo_s* vbo);
 int gsVboCreate(gsVbo_s* vbo, u32 size);
+int gsVboFlushData(gsVbo_s* vbo);
 int gsVboDestroy(gsVbo_s* vbo);
 int gsVboDraw(gsVbo_s* vbo);
 void* gsVboGetOffset(gsVbo_s* vbo);

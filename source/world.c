@@ -36,7 +36,7 @@ void generateWorldClusterGeometry(worldCluster_s* wcl)
 	static blockFace_s faceList[4096]; //TODO : calculate real max
 	static int faceListSize=0;
 
-	const vect3Di_s p = vmuli(wcl->position, CLUSTER_SIZE);
+	// const vect3Di_s p = vmuli(wcl->position, CLUSTER_SIZE);
 	int i, j, k;
 	for(i=1; i<CLUSTER_SIZE-1; i++)
 	{
@@ -45,12 +45,12 @@ void generateWorldClusterGeometry(worldCluster_s* wcl)
 			for(k=1; k<CLUSTER_SIZE-1; k++)
 			{
 				u8 cb=wcl->data[i][j][k];
-				if(blockShouldBeFace(cb, wcl->data[i+1][j][k])>=0)pushFace(faceList, faceListSize, blockFace(FACE_PX, vaddi(p, vect3Di(i,j,k))));
-				if(blockShouldBeFace(cb, wcl->data[i-1][j][k])>=0)pushFace(faceList, faceListSize, blockFace(FACE_MX, vaddi(p, vect3Di(i,j,k))));
-				if(blockShouldBeFace(cb, wcl->data[i][j+1][k])>=0)pushFace(faceList, faceListSize, blockFace(FACE_PY, vaddi(p, vect3Di(i,j,k))));
-				if(blockShouldBeFace(cb, wcl->data[i][j-1][k])>=0)pushFace(faceList, faceListSize, blockFace(FACE_MY, vaddi(p, vect3Di(i,j,k))));
-				if(blockShouldBeFace(cb, wcl->data[i][j][k+1])>=0)pushFace(faceList, faceListSize, blockFace(FACE_PZ, vaddi(p, vect3Di(i,j,k))));
-				if(blockShouldBeFace(cb, wcl->data[i][j][k-1])>=0)pushFace(faceList, faceListSize, blockFace(FACE_MZ, vaddi(p, vect3Di(i,j,k))));
+				if(blockShouldBeFace(cb, wcl->data[i+1][j][k])>=0)pushFace(faceList, faceListSize, blockFace(FACE_PX, vect3Di(i,j,k)));
+				if(blockShouldBeFace(cb, wcl->data[i-1][j][k])>=0)pushFace(faceList, faceListSize, blockFace(FACE_MX, vect3Di(i,j,k)));
+				if(blockShouldBeFace(cb, wcl->data[i][j+1][k])>=0)pushFace(faceList, faceListSize, blockFace(FACE_PY, vect3Di(i,j,k)));
+				if(blockShouldBeFace(cb, wcl->data[i][j-1][k])>=0)pushFace(faceList, faceListSize, blockFace(FACE_MY, vect3Di(i,j,k)));
+				if(blockShouldBeFace(cb, wcl->data[i][j][k+1])>=0)pushFace(faceList, faceListSize, blockFace(FACE_PZ, vect3Di(i,j,k)));
+				if(blockShouldBeFace(cb, wcl->data[i][j][k-1])>=0)pushFace(faceList, faceListSize, blockFace(FACE_MZ, vect3Di(i,j,k)));
 			}
 		}
 	}
@@ -67,6 +67,7 @@ void generateWorldClusterGeometry(worldCluster_s* wcl)
 			blockGenerateFaceGeometry(bf, &wcl->vbo);
 		}
 
+		gsVboFlushData(&wcl->vbo);
 		wcl->generated=true;
 	}
 }

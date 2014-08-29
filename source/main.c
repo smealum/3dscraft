@@ -8,8 +8,8 @@
 #include "world.h"
 #include "player.h"
 #include "test_vsh_shbin.h"
-#include "test_png_bin.h"
-#include "mdl.h"
+#include "terrain_bin.h"
+// #include "mdl.h"
 
 DVLB_s* shader;
 u32* texData;
@@ -18,33 +18,6 @@ player_s player;
 world_s world;
 worldCluster_s wcl;
 gsVbo_s modelVbo;
-
-void setUniformMatrix(u32 startreg, float* m)
-{
-	float param[16];
-
-	param[0x0]=m[3]; //w
-	param[0x1]=m[2]; //z
-	param[0x2]=m[1]; //y
-	param[0x3]=m[0]; //x
-
-	param[0x4]=m[7];
-	param[0x5]=m[6];
-	param[0x6]=m[5];
-	param[0x7]=m[4];
-	
-	param[0x8]=m[11];
-	param[0x9]=m[10];
-	param[0xa]=m[9];
-	param[0xb]=m[8];
-
-	param[0xc]=m[15];
-	param[0xd]=m[14];
-	param[0xe]=m[13];
-	param[0xf]=m[12];
-
-	GPU_SetUniform(startreg, (u32*)param, 4);
-}
 
 float angle=0.0f;
 float angleZ=0.0f;
@@ -98,7 +71,8 @@ void doFrame1()
 			gsRotateX(angle);
 			gsRotateZ(angleZ);
 
-			gsVboDraw(&modelVbo);
+			// gsVboDraw(&modelVbo);
+			drawWorldCluster(&wcl);
 		gsPopMatrix();
 
 	// //finalize stuff ?
@@ -149,12 +123,16 @@ int main()
 
 	GPU_Reset(gxCmdBuf, gpuCmd, gpuCmdSize);
 
-	texData=(u32*)linearAlloc(0x100000);
+	texData=(u32*)linearAlloc(terrain_bin_size);
+	memcpy(texData, terrain_bin, terrain_bin_size);
+	GSPGPU_FlushDataCache(NULL, (u8*)texData, terrain_bin_size);
 
-	memcpy(texData, test_png_bin, test_png_bin_size);
+	// gsVboCreate(&modelVbo, sizeof(mdlData));
+	// gsVboAddData(&modelVbo, mdlData, sizeof(mdlData));
 
-	gsVboCreate(&modelVbo, sizeof(mdlData));
-	gsVboAddData(&modelVbo, mdlData, sizeof(mdlData));
+	initWorldCluster(&wcl, vect3Di(0,8,0));
+	generateWorldClusterData(&wcl);
+	generateWorldClusterGeometry(&wcl);
 
 	gsMatrixMode(GS_PROJECTION);
 	gsProjectionMatrix(1.3962634f, 240.0f/400.0f, 0.01f, 10.0f);

@@ -245,6 +245,15 @@ int gsVboAddData(gsVbo_s* vbo, void* data, u32 size)
 	return 0;
 }
 
+int gsVboFlushData(gsVbo_s* vbo)
+{
+	if(!vbo)return -1;
+
+	GSPGPU_FlushDataCache(NULL, vbo->data, vbo->currentSize);
+
+	return 0;
+}
+
 int gsVboDestroy(gsVbo_s* vbo)
 {
 	if(!vbo)return -1;
