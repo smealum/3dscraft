@@ -28,7 +28,7 @@ void drawWorldCluster(worldCluster_s* wcl)
 	gsPopMatrix();
 }
 
-void generateWorldClusterGeometry(worldCluster_s* wcl)
+void generateWorldClusterGeometry(worldCluster_s* wcl, world_s* w)
 {
 	if(!wcl)return;
 	if(wcl->generated)gsVboDestroy(&wcl->vbo);
@@ -39,21 +39,35 @@ void generateWorldClusterGeometry(worldCluster_s* wcl)
 	static blockFace_s faceList[4096]; //TODO : calculate real max
 	static int faceListSize=0;
 
-	// const vect3Di_s p = vmuli(wcl->position, CLUSTER_SIZE);
+	//TODO : optimize world block accesses
+	const vect3Di_s p = vmuli(wcl->position, CLUSTER_SIZE);
 	int i, j, k;
-	for(i=1; i<CLUSTER_SIZE-1; i++)
+	for(i=0; i<CLUSTER_SIZE; i++)
 	{
-		for(j=1; j<CLUSTER_SIZE-1; j++)
+		for(j=0; j<CLUSTER_SIZE; j++)
 		{
-			for(k=1; k<CLUSTER_SIZE-1; k++)
+			for(k=0; k<CLUSTER_SIZE; k++)
 			{
-				u8 cb=wcl->data[i][j][k];
-				if(blockShouldBeFace(cb, wcl->data[i+1][j][k])>=0)pushFace(faceList, faceListSize, blockFace(cb, FACE_PX, vect3Di(i,j,k)));
-				if(blockShouldBeFace(cb, wcl->data[i-1][j][k])>=0)pushFace(faceList, faceListSize, blockFace(cb, FACE_MX, vect3Di(i,j,k)));
-				if(blockShouldBeFace(cb, wcl->data[i][j+1][k])>=0)pushFace(faceList, faceListSize, blockFace(cb, FACE_PY, vect3Di(i,j,k)));
-				if(blockShouldBeFace(cb, wcl->data[i][j-1][k])>=0)pushFace(faceList, faceListSize, blockFace(cb, FACE_MY, vect3Di(i,j,k)));
-				if(blockShouldBeFace(cb, wcl->data[i][j][k+1])>=0)pushFace(faceList, faceListSize, blockFace(cb, FACE_PZ, vect3Di(i,j,k)));
-				if(blockShouldBeFace(cb, wcl->data[i][j][k-1])>=0)pushFace(faceList, faceListSize, blockFace(cb, FACE_MZ, vect3Di(i,j,k)));
+				if(i>=1 && i<CLUSTER_SIZE-1 && j>=1 && j<CLUSTER_SIZE-1 && k>=1 && k<CLUSTER_SIZE-1)
+				{
+					const u8 cb=wcl->data[i][j][k];
+
+					if(blockShouldBeFace(cb, wcl->data[i+1][j][k])>=0) pushFace(faceList, faceListSize, blockFace(cb, FACE_PX, vect3Di(i,j,k)));
+					if(blockShouldBeFace(cb, wcl->data[i-1][j][k])>=0) pushFace(faceList, faceListSize, blockFace(cb, FACE_MX, vect3Di(i,j,k)));
+					if(blockShouldBeFace(cb, wcl->data[i][j+1][k])>=0) pushFace(faceList, faceListSize, blockFace(cb, FACE_PY, vect3Di(i,j,k)));
+					if(blockShouldBeFace(cb, wcl->data[i][j-1][k])>=0) pushFace(faceList, faceListSize, blockFace(cb, FACE_MY, vect3Di(i,j,k)));
+					if(blockShouldBeFace(cb, wcl->data[i][j][k+1])>=0) pushFace(faceList, faceListSize, blockFace(cb, FACE_PZ, vect3Di(i,j,k)));
+					if(blockShouldBeFace(cb, wcl->data[i][j][k-1])>=0) pushFace(faceList, faceListSize, blockFace(cb, FACE_MZ, vect3Di(i,j,k)));
+				}else{
+					const s16 cb=getWorldBlock(w, vaddi(p, vect3Di(i,j,k)));
+
+					if(blockShouldBeFace(cb, getWorldBlock(w, vaddi(p, vect3Di(i+1, j, k))))>=0) pushFace(faceList, faceListSize, blockFace(cb, FACE_PX, vect3Di(i,j,k)));
+					if(blockShouldBeFace(cb, getWorldBlock(w, vaddi(p, vect3Di(i-1, j, k))))>=0) pushFace(faceList, faceListSize, blockFace(cb, FACE_MX, vect3Di(i,j,k)));
+					if(blockShouldBeFace(cb, getWorldBlock(w, vaddi(p, vect3Di(i, j+1, k))))>=0) pushFace(faceList, faceListSize, blockFace(cb, FACE_PY, vect3Di(i,j,k)));
+					if(blockShouldBeFace(cb, getWorldBlock(w, vaddi(p, vect3Di(i, j-1, k))))>=0) pushFace(faceList, faceListSize, blockFace(cb, FACE_MY, vect3Di(i,j,k)));
+					if(blockShouldBeFace(cb, getWorldBlock(w, vaddi(p, vect3Di(i, j, k+1))))>=0) pushFace(faceList, faceListSize, blockFace(cb, FACE_PZ, vect3Di(i,j,k)));
+					if(blockShouldBeFace(cb, getWorldBlock(w, vaddi(p, vect3Di(i, j, k-1))))>=0) pushFace(faceList, faceListSize, blockFace(cb, FACE_MZ, vect3Di(i,j,k)));
+				}
 			}
 		}
 	}
@@ -97,6 +111,15 @@ void generateWorldClusterData(worldCluster_s* wcl)
 	}
 }
 
+s16 getWorldClusterBlock(worldCluster_s* wcl, vect3Di_s p)
+{
+	if(!wcl)return -1;
+	if(p.x<0 || p.y<0 || p.z<0)return -1;
+	if(p.x>=CLUSTER_SIZE || p.y>=CLUSTER_SIZE || p.z>=CLUSTER_SIZE)return -1;
+
+	return wcl->data[p.x][p.y][p.z];
+}
+
 void initWorldChunk(worldChunk_s* wch, vect3Di_s pos)
 {
 	if(!wch)return;
@@ -114,11 +137,11 @@ void generateWorldChunkData(worldChunk_s* wch)
 }
 
 //TEMP ?
-void generateWorldChunkGeometry(worldChunk_s* wch)
+void generateWorldChunkGeometry(worldChunk_s* wch, world_s* w)
 {
 	if(!wch)return;
 
-	int k; for(k=0; k<CHUNK_HEIGHT; k++)generateWorldClusterGeometry(&wch->data[k]);
+	int k; for(k=0; k<CHUNK_HEIGHT; k++)generateWorldClusterGeometry(&wch->data[k], w);
 }
 
 void drawWorldChunk(worldChunk_s* wch)
@@ -127,6 +150,15 @@ void drawWorldChunk(worldChunk_s* wch)
 
 	//culling goes here
 	int k; for(k=0; k<CHUNK_HEIGHT; k++)drawWorldCluster(&wch->data[k]);
+}
+
+s16 getWorldChunkBlock(worldChunk_s* wc, vect3Di_s p)
+{
+	if(!wc)return -1;
+	if(p.x<0 || p.y<0 || p.z<0)return -1;
+	if(p.x>=CLUSTER_SIZE || p.y>=CHUNK_HEIGHT*CLUSTER_SIZE || p.z>=CLUSTER_SIZE)return -1;
+
+	return getWorldClusterBlock(&wc->data[p.y/CLUSTER_SIZE], vect3Di(p.x, p.y%CLUSTER_SIZE, p.z));
 }
 
 void initWorld(world_s* w)
@@ -161,9 +193,18 @@ void generateWorld(world_s* w)
 	{
 		for(j=0; j<WORLD_SIZE; j++)
 		{
-			generateWorldChunkGeometry(&w->data[i][j]);
+			generateWorldChunkGeometry(&w->data[i][j], w);
 		}
 	}
+}
+
+s16 getWorldBlock(world_s* w, vect3Di_s p)
+{
+	if(!w)return -1;
+	if(p.x<0 || p.y<0 || p.z<0)return -1;
+	if(p.x>=WORLD_SIZE*CLUSTER_SIZE || p.y>=CHUNK_HEIGHT*CLUSTER_SIZE || p.z>=WORLD_SIZE*CLUSTER_SIZE)return -1;
+
+	return getWorldChunkBlock(&w->data[p.x/CLUSTER_SIZE][p.z/CLUSTER_SIZE], vect3Di(p.x%CLUSTER_SIZE, p.y, p.z%CLUSTER_SIZE));
 }
 
 void drawWorld(world_s* w)

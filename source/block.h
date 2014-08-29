@@ -50,7 +50,7 @@ const extern blockType_s blockTypes[BLOCK_NUM];
 
 void blockGenerateFaceGeometry(blockFace_s* bf, gsVbo_s* vbo);
 
-s16 blockShouldBeFace(u8 currentBlock, u8 nextBlock);
+s16 blockShouldBeFace(s16 currentBlock, s16 nextBlock);
 
 vect3Df_s blockFaceGetTexcoord(blockFace_s* bf);
 

@@ -34,11 +34,13 @@ typedef struct
 
 void initWorldCluster(worldCluster_s* wcl, vect3Di_s pos);
 void drawWorldCluster(worldCluster_s* wcl);
-void generateWorldClusterGeometry(worldCluster_s* wcl);
 void generateWorldClusterData(worldCluster_s* wcl);
+void generateWorldClusterGeometry(worldCluster_s* wcl, world_s* w);
 
 void initWorld(world_s* w);
 void generateWorld(world_s* w);
 void drawWorld(world_s* w);
+
+s16 getWorldBlock(world_s* w, vect3Di_s p);
 
 #endif

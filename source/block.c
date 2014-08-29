@@ -41,8 +41,10 @@ const vect3Df_s fn[]={(vect3Df_s){-1.0f,0.0f,0.0f}, //MX
 						(vect3Df_s){0.0f,0.0f,1.0f}, //PZ
 						};
 
-s16 blockShouldBeFace(u8 currentBlock, u8 nextBlock)
+s16 blockShouldBeFace(s16 currentBlock, s16 nextBlock)
 {
+	if(currentBlock<0 || nextBlock<0)return -1;
+	if(currentBlock>=BLOCK_NUM || nextBlock>=BLOCK_NUM)return -1;
 	if(currentBlock!=BLOCK_AIR && nextBlock!=BLOCK_AIR)return -1;
 	if(currentBlock==BLOCK_AIR && nextBlock==BLOCK_AIR)return -1;
 	if(currentBlock!=BLOCK_AIR)return currentBlock;

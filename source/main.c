@@ -93,7 +93,7 @@ int main()
 
 	initWorldCluster(&wcl, vect3Di(0,8,0));
 	generateWorldClusterData(&wcl);
-	generateWorldClusterGeometry(&wcl);
+	generateWorldClusterGeometry(&wcl, NULL);
 
 	initWorld(&world);
 	generateWorld(&world);
