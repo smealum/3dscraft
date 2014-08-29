@@ -73,12 +73,9 @@ void doFrame1()
 
 			// gsVboDraw(&modelVbo);
 			drawWorldCluster(&wcl);
+			drawWorldCluster(&wcl);
+			drawWorldCluster(&wcl);
 		gsPopMatrix();
-
-	// //finalize stuff ?
-	// 	GPUCMD_AddSingleParam(0x000F0111, 0x00000001);
-	// 	GPUCMD_AddSingleParam(0x000F0110, 0x00000001);
-	// 	GPUCMD_AddSingleParam(0x0008025E, 0x00000000);
 }
 
 void demoControls(void)
