@@ -17,6 +17,8 @@ u32* texData;
 
 player_s player;
 world_s world;
+worldCluster_s wcl;
+gsVbo_s vbo;
 
 void setUniformMatrix(u32 startreg, float* m)
 {
@@ -114,26 +116,27 @@ void doFrame1()
 		GPU_DrawArray(GPU_TRIANGLES, mdlFaces*3);
 		// GPU_DrawElements(GPU_TRIANGLES, (u32*)(((u32)((void*)indArray-(void*)gspHeap))+0x20000000-base), 6);
 
-	//setup matrices
-		loadIdentity44(modelView);
-		loadIdentity44(projection);
+	// //setup matrices
+	// 	loadIdentity44(modelView);
+	// 	loadIdentity44(projection);
 
-		translateMatrix(modelView, tx, -ty, tz);
-		rotateMatrixX(modelView, -angle);
-		rotateMatrixZ(modelView, -angleZ);
+	// 	translateMatrix(modelView, tx, -ty, tz);
+	// 	rotateMatrixX(modelView, -angle);
+	// 	rotateMatrixZ(modelView, -angleZ);
 
-		setUniformMatrix(0x24, modelView);
+	// 	setUniformMatrix(0x24, modelView);
 
-		// setCameraPlayer(&player);
+	// 	// setCameraPlayer(&player);
 
-	//draw second
-		// GPU_DrawArray(GPU_TRIANGLES, mdlFaces*3);
-		drawWorld(&world);
+	// //draw second
+	// 	GPU_DrawArray(GPU_TRIANGLES, mdlFaces*3);
+	// 	// drawWorld(&world);
+	// 	// drawWorldCluster(&wcl);
 
-	//finalize stuff ?
-		GPUCMD_AddSingleParam(0x000F0111, 0x00000001);
-		GPUCMD_AddSingleParam(0x000F0110, 0x00000001);
-		GPUCMD_AddSingleParam(0x0008025E, 0x00000000);
+	// //finalize stuff ?
+	// 	GPUCMD_AddSingleParam(0x000F0111, 0x00000001);
+	// 	GPUCMD_AddSingleParam(0x000F0110, 0x00000001);
+	// 	GPUCMD_AddSingleParam(0x0008025E, 0x00000000);
 }
 
 void demoControls(void)
@@ -173,20 +176,25 @@ int main()
 
 	gsInit();
 
-	initPlayer(&player);
-	initWorld(&world);
-	generateWorld(&world);
-
 	u32 gpuCmdSize=0x40000;
-	u32* gpuCmd=(u32*)gfxAllocLinear(gpuCmdSize*4);
+	u32* gpuCmd=(u32*)linearAlloc(gpuCmdSize*4);
 
 	GPU_Reset(gxCmdBuf, gpuCmd, gpuCmdSize);
 
-	vertArray=(float*)gfxAllocLinear(0x100000);
-	texData=(u32*)gfxAllocLinear(0x100000);
+	vertArray=(float*)linearAlloc(0x100000);
+	texData=(u32*)linearAlloc(0x100000);
 
 	memcpy(texData, test_png_bin, test_png_bin_size);
 	memcpy(vertArray, mdlData, sizeof(mdlData));
+	
+	initPlayer(&player);
+	// initWorld(&world);
+
+	// initWorldCluster(&wcl, vect3Di(0,8,0));
+	// generateWorldClusterGeometry(&wcl);
+	// generateWorldClusterData(&wcl);
+	
+	// generateWorld(&world);
 
 	tx=ty=0.0f; tz=-0.1f;
 	shader=SHDR_ParseSHBIN((u32*)test_vsh_shbin,test_vsh_shbin_size);

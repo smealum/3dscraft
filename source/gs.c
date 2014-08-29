@@ -220,7 +220,7 @@ int gsVboCreate(gsVbo_s* vbo, u32 size)
 	if(!vbo)return -1;
 
 	//TODO : implement some real allocation
-	vbo->data=gfxAllocLinear(size);
+	vbo->data=linearAlloc(size);
 	vbo->currentSize=0;
 	vbo->maxSize=size;
 
@@ -260,7 +260,7 @@ int gsVboDraw(gsVbo_s* vbo)
 {
 	if(!vbo)return -1;
 
-	gsUpdateTransformation();
+	// gsUpdateTransformation();
 
 	GPU_SetAttributeBuffers(3, (u32*)osConvertVirtToPhys((u32)vbo->data),
 		GPU_ATTRIBFMT(0, 3, GPU_FLOAT)|GPU_ATTRIBFMT(1, 2, GPU_FLOAT)|GPU_ATTRIBFMT(2, 3, GPU_FLOAT),

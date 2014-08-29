@@ -77,12 +77,12 @@ void generateWorldClusterData(worldCluster_s* wcl)
 	if(wcl->generated)gsVboDestroy(&wcl->vbo);
 
 	//TEMP
-	if(wcl->position.y<8)memset(wcl->data, 0x01, CLUSTER_SIZE*CLUSTER_SIZE*CLUSTER_SIZE);
+	if(wcl->position.y<8)memset(wcl->data, BLOCK_DIRT, CLUSTER_SIZE*CLUSTER_SIZE*CLUSTER_SIZE);
 	else if(wcl->position.y==8)
 	{
-		memset(wcl->data, 0x00, CLUSTER_SIZE*CLUSTER_SIZE*CLUSTER_SIZE);
-		memset(wcl->data, 0x01, CLUSTER_SIZE*CLUSTER_SIZE*CLUSTER_SIZE/2);
-	}else memset(wcl->data, 0x00, CLUSTER_SIZE*CLUSTER_SIZE*CLUSTER_SIZE);
+		memset(wcl->data, BLOCK_AIR, CLUSTER_SIZE*CLUSTER_SIZE*CLUSTER_SIZE);
+		memset(wcl->data, BLOCK_DIRT, CLUSTER_SIZE*CLUSTER_SIZE*CLUSTER_SIZE/2);
+	}else memset(wcl->data, BLOCK_AIR, CLUSTER_SIZE*CLUSTER_SIZE*CLUSTER_SIZE);
 }
 
 void initWorldChunk(worldChunk_s* wch, vect3Di_s pos)
