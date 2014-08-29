@@ -17,11 +17,6 @@ u32* texData;
 player_s player;
 world_s world;
 worldCluster_s wcl;
-gsVbo_s modelVbo;
-
-float angle=0.0f;
-float angleZ=0.0f;
-float tx, ty, tz;
 
 u32* gpuOut=(u32*)0x1F119400;
 u32* gpuDOut=(u32*)0x1F370800;
@@ -67,38 +62,10 @@ void doFrame1()
 
 	//draw first model
 		gsPushMatrix();
-			gsTranslate(tx, ty, tz);
-			gsRotateX(angle);
-			gsRotateZ(angleZ);
-
-			// gsVboDraw(&modelVbo);
-			drawWorldCluster(&wcl);
-			drawWorldCluster(&wcl);
+			setCameraPlayer(&player);
+			drawWorld(&world);
 			drawWorldCluster(&wcl);
 		gsPopMatrix();
-}
-
-void demoControls(void)
-{
-	hidScanInput();
-	u32 PAD=hidKeysHeld();
-
-	if(PAD&KEY_UP)tx+=0.1f;
-	if(PAD&KEY_DOWN)tx-=0.1f;
-
-	if(PAD&KEY_LEFT)ty+=0.1f;
-	if(PAD&KEY_RIGHT)ty-=0.1f;
-
-	if(PAD&KEY_R)tz+=0.1f;
-	if(PAD&KEY_L)tz-=0.1f;
-
-	if(PAD&KEY_A)angle+=0.1f;
-	if(PAD&KEY_Y)angle-=0.1f;
-
-	if(PAD&KEY_X)angleZ+=0.1f;
-	if(PAD&KEY_B)angleZ-=0.1f;
-
-	controlsPlayer(&player);
 }
 
 extern u32* gxCmdBuf;
@@ -124,19 +91,18 @@ int main()
 	memcpy(texData, terrain_bin, terrain_bin_size);
 	GSPGPU_FlushDataCache(NULL, (u8*)texData, terrain_bin_size);
 
-	// gsVboCreate(&modelVbo, sizeof(mdlData));
-	// gsVboAddData(&modelVbo, mdlData, sizeof(mdlData));
-
 	initWorldCluster(&wcl, vect3Di(0,8,0));
 	generateWorldClusterData(&wcl);
 	generateWorldClusterGeometry(&wcl);
+
+	initWorld(&world);
+	generateWorld(&world);
 
 	gsMatrixMode(GS_PROJECTION);
 	gsProjectionMatrix(1.3962634f, 240.0f/400.0f, 0.01f, 10.0f);
 	
 	initPlayer(&player);
 
-	tx=ty=0.0f; tz=-0.1f;
 	shader=SHDR_ParseSHBIN((u32*)test_vsh_shbin,test_vsh_shbin_size);
 
 	GX_SetMemoryFill(gxCmdBuf, (u32*)gpuOut, 0x404040FF, (u32*)&gpuOut[0x2EE00], 0x201, (u32*)gpuDOut, 0x00000000, (u32*)&gpuDOut[0x2EE00], 0x201);
@@ -147,7 +113,8 @@ int main()
 	{
 		if(status==APP_RUNNING)
 		{
-			demoControls();
+			hidScanInput();
+			controlsPlayer(&player);
 			updatePlayer(&player);
 
 			gfxSwapBuffersGpu();

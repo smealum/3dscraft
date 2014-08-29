@@ -4,8 +4,9 @@
 
 const blockType_s blockTypes[BLOCK_NUM] =
 	{
-		(blockType_s){0,0,0}, //BLOCK_AIR
+		(blockType_s){5,3,4}, //BLOCK_AIR
 		(blockType_s){2,2,2}, //BLOCK_DIRT
+		(blockType_s){0,2,3} //BLOCK_GRASS
 	};
 
 const vect3Df_s fo[]={(vect3Df_s){0.0f,0.0f,0.0f}, //MX
@@ -42,10 +43,10 @@ const vect3Df_s fn[]={(vect3Df_s){-1.0f,0.0f,0.0f}, //MX
 
 s16 blockShouldBeFace(u8 currentBlock, u8 nextBlock)
 {
-	if(currentBlock && nextBlock)return -1;
-	if(!currentBlock && !nextBlock)return -1;
-	if(currentBlock)return currentBlock;
-	return nextBlock;
+	if(currentBlock!=BLOCK_AIR && nextBlock!=BLOCK_AIR)return -1;
+	if(currentBlock==BLOCK_AIR && nextBlock==BLOCK_AIR)return -1;
+	if(currentBlock!=BLOCK_AIR)return currentBlock;
+	return -1;
 }
 
 void blockGenerateFaceGeometry(blockFace_s* bf, gsVbo_s* vbo)
@@ -70,28 +71,28 @@ void blockGenerateFaceGeometry(blockFace_s* bf, gsVbo_s* vbo)
 
 	//triangle 1
 		v.position=vertices[0];
-		v.texcoord[0]=t.x+0.0f; v.texcoord[1]=t.y+0.0f;
+		v.texcoord[0]=t.x+0.0f; v.texcoord[1]=t.y+BLOCK_TEXTURE_SIZE;
 		gsVboAddData(vbo, &v, sizeof(faceVertex_s));
 
 		v.position=vertices[1];
-		v.texcoord[0]=t.x+BLOCK_TEXTURE_SIZE; v.texcoord[1]=t.y+0.0f;
+		v.texcoord[0]=t.x+BLOCK_TEXTURE_SIZE; v.texcoord[1]=t.y+BLOCK_TEXTURE_SIZE;
 		gsVboAddData(vbo, &v, sizeof(faceVertex_s));
 
 		v.position=vertices[2];
-		v.texcoord[0]=t.x+BLOCK_TEXTURE_SIZE; v.texcoord[1]=t.y+BLOCK_TEXTURE_SIZE;
+		v.texcoord[0]=t.x+BLOCK_TEXTURE_SIZE; v.texcoord[1]=t.y+0.0f;
 		gsVboAddData(vbo, &v, sizeof(faceVertex_s));
 
 	//triangle 2
 		v.position=vertices[0];
-		v.texcoord[0]=t.x+0.0f; v.texcoord[1]=t.y+0.0f;
+		v.texcoord[0]=t.x+0.0f; v.texcoord[1]=t.y+BLOCK_TEXTURE_SIZE;
 		gsVboAddData(vbo, &v, sizeof(faceVertex_s));
 
 		v.position=vertices[2];
-		v.texcoord[0]=t.x+BLOCK_TEXTURE_SIZE; v.texcoord[1]=t.y+BLOCK_TEXTURE_SIZE;
+		v.texcoord[0]=t.x+BLOCK_TEXTURE_SIZE; v.texcoord[1]=t.y+0.0f;
 		gsVboAddData(vbo, &v, sizeof(faceVertex_s));
 
 		v.position=vertices[3];
-		v.texcoord[0]=t.x+0.0f; v.texcoord[1]=t.y+BLOCK_TEXTURE_SIZE;
+		v.texcoord[0]=t.x+0.0f; v.texcoord[1]=t.y+0.0f;
 		gsVboAddData(vbo, &v, sizeof(faceVertex_s));
 }
 

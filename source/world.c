@@ -22,7 +22,10 @@ void drawWorldCluster(worldCluster_s* wcl)
 	if(!wcl || !wcl->generated)return;
 
 	//TODO : transformations
-	gsVboDraw(&wcl->vbo);
+	gsPushMatrix();
+		gsTranslate(wcl->position.x*CLUSTER_SIZE, wcl->position.y*CLUSTER_SIZE, wcl->position.z*CLUSTER_SIZE);
+		gsVboDraw(&wcl->vbo);
+	gsPopMatrix();
 }
 
 void generateWorldClusterGeometry(worldCluster_s* wcl)
@@ -45,12 +48,12 @@ void generateWorldClusterGeometry(worldCluster_s* wcl)
 			for(k=1; k<CLUSTER_SIZE-1; k++)
 			{
 				u8 cb=wcl->data[i][j][k];
-				if(blockShouldBeFace(cb, wcl->data[i+1][j][k])>=0)pushFace(faceList, faceListSize, blockFace(FACE_PX, vect3Di(i,j,k)));
-				if(blockShouldBeFace(cb, wcl->data[i-1][j][k])>=0)pushFace(faceList, faceListSize, blockFace(FACE_MX, vect3Di(i,j,k)));
-				if(blockShouldBeFace(cb, wcl->data[i][j+1][k])>=0)pushFace(faceList, faceListSize, blockFace(FACE_PY, vect3Di(i,j,k)));
-				if(blockShouldBeFace(cb, wcl->data[i][j-1][k])>=0)pushFace(faceList, faceListSize, blockFace(FACE_MY, vect3Di(i,j,k)));
-				if(blockShouldBeFace(cb, wcl->data[i][j][k+1])>=0)pushFace(faceList, faceListSize, blockFace(FACE_PZ, vect3Di(i,j,k)));
-				if(blockShouldBeFace(cb, wcl->data[i][j][k-1])>=0)pushFace(faceList, faceListSize, blockFace(FACE_MZ, vect3Di(i,j,k)));
+				if(blockShouldBeFace(cb, wcl->data[i+1][j][k])>=0)pushFace(faceList, faceListSize, blockFace(cb, FACE_PX, vect3Di(i,j,k)));
+				if(blockShouldBeFace(cb, wcl->data[i-1][j][k])>=0)pushFace(faceList, faceListSize, blockFace(cb, FACE_MX, vect3Di(i,j,k)));
+				if(blockShouldBeFace(cb, wcl->data[i][j+1][k])>=0)pushFace(faceList, faceListSize, blockFace(cb, FACE_PY, vect3Di(i,j,k)));
+				if(blockShouldBeFace(cb, wcl->data[i][j-1][k])>=0)pushFace(faceList, faceListSize, blockFace(cb, FACE_MY, vect3Di(i,j,k)));
+				if(blockShouldBeFace(cb, wcl->data[i][j][k+1])>=0)pushFace(faceList, faceListSize, blockFace(cb, FACE_PZ, vect3Di(i,j,k)));
+				if(blockShouldBeFace(cb, wcl->data[i][j][k-1])>=0)pushFace(faceList, faceListSize, blockFace(cb, FACE_MZ, vect3Di(i,j,k)));
 			}
 		}
 	}
@@ -78,19 +81,27 @@ void generateWorldClusterData(worldCluster_s* wcl)
 	if(wcl->generated)gsVboDestroy(&wcl->vbo);
 
 	//TEMP
-	if(wcl->position.y<8)memset(wcl->data, BLOCK_DIRT, CLUSTER_SIZE*CLUSTER_SIZE*CLUSTER_SIZE);
-	else if(wcl->position.y==8)
+	int i, j, k;
+	for(i=0; i<CLUSTER_SIZE; i++)
 	{
-		memset(wcl->data, BLOCK_AIR, CLUSTER_SIZE*CLUSTER_SIZE*CLUSTER_SIZE);
-		memset(wcl->data, BLOCK_DIRT, CLUSTER_SIZE*CLUSTER_SIZE*CLUSTER_SIZE/2);
-	}else memset(wcl->data, BLOCK_AIR, CLUSTER_SIZE*CLUSTER_SIZE*CLUSTER_SIZE);
+		for(j=0; j<CLUSTER_SIZE; j++)
+		{
+			for(k=0; k<CLUSTER_SIZE; k++)
+			{
+				const vect3Di_s p=vect3Di(i+wcl->position.x*CLUSTER_SIZE, j+wcl->position.y*CLUSTER_SIZE, k+wcl->position.z*CLUSTER_SIZE);
+				if(p.y < (CHUNK_HEIGHT+1)*CLUSTER_SIZE/2)wcl->data[i][j][k]=BLOCK_GRASS;
+				else if(p.y < (CHUNK_HEIGHT+1)*CLUSTER_SIZE/2+1 && i<2 && j>3)wcl->data[i][j][k]=BLOCK_GRASS;
+				else wcl->data[i][j][k]=BLOCK_AIR;
+			}
+		}
+	}
 }
 
 void initWorldChunk(worldChunk_s* wch, vect3Di_s pos)
 {
 	if(!wch)return;
 
-	int k; for(k=0; k<CHUNK_HEIGHT; k++)initWorldCluster(&wch->data[k], vect3Di(pos.x, k, pos.z));
+	int j; for(j=0; j<CHUNK_HEIGHT; j++)initWorldCluster(&wch->data[j], vect3Di(pos.x, j, pos.z));
 	wch->position=pos;
 }
 

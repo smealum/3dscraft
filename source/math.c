@@ -26,11 +26,11 @@ void translateMatrix(float* tm, float x, float y, float z)
 	rm[7]=y;
 	rm[11]=z;
 	
-	multMatrix44(rm,tm,m);
+	multMatrix44(tm,rm,m);
 	memcpy(tm,m,16*sizeof(float));
 }
 
-void rotateMatrixX(float* tm, float x)
+void rotateMatrixX(float* tm, float x, bool r)
 {
 	float rm[16], m[16];
 	memset(rm, 0x00, 16*4);
@@ -40,11 +40,12 @@ void rotateMatrixX(float* tm, float x)
 	rm[9]=-sin(x);
 	rm[10]=cos(x);
 	rm[15]=1.0f;
-	multMatrix44(tm,rm,m);
+	if(!r)multMatrix44(tm,rm,m);
+	else multMatrix44(rm,tm,m);
 	memcpy(tm,m,16*sizeof(float));
 }
 
-void rotateMatrixY(float* tm, float x)
+void rotateMatrixY(float* tm, float x, bool r)
 {
 	float rm[16], m[16];
 	memset(rm, 0x00, 16*4);
@@ -54,11 +55,12 @@ void rotateMatrixY(float* tm, float x)
 	rm[8]=-sin(x);
 	rm[10]=cos(x);
 	rm[15]=1.0f;
-	multMatrix44(tm,rm,m);
+	if(!r)multMatrix44(tm,rm,m);
+	else multMatrix44(rm,tm,m);
 	memcpy(tm,m,16*sizeof(float));
 }
 
-void rotateMatrixZ(float* tm, float x)
+void rotateMatrixZ(float* tm, float x, bool r)
 {
 	float rm[16], m[16];
 	memset(rm, 0x00, 16*4);
@@ -68,7 +70,8 @@ void rotateMatrixZ(float* tm, float x)
 	rm[5]=cos(x);
 	rm[10]=1.0f;
 	rm[15]=1.0f;
-	multMatrix44(tm,rm,m);
+	if(!r)multMatrix44(tm,rm,m);
+	else multMatrix44(rm,tm,m);
 	memcpy(tm,m,16*sizeof(float));
 }
 
@@ -111,11 +114,11 @@ void initProjectionMatrix(float* m, float fovy, float aspect, float near, float 
 vect3Df_s getMatrixColumn(float* m, u8 i)
 {
 	if(!m || i>=4)return vect3Df(0,0,0);
-	return vect3Df(m[i+0*4],m[i+1*4],m[i+2*4]);
+	return vect3Df(m[0+i*4],m[1+i*4],m[2+i*4]);
 }
 
 vect3Df_s getMatrixRow(float* m, u8 i)
 {
 	if(!m || i>=4)return vect3Df(0,0,0);
-	return vect3Df(m[0+i*4],m[1+i*4],m[2+i*4]);
+	return vect3Df(m[i+0*4],m[i+1*4],m[i+2*4]);
 }

@@ -14,6 +14,7 @@ typedef enum
 {
 	BLOCK_AIR = 0,
 	BLOCK_DIRT,
+	BLOCK_GRASS,
 	BLOCK_NUM
 }block_t;
 
@@ -53,9 +54,9 @@ s16 blockShouldBeFace(u8 currentBlock, u8 nextBlock);
 
 vect3Df_s blockFaceGetTexcoord(blockFace_s* bf);
 
-static inline blockFace_s blockFace(orientation_t o, vect3Di_s p)
+static inline blockFace_s blockFace(block_t t, orientation_t o, vect3Di_s p)
 {
-	return (blockFace_s){o,p};
+	return (blockFace_s){o,p,t};
 }
 
 #endif

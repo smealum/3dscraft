@@ -127,19 +127,19 @@ void gsProjectionMatrix(float fovy, float aspect, float near, float far)
 
 void gsRotateX(float x)
 {
-	rotateMatrixX(gsGetMatrix(gsCurrentMatrixType), x);
+	rotateMatrixX(gsGetMatrix(gsCurrentMatrixType), x, false);
 	gsMatrixStackUpdated[gsCurrentMatrixType]=true;
 }
 
 void gsRotateY(float y)
 {
-	rotateMatrixY(gsGetMatrix(gsCurrentMatrixType), y);
+	rotateMatrixY(gsGetMatrix(gsCurrentMatrixType), y, false);
 	gsMatrixStackUpdated[gsCurrentMatrixType]=true;
 }
 
 void gsRotateZ(float z)
 {
-	rotateMatrixZ(gsGetMatrix(gsCurrentMatrixType), z);
+	rotateMatrixZ(gsGetMatrix(gsCurrentMatrixType), z, false);
 	gsMatrixStackUpdated[gsCurrentMatrixType]=true;
 }
 
@@ -267,7 +267,7 @@ int gsVboDestroy(gsVbo_s* vbo)
 
 int gsVboDraw(gsVbo_s* vbo)
 {
-	if(!vbo)return -1;
+	if(!vbo || !vbo->data || !vbo->currentSize || !vbo->maxSize)return -1;
 
 	gsUpdateTransformation();
 
