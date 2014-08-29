@@ -9,8 +9,8 @@
 
 #define CHUNK_HEIGHT (16)
 
-// #define WORLD_SIZE (16)
-#define WORLD_SIZE (1)
+#define WORLD_SIZE (16)
+// #define WORLD_SIZE (1)
 
 typedef struct
 {

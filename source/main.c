@@ -12,13 +12,12 @@
 #include "mdl.h"
 
 DVLB_s* shader;
-float* vertArray;
 u32* texData;
 
 player_s player;
 world_s world;
 worldCluster_s wcl;
-gsVbo_s vbo;
+gsVbo_s modelVbo;
 
 void setUniformMatrix(u32 startreg, float* m)
 {
@@ -73,11 +72,6 @@ void doFrame1()
 	//setup shader
 		SHDR_UseProgram(shader, 0);
 
-	//attribute buffers
-		GPU_SetAttributeBuffers(3, (u32*)osConvertVirtToPhys((u32)vertArray),
-			GPU_ATTRIBFMT(0, 3, GPU_FLOAT)|GPU_ATTRIBFMT(1, 2, GPU_FLOAT)|GPU_ATTRIBFMT(2, 3, GPU_FLOAT),
-			0xFFC, 0x210, 1, (u32[]){0x00000000}, (u64[]){0x210}, (u8[]){3});
-
 	//?
 		GPUCMD_AddSingleParam(0x000F0100, 0x00E40100);
 		GPUCMD_AddSingleParam(0x000F0101, 0x01010000);
@@ -96,42 +90,16 @@ void doFrame1()
 	//texturing stuff
 		GPU_SetTexture((u32*)osConvertVirtToPhys((u32)texData),256,256,0x6,GPU_RGBA8);
 
-	//setup matrices
-		float modelView[16];
-		float projection[16];
-
-		loadIdentity44(modelView);
-		loadIdentity44(projection);
-
-		translateMatrix(modelView, tx, ty, tz);
-		rotateMatrixX(modelView, angle);
-		rotateMatrixZ(modelView, angleZ);
-
-		initProjectionMatrix(projection, 1.3962634f, 240.0f/400.0f, 0.01f, 10.0f);
-
-		setUniformMatrix(0x24, modelView);
-		setUniformMatrix(0x20, projection);
+	gsMatrixMode(GS_MODELVIEW);
 
 	//draw first model
-		GPU_DrawArray(GPU_TRIANGLES, mdlFaces*3);
-		// GPU_DrawElements(GPU_TRIANGLES, (u32*)(((u32)((void*)indArray-(void*)gspHeap))+0x20000000-base), 6);
+		gsPushMatrix();
+			gsTranslate(tx, ty, tz);
+			gsRotateX(angle);
+			gsRotateZ(angleZ);
 
-	// //setup matrices
-	// 	loadIdentity44(modelView);
-	// 	loadIdentity44(projection);
-
-	// 	translateMatrix(modelView, tx, -ty, tz);
-	// 	rotateMatrixX(modelView, -angle);
-	// 	rotateMatrixZ(modelView, -angleZ);
-
-	// 	setUniformMatrix(0x24, modelView);
-
-	// 	// setCameraPlayer(&player);
-
-	// //draw second
-	// 	GPU_DrawArray(GPU_TRIANGLES, mdlFaces*3);
-	// 	// drawWorld(&world);
-	// 	// drawWorldCluster(&wcl);
+			gsVboDraw(&modelVbo);
+		gsPopMatrix();
 
 	// //finalize stuff ?
 	// 	GPUCMD_AddSingleParam(0x000F0111, 0x00000001);
@@ -181,20 +149,17 @@ int main()
 
 	GPU_Reset(gxCmdBuf, gpuCmd, gpuCmdSize);
 
-	vertArray=(float*)linearAlloc(0x100000);
 	texData=(u32*)linearAlloc(0x100000);
 
 	memcpy(texData, test_png_bin, test_png_bin_size);
-	memcpy(vertArray, mdlData, sizeof(mdlData));
+
+	gsVboCreate(&modelVbo, sizeof(mdlData));
+	gsVboAddData(&modelVbo, mdlData, sizeof(mdlData));
+
+	gsMatrixMode(GS_PROJECTION);
+	gsProjectionMatrix(1.3962634f, 240.0f/400.0f, 0.01f, 10.0f);
 	
 	initPlayer(&player);
-	// initWorld(&world);
-
-	// initWorldCluster(&wcl, vect3Di(0,8,0));
-	// generateWorldClusterGeometry(&wcl);
-	// generateWorldClusterData(&wcl);
-	
-	// generateWorld(&world);
 
 	tx=ty=0.0f; tz=-0.1f;
 	shader=SHDR_ParseSHBIN((u32*)test_vsh_shbin,test_vsh_shbin_size);
@@ -210,17 +175,21 @@ int main()
 			demoControls();
 			updatePlayer(&player);
 
-			GX_SetMemoryFill(gxCmdBuf, (u32*)gpuOut, 0x404040FF, (u32*)&gpuOut[0x2EE00], 0x201, (u32*)gpuDOut, 0x00000000, (u32*)&gpuDOut[0x2EE00], 0x201);
+			gfxSwapBuffersGpu();
 
 			GPUCMD_SetBuffer(gpuCmd, gpuCmdSize, 0);
 			doFrame1();
 			GPUCMD_Finalize();
+			gspWaitForVBlank(); //TEMP
 			GPUCMD_Run(gxCmdBuf);
 
-			gfxSwapBuffersGpu();
+			gspWaitForVBlank();
+
 			GX_SetDisplayTransfer(gxCmdBuf, (u32*)gpuOut, 0x019001E0, (u32*)gfxGetFramebuffer(GFX_TOP, GFX_LEFT, NULL, NULL), 0x019001E0, 0x01001000);
+			svcSleepThread(100000); //TEMP
+			GX_SetMemoryFill(gxCmdBuf, (u32*)gpuOut, 0x404040FF, (u32*)&gpuOut[0x2EE00], 0x201, (u32*)gpuDOut, 0x00000000, (u32*)&gpuDOut[0x2EE00], 0x201);
+			svcSleepThread(100000); //TEMP
 		}
-		gspWaitForVBlank();
 	}
 
 	gsExit();
