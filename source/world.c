@@ -3,6 +3,7 @@
 
 #include "gs.h"
 #include "world.h"
+#include "sdnoise.h"
 
 #define pushFace(l, s, f) ((l)[(s)++]=f)
 #define popFace(l, s) ((s)?(&((l)[--(s)])):NULL)
@@ -21,7 +22,6 @@ void drawWorldCluster(worldCluster_s* wcl)
 {
 	if(!wcl || !wcl->generated)return;
 
-	//TODO : transformations
 	gsPushMatrix();
 		gsTranslate(wcl->position.x*CLUSTER_SIZE, wcl->position.y*CLUSTER_SIZE, wcl->position.z*CLUSTER_SIZE);
 		gsVboDraw(&wcl->vbo);
@@ -37,7 +37,9 @@ void generateWorldClusterGeometry(worldCluster_s* wcl, world_s* w)
 
 	//first, we go through the whole cluster to generate a "list" of faces
 	static blockFace_s faceList[4096]; //TODO : calculate real max
-	static int faceListSize=0;
+	int faceListSize=0;
+
+	memset(faceList, 0x00, 4096*sizeof(blockFace_s));
 
 	//TODO : optimize world block accesses
 	const vect3Di_s p = vmuli(wcl->position, CLUSTER_SIZE);
@@ -48,19 +50,16 @@ void generateWorldClusterGeometry(worldCluster_s* wcl, world_s* w)
 		{
 			for(k=0; k<CLUSTER_SIZE; k++)
 			{
+				const u8 cb=wcl->data[i][j][k];
 				if(i>=1 && i<CLUSTER_SIZE-1 && j>=1 && j<CLUSTER_SIZE-1 && k>=1 && k<CLUSTER_SIZE-1)
 				{
-					const u8 cb=wcl->data[i][j][k];
-
 					if(blockShouldBeFace(cb, wcl->data[i+1][j][k])>=0) pushFace(faceList, faceListSize, blockFace(cb, FACE_PX, vect3Di(i,j,k)));
 					if(blockShouldBeFace(cb, wcl->data[i-1][j][k])>=0) pushFace(faceList, faceListSize, blockFace(cb, FACE_MX, vect3Di(i,j,k)));
 					if(blockShouldBeFace(cb, wcl->data[i][j+1][k])>=0) pushFace(faceList, faceListSize, blockFace(cb, FACE_PY, vect3Di(i,j,k)));
 					if(blockShouldBeFace(cb, wcl->data[i][j-1][k])>=0) pushFace(faceList, faceListSize, blockFace(cb, FACE_MY, vect3Di(i,j,k)));
 					if(blockShouldBeFace(cb, wcl->data[i][j][k+1])>=0) pushFace(faceList, faceListSize, blockFace(cb, FACE_PZ, vect3Di(i,j,k)));
 					if(blockShouldBeFace(cb, wcl->data[i][j][k-1])>=0) pushFace(faceList, faceListSize, blockFace(cb, FACE_MZ, vect3Di(i,j,k)));
-				}else{
-					const s16 cb=getWorldBlock(w, vaddi(p, vect3Di(i,j,k)));
-
+				}else if(w){
 					if(blockShouldBeFace(cb, getWorldBlock(w, vaddi(p, vect3Di(i+1, j, k))))>=0) pushFace(faceList, faceListSize, blockFace(cb, FACE_PX, vect3Di(i,j,k)));
 					if(blockShouldBeFace(cb, getWorldBlock(w, vaddi(p, vect3Di(i-1, j, k))))>=0) pushFace(faceList, faceListSize, blockFace(cb, FACE_MX, vect3Di(i,j,k)));
 					if(blockShouldBeFace(cb, getWorldBlock(w, vaddi(p, vect3Di(i, j+1, k))))>=0) pushFace(faceList, faceListSize, blockFace(cb, FACE_PY, vect3Di(i,j,k)));
@@ -89,6 +88,11 @@ void generateWorldClusterGeometry(worldCluster_s* wcl, world_s* w)
 	}
 }
 
+int getWorldElevation(vect3Di_s p)
+{
+	return (int)(sdnoise2(((float)p.x)/(CLUSTER_SIZE*4), ((float)p.z)/(CLUSTER_SIZE*4), NULL, NULL)*CLUSTER_SIZE)+(CHUNK_HEIGHT*CLUSTER_SIZE/2);
+}
+
 void generateWorldClusterData(worldCluster_s* wcl)
 {
 	if(!wcl)return;
@@ -98,13 +102,14 @@ void generateWorldClusterData(worldCluster_s* wcl)
 	int i, j, k;
 	for(i=0; i<CLUSTER_SIZE; i++)
 	{
-		for(j=0; j<CLUSTER_SIZE; j++)
+		for(k=0; k<CLUSTER_SIZE; k++)
 		{
-			for(k=0; k<CLUSTER_SIZE; k++)
+			//TEMP
+			const vect3Di_s p=vect3Di(i+wcl->position.x*CLUSTER_SIZE, wcl->position.y*CLUSTER_SIZE, k+wcl->position.z*CLUSTER_SIZE);
+			int height=getWorldElevation(p);
+			for(j=0; j<CLUSTER_SIZE; j++)
 			{
-				const vect3Di_s p=vect3Di(i+wcl->position.x*CLUSTER_SIZE, j+wcl->position.y*CLUSTER_SIZE, k+wcl->position.z*CLUSTER_SIZE);
-				if(p.y < (CHUNK_HEIGHT+1)*CLUSTER_SIZE/2)wcl->data[i][j][k]=BLOCK_GRASS;
-				else if(p.y < (CHUNK_HEIGHT+1)*CLUSTER_SIZE/2+1 && i<2 && j>3)wcl->data[i][j][k]=BLOCK_GRASS;
+				if(p.y+j < height)wcl->data[i][j][k]=BLOCK_GRASS;
 				else wcl->data[i][j][k]=BLOCK_AIR;
 			}
 		}

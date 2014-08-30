@@ -24,12 +24,12 @@ void controlsPlayer(player_s* p)
 	vect3Df_s vy=vnormf(getMatrixColumn((float*)p->orientation, 1));
 	vect3Df_s vz=vnormf(getMatrixColumn((float*)p->orientation, 2));
 
-	if(PAD&KEY_UP)p->velocity=vaddf(p->velocity, vmulf(vz, -4.0f));
-	if(PAD&KEY_DOWN)p->velocity=vaddf(p->velocity, vmulf(vz, 4.0f));
-	if(PAD&KEY_RIGHT)p->velocity=vaddf(p->velocity, vmulf(vy, -4.0f));
-	if(PAD&KEY_LEFT)p->velocity=vaddf(p->velocity, vmulf(vy, 4.0f));
-	if(PAD&KEY_R)p->velocity=vaddf(p->velocity, vmulf(vx, -4.0f));
-	if(PAD&KEY_L)p->velocity=vaddf(p->velocity, vmulf(vx, 4.0f));
+	if(PAD&KEY_UP)p->velocity=vaddf(p->velocity, vmulf(vz, -1.0f));
+	if(PAD&KEY_DOWN)p->velocity=vaddf(p->velocity, vmulf(vz, 1.0f));
+	if(PAD&KEY_RIGHT)p->velocity=vaddf(p->velocity, vmulf(vy, -1.0f));
+	if(PAD&KEY_LEFT)p->velocity=vaddf(p->velocity, vmulf(vy, 1.0f));
+	if(PAD&KEY_R)p->velocity=vaddf(p->velocity, vmulf(vx, -1.0f));
+	if(PAD&KEY_L)p->velocity=vaddf(p->velocity, vmulf(vx, 1.0f));
 
 	if(PAD&KEY_X)rotateMatrixX((float*)p->orientation, 0.1f, false);
 	if(PAD&KEY_B)rotateMatrixX((float*)p->orientation, -0.1f, false);

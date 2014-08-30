@@ -221,6 +221,7 @@ int gsVboCreate(gsVbo_s* vbo, u32 size)
 
 	//TODO : implement some real allocation
 	vbo->data=linearAlloc(size);
+	vbo->numVertices=0;
 	vbo->currentSize=0;
 	vbo->maxSize=size;
 
@@ -234,13 +235,14 @@ void* gsVboGetOffset(gsVbo_s* vbo)
 	return (void*)(&((u8*)vbo->data)[vbo->currentSize]);
 }
 
-int gsVboAddData(gsVbo_s* vbo, void* data, u32 size)
+int gsVboAddData(gsVbo_s* vbo, void* data, u32 size, u32 units)
 {
 	if(!vbo || !data || !size)return -1;
-	if(vbo->maxSize-vbo->currentSize < size)return -1;
+	if(((s32)vbo->maxSize)-((s32)vbo->currentSize) < size)return -1;
 
 	memcpy(gsVboGetOffset(vbo), data, size);
 	vbo->currentSize+=size;
+	vbo->numVertices+=units;
 
 	return 0;
 }
@@ -271,10 +273,11 @@ int gsVboDraw(gsVbo_s* vbo)
 
 	gsUpdateTransformation();
 
+	//TEMP : need to make it configurable
 	GPU_SetAttributeBuffers(3, (u32*)osConvertVirtToPhys((u32)vbo->data),
 		GPU_ATTRIBFMT(0, 3, GPU_FLOAT)|GPU_ATTRIBFMT(1, 2, GPU_FLOAT)|GPU_ATTRIBFMT(2, 3, GPU_FLOAT),
 		0xFFC, 0x210, 1, (u32[]){0x00000000}, (u64[]){0x210}, (u8[]){3});
-	GPU_DrawArray(GPU_TRIANGLES, vbo->currentSize);
+	GPU_DrawArray(GPU_TRIANGLES, vbo->numVertices);
 
 	return 0;
 }

@@ -64,6 +64,8 @@ void doFrame1()
 		gsPushMatrix();
 			setCameraPlayer(&player);
 			drawWorld(&world);
+
+			gsTranslate(100.0f, 100.0f, 100.0f);
 			drawWorldCluster(&wcl);
 		gsPopMatrix();
 }

@@ -74,28 +74,28 @@ void blockGenerateFaceGeometry(blockFace_s* bf, gsVbo_s* vbo)
 	//triangle 1
 		v.position=vertices[0];
 		v.texcoord[0]=t.x+0.0f; v.texcoord[1]=t.y+BLOCK_TEXTURE_SIZE;
-		gsVboAddData(vbo, &v, sizeof(faceVertex_s));
+		gsVboAddData(vbo, &v, sizeof(faceVertex_s), 1);
 
 		v.position=vertices[1];
 		v.texcoord[0]=t.x+BLOCK_TEXTURE_SIZE; v.texcoord[1]=t.y+BLOCK_TEXTURE_SIZE;
-		gsVboAddData(vbo, &v, sizeof(faceVertex_s));
+		gsVboAddData(vbo, &v, sizeof(faceVertex_s), 1);
 
 		v.position=vertices[2];
 		v.texcoord[0]=t.x+BLOCK_TEXTURE_SIZE; v.texcoord[1]=t.y+0.0f;
-		gsVboAddData(vbo, &v, sizeof(faceVertex_s));
+		gsVboAddData(vbo, &v, sizeof(faceVertex_s), 1);
 
 	//triangle 2
 		v.position=vertices[0];
 		v.texcoord[0]=t.x+0.0f; v.texcoord[1]=t.y+BLOCK_TEXTURE_SIZE;
-		gsVboAddData(vbo, &v, sizeof(faceVertex_s));
+		gsVboAddData(vbo, &v, sizeof(faceVertex_s), 1);
 
 		v.position=vertices[2];
 		v.texcoord[0]=t.x+BLOCK_TEXTURE_SIZE; v.texcoord[1]=t.y+0.0f;
-		gsVboAddData(vbo, &v, sizeof(faceVertex_s));
+		gsVboAddData(vbo, &v, sizeof(faceVertex_s), 1);
 
 		v.position=vertices[3];
 		v.texcoord[0]=t.x+0.0f; v.texcoord[1]=t.y+0.0f;
-		gsVboAddData(vbo, &v, sizeof(faceVertex_s));
+		gsVboAddData(vbo, &v, sizeof(faceVertex_s), 1);
 }
 
 void faceGetTexcoord(u16 n, float* u, float* v)

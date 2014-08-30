@@ -17,6 +17,7 @@ typedef struct
 	u8* data;
 	u32 currentSize; // in bytes
 	u32 maxSize; // in bytes
+	u32 numVertices;
 }gsVbo_s;
 
 
@@ -44,6 +45,6 @@ int gsVboFlushData(gsVbo_s* vbo);
 int gsVboDestroy(gsVbo_s* vbo);
 int gsVboDraw(gsVbo_s* vbo);
 void* gsVboGetOffset(gsVbo_s* vbo);
-int gsVboAddData(gsVbo_s* vbo, void* data, u32 size);
+int gsVboAddData(gsVbo_s* vbo, void* data, u32 size, u32 units);
 
 #endif
