@@ -56,7 +56,7 @@ void doFrame1()
 			GPU_TEVOPERANDS(0,0,0), GPU_TEVOPERANDS(0,0,0), GPU_MODULATE, GPU_MODULATE, 0xFFFFFFFF);
 
 	//texturing stuff
-		GPU_SetTexture((u32*)osConvertVirtToPhys((u32)texData),256,256,0x6,GPU_RGBA8);
+		GPU_SetTexture(GPU_TEXUNIT0, (u32*)osConvertVirtToPhys((u32)texData),256,256,0x6,GPU_RGBA8);
 
 	gsMatrixMode(GS_MODELVIEW);
 
