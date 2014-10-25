@@ -121,18 +121,18 @@ int main()
 
 			gfxSwapBuffersGpu();
 
+			gspWaitForVBlank();
+
 			GPUCMD_SetBuffer(gpuCmd, gpuCmdSize, 0);
 			doFrame1();
 			GPUCMD_Finalize();
-			gspWaitForVBlank(); //TEMP
 			GPUCMD_Run(gxCmdBuf);
-
-			gspWaitForVBlank();
+			gspWaitForP3D();
 
 			GX_SetDisplayTransfer(gxCmdBuf, (u32*)gpuOut, 0x019001E0, (u32*)gfxGetFramebuffer(GFX_TOP, GFX_LEFT, NULL, NULL), 0x019001E0, 0x01001000);
-			svcSleepThread(100000); //TEMP
+			gspWaitForPPF();
+			
 			GX_SetMemoryFill(gxCmdBuf, (u32*)gpuOut, 0x404040FF, (u32*)&gpuOut[0x2EE00], 0x201, (u32*)gpuDOut, 0x00000000, (u32*)&gpuDOut[0x2EE00], 0x201);
-			svcSleepThread(100000); //TEMP
 		}
 	}
 
