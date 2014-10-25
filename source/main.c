@@ -9,7 +9,6 @@
 #include "player.h"
 #include "test_vsh_shbin.h"
 #include "terrain_bin.h"
-// #include "mdl.h"
 
 DVLB_s* shader;
 u32* texData;
@@ -58,15 +57,11 @@ void doFrame1()
 	//texturing stuff
 		GPU_SetTexture(GPU_TEXUNIT0, (u32*)osConvertVirtToPhys((u32)texData),256,256,0x6,GPU_RGBA8);
 
-	gsMatrixMode(GS_MODELVIEW);
-
-	//draw first model
+	//draw world
+		gsMatrixMode(GS_MODELVIEW);
 		gsPushMatrix();
 			setCameraPlayer(&player);
 			drawWorld(&world);
-
-			gsTranslate(100.0f, 100.0f, 100.0f);
-			drawWorldCluster(&wcl);
 		gsPopMatrix();
 }
 
@@ -119,10 +114,6 @@ int main()
 			controlsPlayer(&player);
 			updatePlayer(&player);
 
-			gfxSwapBuffersGpu();
-
-			gspWaitForVBlank();
-
 			GPUCMD_SetBuffer(gpuCmd, gpuCmdSize, 0);
 			doFrame1();
 			GPUCMD_Finalize();
@@ -131,8 +122,10 @@ int main()
 
 			GX_SetDisplayTransfer(gxCmdBuf, (u32*)gpuOut, 0x019001E0, (u32*)gfxGetFramebuffer(GFX_TOP, GFX_LEFT, NULL, NULL), 0x019001E0, 0x01001000);
 			gspWaitForPPF();
-			
+
 			GX_SetMemoryFill(gxCmdBuf, (u32*)gpuOut, 0x404040FF, (u32*)&gpuOut[0x2EE00], 0x201, (u32*)gpuDOut, 0x00000000, (u32*)&gpuDOut[0x2EE00], 0x201);
+			gfxSwapBuffersGpu();
+			gspWaitForEvent(GSPEVENT_VBlank0, false);
 		}
 	}
 

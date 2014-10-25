@@ -1,7 +1,7 @@
 ; make sure you update aemstro_as for this (27/05/14)
  
 ; setup constants
-	.const 5, 0.0, 0.0, -0.99, 1.0
+	.const 5, -0.57, 0.0, -0.99, 1.0
  
 ; setup outmap
 	.out o0, result.position
@@ -33,10 +33,11 @@
 		mov d03, d25 (0x7)
 		mov d04, d25 (0x7)
 		; result.color = crappy lighting
-		dp3 d1A, d44, d02 (0x0)
-		dp3 d1A, d45, d02 (0x1)
-		dp3 d1A, d46, d02 (0x2)
-		dp4 d01, d00, d1A (0x6)
+		;dp3 d1A, d44, d02 (0x0)
+		;dp3 d1A, d45, d02 (0x1)
+		;dp3 d1A, d46, d02 (0x2)
+		;dp4 d01, d00, d1A (0x6)
+		dp3 d01, d25, d02 (0x8)
 		mov d01, d25 (0x3)
 		flush
 		end
@@ -51,4 +52,4 @@
 	.opdesc xyzw, xyzw, xyzw ; 0x5
 	.opdesc xyz_, xyzw, xyzw ; 0x6
 	.opdesc xyzw, yyyw, xyzw ; 0x7
-	.opdesc xyzw, wwww, wwww ; 0x8
+	.opdesc xyz_, xxxw, xyzw ; 0x8
