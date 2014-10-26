@@ -19,6 +19,8 @@ void controlsPlayer(player_s* p)
 	if(!p)return;
 
 	const u32 PAD=hidKeysHeld();
+	circlePosition cstick;
+	hidCstickRead(&cstick);
 
 	vect3Df_s vx=vnormf(getMatrixColumn((float*)p->orientation, 0));
 	vect3Df_s vy=vnormf(getMatrixColumn((float*)p->orientation, 1));
@@ -35,6 +37,8 @@ void controlsPlayer(player_s* p)
 	if(PAD&KEY_B)rotateMatrixX((float*)p->orientation, -0.1f, false);
 	if(PAD&KEY_A)rotateMatrixY((float*)p->orientation, 0.1f, false);
 	if(PAD&KEY_Y)rotateMatrixY((float*)p->orientation, -0.1f, false);
+
+	rotateMatrixY((float*)p->orientation, (cstick.dx*0.2f)/0x9c, false);
 }
 
 void updatePlayer(player_s* p)

@@ -73,6 +73,7 @@ int main()
 	aptInit();
 	gfxInit();
 	hidInit(NULL);
+	irrstInit(NULL);
 	aptSetupEventHandler();
 	
 	GPU_Init(NULL);
@@ -130,6 +131,7 @@ int main()
 	}
 
 	gsExit();
+	irrstExit();
 	hidExit();
 	gfxExit();
 	aptExit();
