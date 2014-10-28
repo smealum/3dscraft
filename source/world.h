@@ -28,7 +28,7 @@ typedef struct
 
 typedef struct
 {
-	worldChunk_s data[WORLD_SIZE][WORLD_SIZE];
+	worldChunk_s* data[WORLD_SIZE][WORLD_SIZE];
 }world_s;
 
 

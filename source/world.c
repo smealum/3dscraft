@@ -177,7 +177,8 @@ void initWorld(world_s* w)
 		for(j=0; j<WORLD_SIZE; j++)
 		{
 			// w->data[i][j]=NULL;
-			initWorldChunk(&w->data[i][j], vect3Di(i,0,j));
+			w->data[i][j]=malloc(sizeof(worldChunk_s));
+			initWorldChunk(w->data[i][j], vect3Di(i,0,j));
 		}
 	}
 }
@@ -192,9 +193,8 @@ void generateWorld(world_s* w)
 	{
 		for(j=0; j<WORLD_SIZE; j++)
 		{
-			// w->data[i][j]=malloc(sizeof(worldCluster_s));
-			initWorldChunk(&w->data[i][j], vect3Di(i,0,j));
-			generateWorldChunkData(&w->data[i][j]);
+			initWorldChunk(w->data[i][j], vect3Di(i,0,j));
+			generateWorldChunkData(w->data[i][j]);
 		}
 		print("%d,", i);
 	}
@@ -204,7 +204,7 @@ void generateWorld(world_s* w)
 	{
 		for(j=0; j<WORLD_SIZE; j++)
 		{
-			generateWorldChunkGeometry(&w->data[i][j], w);
+			generateWorldChunkGeometry(w->data[i][j], w);
 		}
 		print("%d,", i);
 	}
@@ -217,7 +217,7 @@ s16 getWorldBlock(world_s* w, vect3Di_s p)
 	if(p.x<0 || p.y<0 || p.z<0)return -1;
 	if(p.x>=WORLD_SIZE*CLUSTER_SIZE || p.y>=CHUNK_HEIGHT*CLUSTER_SIZE || p.z>=WORLD_SIZE*CLUSTER_SIZE)return -1;
 
-	return getWorldChunkBlock(&w->data[p.x/CLUSTER_SIZE][p.z/CLUSTER_SIZE], vect3Di(p.x%CLUSTER_SIZE, p.y, p.z%CLUSTER_SIZE));
+	return getWorldChunkBlock(w->data[p.x/CLUSTER_SIZE][p.z/CLUSTER_SIZE], vect3Di(p.x%CLUSTER_SIZE, p.y, p.z%CLUSTER_SIZE));
 }
 
 void updateWorld(world_s* w)
@@ -254,7 +254,7 @@ void drawWorld(world_s* w)
 		for(j=0; j<WORLD_SIZE; j++)
 		{
 			//culling goes here
-			drawWorldChunk(&w->data[i][j]);
+			drawWorldChunk(w->data[i][j]);
 		}
 	}
 }
