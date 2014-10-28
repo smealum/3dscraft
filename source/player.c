@@ -33,10 +33,10 @@ void controlsPlayer(player_s* p)
 	if(PAD&KEY_R)p->velocity=vaddf(p->velocity, vmulf(vx, -1.0f));
 	if(PAD&KEY_L)p->velocity=vaddf(p->velocity, vmulf(vx, 1.0f));
 
-	if(PAD&KEY_X)rotateMatrixX((float*)p->orientation, 0.1f, false);
-	if(PAD&KEY_B)rotateMatrixX((float*)p->orientation, -0.1f, false);
-	if(PAD&KEY_A)rotateMatrixY((float*)p->orientation, 0.1f, false);
-	if(PAD&KEY_Y)rotateMatrixY((float*)p->orientation, -0.1f, false);
+	// if(PAD&KEY_X)rotateMatrixX((float*)p->orientation, 0.1f, false);
+	// if(PAD&KEY_B)rotateMatrixX((float*)p->orientation, -0.1f, false);
+	// if(PAD&KEY_A)rotateMatrixY((float*)p->orientation, 0.1f, false);
+	// if(PAD&KEY_Y)rotateMatrixY((float*)p->orientation, -0.1f, false);
 
 	rotateMatrixY((float*)p->orientation, (cstick.dx*0.2f)/0x9c, false);
 }

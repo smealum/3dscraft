@@ -39,6 +39,7 @@ void generateWorldClusterGeometry(worldCluster_s* wcl, world_s* w);
 
 void initWorld(world_s* w);
 void generateWorld(world_s* w);
+void updateWorld(world_s* w);
 void drawWorld(world_s* w);
 
 s16 getWorldBlock(world_s* w, vect3Di_s p);

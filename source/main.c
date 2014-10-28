@@ -7,6 +7,7 @@
 #include "gs.h"
 #include "world.h"
 #include "player.h"
+#include "text.h"
 #include "test_vsh_shbin.h"
 #include "terrain_bin.h"
 
@@ -65,6 +66,18 @@ void doFrame1()
 		gsPopMatrix();
 }
 
+char superStr[4096];
+
+void drawBottom()
+{
+	memset(gfxGetFramebuffer(GFX_BOTTOM, GFX_LEFT, NULL, NULL), 0x00, 240*320*3);
+	gfxDrawText(GFX_BOTTOM, GFX_LEFT, NULL, "3dscraft debug", 240-fontDefault.height, 0);
+	gfxDrawText(GFX_BOTTOM, GFX_LEFT, NULL, superStr, 240-fontDefault.height*2, 0);
+
+	gfxFlushBuffers();
+	gfxSwapBuffers();
+}
+
 extern u32* gxCmdBuf;
 
 int main()
@@ -88,12 +101,12 @@ int main()
 	memcpy(texData, terrain_bin, terrain_bin_size);
 	GSPGPU_FlushDataCache(NULL, (u8*)texData, terrain_bin_size);
 
-	initWorldCluster(&wcl, vect3Di(0,8,0));
-	generateWorldClusterData(&wcl);
-	generateWorldClusterGeometry(&wcl, NULL);
+	print("welcome\n");
 
 	initWorld(&world);
-	generateWorld(&world);
+	print("generating world...\n");
+	generateWorld(&world); // TEMP
+	print("done\n");
 
 	gsMatrixMode(GS_PROJECTION);
 	gsProjectionMatrix(1.3962634f, 240.0f/400.0f, 0.01f, 10.0f);
@@ -103,7 +116,7 @@ int main()
 	shader=SHDR_ParseSHBIN((u32*)test_vsh_shbin,test_vsh_shbin_size);
 
 	GX_SetMemoryFill(gxCmdBuf, (u32*)gpuOut, 0x404040FF, (u32*)&gpuOut[0x2EE00], 0x201, (u32*)gpuDOut, 0x00000000, (u32*)&gpuDOut[0x2EE00], 0x201);
-	gspWaitForPSC0();
+	// gspWaitForPSC0();
 	gfxSwapBuffersGpu();
 
 	APP_STATUS status;
@@ -112,8 +125,10 @@ int main()
 		if(status==APP_RUNNING)
 		{
 			hidScanInput();
+			if(keysDown()&KEY_START)break;
 			controlsPlayer(&player);
 			updatePlayer(&player);
+			// updateWorld(&world);
 
 			GPUCMD_SetBuffer(gpuCmd, gpuCmdSize, 0);
 			doFrame1();

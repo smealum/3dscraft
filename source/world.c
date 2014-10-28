@@ -4,6 +4,7 @@
 #include "gs.h"
 #include "world.h"
 #include "sdnoise.h"
+#include "text.h"
 
 #define pushFace(l, s, f) ((l)[(s)++]=f)
 #define popFace(l, s) ((s)?(&((l)[--(s)])):NULL)
@@ -175,6 +176,7 @@ void initWorld(world_s* w)
 	{
 		for(j=0; j<WORLD_SIZE; j++)
 		{
+			// w->data[i][j]=NULL;
 			initWorldChunk(&w->data[i][j], vect3Di(i,0,j));
 		}
 	}
@@ -190,9 +192,13 @@ void generateWorld(world_s* w)
 	{
 		for(j=0; j<WORLD_SIZE; j++)
 		{
+			// w->data[i][j]=malloc(sizeof(worldCluster_s));
+			initWorldChunk(&w->data[i][j], vect3Di(i,0,j));
 			generateWorldChunkData(&w->data[i][j]);
 		}
+		print("%d,", i);
 	}
+	print("\n");
 
 	for(i=0; i<WORLD_SIZE; i++)
 	{
@@ -200,7 +206,9 @@ void generateWorld(world_s* w)
 		{
 			generateWorldChunkGeometry(&w->data[i][j], w);
 		}
+		print("%d,", i);
 	}
+	print("\n");
 }
 
 s16 getWorldBlock(world_s* w, vect3Di_s p)
@@ -210,6 +218,30 @@ s16 getWorldBlock(world_s* w, vect3Di_s p)
 	if(p.x>=WORLD_SIZE*CLUSTER_SIZE || p.y>=CHUNK_HEIGHT*CLUSTER_SIZE || p.z>=WORLD_SIZE*CLUSTER_SIZE)return -1;
 
 	return getWorldChunkBlock(&w->data[p.x/CLUSTER_SIZE][p.z/CLUSTER_SIZE], vect3Di(p.x%CLUSTER_SIZE, p.y, p.z%CLUSTER_SIZE));
+}
+
+void updateWorld(world_s* w)
+{
+	if(!w)return;
+
+	int i, j;
+	for(i=0; i<WORLD_SIZE; i++)
+	{
+		for(j=0; j<WORLD_SIZE; j++)
+		{
+			// //TEMP, naive generation
+			// if(!w->data[i][j])
+			// {
+			// 	w->data[i][j]=malloc(sizeof(worldCluster_s));
+			// 	if(w->data[i][j])
+			// 	{
+			// 		initWorldChunk(w->data[i][j], vect3Di(i,0,j));
+			// 		generateWorldChunkData(w->data[i][j]);
+			// 		generateWorldChunkGeometry(w->data[i][j], w); //will miss faces, but this is TEMP anyway
+			// 	}
+			// }
+		}
+	}
 }
 
 void drawWorld(world_s* w)
