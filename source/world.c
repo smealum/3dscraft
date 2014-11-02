@@ -3,6 +3,7 @@
 
 #include "gs.h"
 #include "world.h"
+#include "dispatcher.h"
 #include "sdnoise.h"
 #include "text.h"
 
@@ -179,7 +180,8 @@ void generateWorldChunkData(worldChunk_s* wch)
 {
 	if(!wch)return;
 
-	int k; for(k=0; k<CHUNK_HEIGHT; k++)generateWorldClusterData(&wch->data[k]);
+	// int k; for(k=0; k<CHUNK_HEIGHT; k++)generateWorldClusterData(&wch->data[k]);
+	int k; for(k=0; k<CHUNK_HEIGHT; k++)dispatchJob(NULL, createJobGenerateCluster(&wch->data[k]));
 }
 
 //TEMP ?
@@ -252,11 +254,20 @@ void updateWorld(world_s* w)
 				{
 					initWorldChunk(w->data[i][j], vect3Di(i+w->position.x,0,j+w->position.y));
 					generateWorldChunkData(w->data[i][j]);
-					generateWorldChunkGeometry(w->data[i][j], w); //will miss faces, but this is TEMP anyway
+					// generateWorldChunkGeometry(w->data[i][j], w); //will miss faces, but this is TEMP anyway
 				}
 			}
 		}
 	}
+
+	if(keysDown()&KEY_X)
+		for(i=0; i<WORLD_SIZE; i++)
+		{
+			for(j=0; j<WORLD_SIZE; j++)
+			{
+				generateWorldChunkGeometry(w->data[i][j], w);
+			}
+		}
 }
 
 void translateWorld(world_s* w, vect3Di_s v)

@@ -24,6 +24,7 @@ job_s* getNewJob(void);
 void freeJob(job_s* j);
 
 void handleJob(job_s* j);
+void finalizeJob(job_s* j);
 
 //job type
 typedef void (*jobHandler_func)(job_s* j);
@@ -31,6 +32,7 @@ typedef void (*jobHandler_func)(job_s* j);
 typedef struct
 {
 	jobHandler_func handler;
+	jobHandler_func finalizer;
 	u32 dataSize;
 }jobType_s;
 

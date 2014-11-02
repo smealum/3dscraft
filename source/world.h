@@ -34,6 +34,8 @@ typedef struct
 	vect3Di_s position; //in cluster coordinates (actually 2D)
 }world_s;
 
+void generateWorldClusterData(worldCluster_s* wcl);
+
 void initChunkPool(void);
 worldChunk_s* getNewChunk(void);
 void freeChunk(worldChunk_s* wch);

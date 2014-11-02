@@ -71,11 +71,19 @@ void jobGenerateClusterHandler(job_s* j)
 	if(!j)return;
 	jobGenerateClusterData_s* d=(jobGenerateClusterData_s*)j->data;
 
+	generateWorldClusterData(d->target);
+}
+
+void jobGenerateClusterFinalizer(job_s* j)
+{
+	if(!j)return;
+	jobGenerateClusterData_s* d=(jobGenerateClusterData_s*)j->data;
+
 	d->target->busy=false;
 }
 
 jobType_s jobTypes[NUM_JOB_TYPES]= {
-	(jobType_s){jobGenerateClusterHandler, sizeof(jobGenerateClusterData_s)}, // JOB_GENERATE_CLUSTER
+	(jobType_s){jobGenerateClusterHandler, jobGenerateClusterFinalizer, sizeof(jobGenerateClusterData_s)}, // JOB_GENERATE_CLUSTER
 };
 
 //job
@@ -84,6 +92,12 @@ void handleJob(job_s* j)
 	if(!j || j->type>=NUM_JOB_TYPES)return;
 
 	jobTypes[j->type].handler(j);
+}
+void finalizeJob(job_s* j)
+{
+	if(!j || j->type>=NUM_JOB_TYPES)return;
+
+	jobTypes[j->type].finalizer(j);
 }
 
 //job queue
@@ -107,7 +121,7 @@ void queueJob(jobQueue_s* jq, job_s* j)
 
 void appendJobQueue(jobQueue_s* jq1, jobQueue_s* jq2)
 {
-	if(!jq1 || !jq2)return;
+	if(!jq1 || !jq2 || !jq2->length)return;
 
 	if(!jq1->length)*jq1=*jq2;
 	else{

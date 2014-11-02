@@ -13,12 +13,13 @@
 #include "test_vsh_shbin.h"
 #include "terrain_bin.h"
 
+#define TICKS_PER_VBL (268123480/60)
+
 DVLB_s* shader;
 u32* texData;
 
 player_s player;
 world_s world;
-dispatcher_s dispatcher;
 
 u32* gpuOut=(u32*)0x1F119400;
 u32* gpuDOut=(u32*)0x1F370800;
@@ -119,7 +120,7 @@ int main()
 	GSPGPU_FlushDataCache(NULL, (u8*)texData, terrain_bin_size);
 
 	print("welcome\n");
-	initDispatcher(&dispatcher);
+	initDispatcher(NULL);
 	initChunkPool();
 	initWorld(&world);
 	print("generating world...\n");
@@ -147,10 +148,7 @@ int main()
 
 			updatePlayer(&player);
 			updateWorld(&world);
-			updateDispatcher(&dispatcher);
-
-			// print("drawing %d chunks... (%d vs %d) (%f)\n", (int)debugValue[0], (int)debugValue[1], (int)debugValue[2], ((float)debugValue[1]*100)/debugValue[2]);
-			debugValue[0]=0;
+			updateDispatcher(NULL);
 
 			GPUCMD_SetBuffer(gpuCmd, gpuCmdSize, 0);
 			doFrame1();
@@ -167,9 +165,12 @@ int main()
 		}
 		gspWaitForEvent(GSPEVENT_VBlank0, true);
 		debugValue[2]=(u32)(svcGetSystemTick()-val);
+
+		// print("drawing %d chunks... (%f vs %f)\n", (int)debugValue[0], (float)(debugValue[1]*100)/TICKS_PER_VBL, (float)(debugValue[2]*100)/TICKS_PER_VBL);
+		// debugValue[0]=0;
 	}
 
-	exitDispatcher(&dispatcher);
+	exitDispatcher(NULL);
 	gsExit();
 	irrstExit();
 	hidExit();
