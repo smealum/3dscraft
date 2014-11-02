@@ -20,24 +20,25 @@ typedef struct
 	bool generated;
 }worldCluster_s;
 
-typedef struct
+typedef struct worldChunk_s
 {
 	worldCluster_s data[CHUNK_HEIGHT];
 	vect3Di_s position; //in cluster coordinates (actually 2D)
+	struct worldChunk_s* next; //for chunk pool and chunk cache
 }worldChunk_s;
 
 typedef struct
 {
 	worldChunk_s* data[WORLD_SIZE][WORLD_SIZE];
+	vect3Di_s position; //in cluster coordinates (actually 2D)
 }world_s;
 
-
-void initWorldCluster(worldCluster_s* wcl, vect3Di_s pos);
-void drawWorldCluster(worldCluster_s* wcl);
-void generateWorldClusterData(worldCluster_s* wcl);
-void generateWorldClusterGeometry(worldCluster_s* wcl, world_s* w);
+void initChunkPool(void);
+worldChunk_s* getNewChunk(void);
+void freeChunk(worldChunk_s* wch);
 
 void initWorld(world_s* w);
+void translateWorld(world_s* w, vect3Di_s v);
 void generateWorld(world_s* w);
 void updateWorld(world_s* w);
 void drawWorld(world_s* w);

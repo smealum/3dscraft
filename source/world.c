@@ -9,6 +9,39 @@
 #define pushFace(l, s, f) ((l)[(s)++]=f)
 #define popFace(l, s) ((s)?(&((l)[--(s)])):NULL)
 
+#define CHUNKPOOL_ALLOCSIZE ((WORLD_SIZE*WORLD_SIZE)/2)
+
+worldChunk_s* chunkPool;
+
+void initChunkPool(void)
+{
+	chunkPool=NULL;
+}
+
+void allocatePoolChunks(void)
+{
+	worldChunk_s* newChunks=malloc(sizeof(worldChunk_s)*CHUNKPOOL_ALLOCSIZE);
+	int i; for(i=0;i<CHUNKPOOL_ALLOCSIZE-1;i++)newChunks[i].next=&newChunks[i+1];
+	newChunks[CHUNKPOOL_ALLOCSIZE-1].next=chunkPool;
+	chunkPool=newChunks;
+}
+
+worldChunk_s* getNewChunk(void)
+{
+	if(!chunkPool)allocatePoolChunks();
+	worldChunk_s* wch=chunkPool;
+	chunkPool=wch->next;
+	wch->next=NULL;
+	return wch;
+}
+
+void freeChunk(worldChunk_s* wch)
+{
+	if(!wch)return;
+	wch->next=chunkPool;
+	chunkPool=wch;
+}
+
 void initWorldCluster(worldCluster_s* wcl, vect3Di_s pos)
 {
 	if(!wcl)return;
@@ -176,44 +209,17 @@ void initWorld(world_s* w)
 	{
 		for(j=0; j<WORLD_SIZE; j++)
 		{
-			// w->data[i][j]=NULL;
-			w->data[i][j]=malloc(sizeof(worldChunk_s));
-			initWorldChunk(w->data[i][j], vect3Di(i,0,j));
+			w->data[i][j]=NULL;
 		}
 	}
-}
 
-//TEMP
-void generateWorld(world_s* w)
-{
-	if(!w)return;
-	int i, j;
-
-	for(i=0; i<WORLD_SIZE; i++)
-	{
-		for(j=0; j<WORLD_SIZE; j++)
-		{
-			initWorldChunk(w->data[i][j], vect3Di(i,0,j));
-			generateWorldChunkData(w->data[i][j]);
-		}
-		print("%d,", i);
-	}
-	print("\n");
-
-	for(i=0; i<WORLD_SIZE; i++)
-	{
-		for(j=0; j<WORLD_SIZE; j++)
-		{
-			generateWorldChunkGeometry(w->data[i][j], w);
-		}
-		print("%d,", i);
-	}
-	print("\n");
+	w->position=vect3Di(0,0,0);
 }
 
 s16 getWorldBlock(world_s* w, vect3Di_s p)
 {
 	if(!w)return -1;
+	p=vaddi(p,vmuli(w->position,-CLUSTER_SIZE));
 	if(p.x<0 || p.y<0 || p.z<0)return -1;
 	if(p.x>=WORLD_SIZE*CLUSTER_SIZE || p.y>=CHUNK_HEIGHT*CLUSTER_SIZE || p.z>=WORLD_SIZE*CLUSTER_SIZE)return -1;
 
@@ -229,19 +235,41 @@ void updateWorld(world_s* w)
 	{
 		for(j=0; j<WORLD_SIZE; j++)
 		{
-			// //TEMP, naive generation
-			// if(!w->data[i][j])
-			// {
-			// 	w->data[i][j]=malloc(sizeof(worldCluster_s));
-			// 	if(w->data[i][j])
-			// 	{
-			// 		initWorldChunk(w->data[i][j], vect3Di(i,0,j));
-			// 		generateWorldChunkData(w->data[i][j]);
-			// 		generateWorldChunkGeometry(w->data[i][j], w); //will miss faces, but this is TEMP anyway
-			// 	}
-			// }
+			//TEMP, naive generation
+			if(!w->data[i][j])
+			{
+				w->data[i][j]=getNewChunk();
+				if(w->data[i][j])
+				{
+					initWorldChunk(w->data[i][j], vect3Di(i+w->position.x,0,j+w->position.y));
+					generateWorldChunkData(w->data[i][j]);
+					generateWorldChunkGeometry(w->data[i][j], w); //will miss faces, but this is TEMP anyway
+				}
+			}
 		}
 	}
+}
+
+void translateWorld(world_s* w, vect3Di_s v)
+{
+	if(!w)return;
+
+	//waaaaay suboptimal but this won't get called often so who cares
+	static worldChunk_s* tmpData[WORLD_SIZE][WORLD_SIZE];
+	memcpy(tmpData, w->data, sizeof(tmpData));
+	memset(w->data, 0x00, sizeof(tmpData));
+
+	int i, j;
+	for(i=0; i<WORLD_SIZE; i++)
+	{
+		for(j=0; j<WORLD_SIZE; j++)
+		{
+			if(i-v.x >= 0 && i-v.x < WORLD_SIZE && j-v.y >= 0 && j-v.y < WORLD_SIZE)w->data[i-v.x][j-v.y]=tmpData[i][j];
+			else{freeChunk(tmpData[i][j]); tmpData[i][j]=NULL;}
+		}
+	}
+
+	w->position=vaddi(w->position,v);
 }
 
 void drawWorld(world_s* w)

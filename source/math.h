@@ -22,6 +22,11 @@ static inline vect3Di_s vaddi(vect3Di_s u, vect3Di_s v)
 	return (vect3Di_s){u.x+v.x,u.y+v.y,u.z+v.z};
 }
 
+static inline vect3Di_s vsubi(vect3Di_s u, vect3Di_s v)
+{
+	return (vect3Di_s){u.x-v.x,u.y-v.y,u.z-v.z};
+}
+
 static inline vect3Di_s vmuli(vect3Di_s v, s32 f)
 {
 	return (vect3Di_s){v.x*f,v.y*f,v.z*f};

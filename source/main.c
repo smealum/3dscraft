@@ -103,10 +103,9 @@ int main()
 
 	print("welcome\n");
 
+	initChunkPool();
 	initWorld(&world);
 	print("generating world...\n");
-	generateWorld(&world); // TEMP
-	print("done\n");
 
 	gsMatrixMode(GS_PROJECTION);
 	gsProjectionMatrix(1.3962634f, 240.0f/400.0f, 0.01f, 10.0f);
@@ -127,8 +126,12 @@ int main()
 			hidScanInput();
 			if(keysDown()&KEY_START)break;
 			controlsPlayer(&player);
+
+			if(keysDown()&KEY_A)translateWorld(&world, vect3Di(1,0,0));
+			if(keysDown()&KEY_B)translateWorld(&world, vect3Di(-1,0,0));
+
 			updatePlayer(&player);
-			// updateWorld(&world);
+			updateWorld(&world);
 
 			GPUCMD_SetBuffer(gpuCmd, gpuCmdSize, 0);
 			doFrame1();
@@ -143,7 +146,7 @@ int main()
 			gspWaitForPSC0();
 			gfxSwapBuffersGpu();
 		}
-		gspWaitForEvent(GSPEVENT_VBlank0, false);
+		gspWaitForEvent(GSPEVENT_VBlank0, true);
 	}
 
 	gsExit();
