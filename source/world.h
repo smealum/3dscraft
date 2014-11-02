@@ -4,6 +4,7 @@
 #include <3ds/types.h>
 #include "math.h"
 #include "block.h"
+#include "camera.h"
 
 #define CLUSTER_SIZE (8)
 
@@ -41,7 +42,7 @@ void initWorld(world_s* w);
 void translateWorld(world_s* w, vect3Di_s v);
 void generateWorld(world_s* w);
 void updateWorld(world_s* w);
-void drawWorld(world_s* w);
+void drawWorld(world_s* w, camera_s* c);
 
 s16 getWorldBlock(world_s* w, vect3Di_s p);
 

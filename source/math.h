@@ -52,6 +52,11 @@ static inline vect3Df_s vmulf(vect3Df_s v, float f)
 	return (vect3Df_s){v.x*f,v.y*f,v.z*f};
 }
 
+static inline vect3Df_s vscalef(vect3Df_s v1, vect3Df_s v2)
+{
+	return (vect3Df_s){v1.x*v2.x,v1.y*v2.y,v1.z*v2.z};
+}
+
 static inline vect3Df_s vnormf(vect3Df_s v)
 {
 	const float l=sqrtf(v.x*v.x+v.y*v.y+v.z*v.z);

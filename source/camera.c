@@ -58,6 +58,34 @@ bool pointInCameraFrustum(camera_s* c, vect3Df_s pt)
 {
 	if(!c)return false;
 	const vect4Df_s pt4=vect4Df(pt.x,pt.y,pt.z,1.0f);
-    int i; for(i=0;i<6;i++)if(vdotf4(pt4,c->frustumPlane[i])<0.0f)return false;
-    return true;
+	int i; for(i=0;i<6;i++)if(vdotf4(pt4,c->frustumPlane[i])<0.0f)return false;
+	return true;
+}
+
+vect3Df_s box[]={(vect3Df_s){0.f,0.f,0.f},
+				(vect3Df_s){1.f,0.f,0.f},
+				(vect3Df_s){0.f,1.f,0.f},
+				(vect3Df_s){0.f,0.f,1.f},
+				(vect3Df_s){1.f,1.f,0.f},
+				(vect3Df_s){1.f,0.f,1.f},
+				(vect3Df_s){0.f,1.f,1.f},
+				(vect3Df_s){1.f,1.f,1.f}};
+
+//et "Assarsson and Moller report that they found no observable penalty in the rendering when skipping further tests"
+bool aabbInCameraFrustum(camera_s* c, vect3Df_s o, vect3Df_s s)
+{
+	if(!c)return false;
+	int i, j;
+	for(i=0;i<6;i++)
+	{
+		int in=0, out=0;
+		for(j=0;j<8 && (!in || !out);j++)
+		{
+			const vect3Df_s pt=vaddf(o,vscalef(box[j],s));
+			if(vdotf4(vect4Df(pt.x,pt.y,pt.z,1.0f),c->frustumPlane[i])<0.0f)out++;
+			else in++;
+		}
+		if(!in)return false;
+	}
+	return true;
 }

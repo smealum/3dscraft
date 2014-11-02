@@ -23,6 +23,8 @@ producer_s producer;
 u32* gpuOut=(u32*)0x1F119400;
 u32* gpuDOut=(u32*)0x1F370800;
 
+u32 debugValue[128];
+
 // topscreen
 void doFrame1()
 {
@@ -64,7 +66,7 @@ void doFrame1()
 		gsMatrixMode(GS_MODELVIEW);
 		gsPushMatrix();
 			setCameraPlayer(&player);
-			drawWorld(&world);
+			drawWorld(&world, &player.camera);
 		gsPopMatrix();
 }
 
@@ -145,7 +147,8 @@ int main()
 			updatePlayer(&player);
 			updateWorld(&world);
 
-			print(pointInCameraFrustum(&player.camera, vect3Df(0.0f, CHUNK_HEIGHT*CLUSTER_SIZE/2+CLUSTER_SIZE, 0.0f))?"yes\n":"no\n");
+			print("drawing %d chunks...\n", (int)debugValue[0]);
+			debugValue[0]=0;
 
 			GPUCMD_SetBuffer(gpuCmd, gpuCmdSize, 0);
 			doFrame1();

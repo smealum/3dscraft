@@ -13,6 +13,8 @@
 
 worldChunk_s* chunkPool;
 
+extern u32 debugValue[128];
+
 void initChunkPool(void)
 {
 	chunkPool=NULL;
@@ -52,12 +54,18 @@ void initWorldCluster(worldCluster_s* wcl, vect3Di_s pos)
 	wcl->generated=false;
 }
 
+vect3Df_s clusterCoordToWorld(vect3Di_s v)
+{
+	return (vect3Df_s){v.x*CLUSTER_SIZE, v.y*CLUSTER_SIZE, v.z*CLUSTER_SIZE};
+}
+
 void drawWorldCluster(worldCluster_s* wcl)
 {
 	if(!wcl || !wcl->generated)return;
+	vect3Df_s v=clusterCoordToWorld(wcl->position);
 
 	gsPushMatrix();
-		gsTranslate(wcl->position.x*CLUSTER_SIZE, wcl->position.y*CLUSTER_SIZE, wcl->position.z*CLUSTER_SIZE);
+		gsTranslate(v.x, v.y, v.z);
 		gsVboDraw(&wcl->vbo);
 	gsPopMatrix();
 }
@@ -183,11 +191,13 @@ void generateWorldChunkGeometry(worldChunk_s* wch, world_s* w)
 	int k; for(k=0; k<CHUNK_HEIGHT; k++)generateWorldClusterGeometry(&wch->data[k], w);
 }
 
-void drawWorldChunk(worldChunk_s* wch)
+void drawWorldChunk(worldChunk_s* wch, camera_s* c)
 {
 	if(!wch)return;
 
-	//culling goes here
+	//baseline culling
+	if(!aabbInCameraFrustum(c, clusterCoordToWorld(wch->position), vect3Df(CLUSTER_SIZE,CLUSTER_SIZE*CHUNK_HEIGHT,CLUSTER_SIZE)))return;
+	debugValue[0]++;
 	int k; for(k=0; k<CHUNK_HEIGHT; k++)drawWorldCluster(&wch->data[k]);
 }
 
@@ -272,7 +282,7 @@ void translateWorld(world_s* w, vect3Di_s v)
 	w->position=vaddi(w->position,v);
 }
 
-void drawWorld(world_s* w)
+void drawWorld(world_s* w, camera_s* c)
 {
 	if(!w)return;
 
@@ -281,8 +291,7 @@ void drawWorld(world_s* w)
 	{
 		for(j=0; j<WORLD_SIZE; j++)
 		{
-			//culling goes here
-			drawWorldChunk(w->data[i][j]);
+			drawWorldChunk(w->data[i][j], c);
 		}
 	}
 }
