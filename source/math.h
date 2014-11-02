@@ -78,9 +78,19 @@ static inline vect4Df_s vaddf4(vect4Df_s u, vect4Df_s v)
 	return (vect4Df_s){u.x+v.x,u.y+v.y,u.z+v.z,u.w+v.w};
 }
 
+static inline vect4Df_s vsubf4(vect4Df_s u, vect4Df_s v)
+{
+	return (vect4Df_s){u.x-v.x,u.y-v.y,u.z-v.z,u.w-v.w};
+}
+
 static inline vect4Df_s vmulf4(vect4Df_s v, float f)
 {
 	return (vect4Df_s){v.x*f,v.y*f,v.z*f,v.w*f};
+}
+
+static inline float vdotf4(vect4Df_s v1, vect4Df_s v2)
+{
+	return v1.x*v2.x+v1.y*v2.y+v1.z*v2.z+v1.w*v2.w;
 }
 
 static inline vect4Df_s vnormf4(vect4Df_s v)

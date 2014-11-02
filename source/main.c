@@ -70,14 +70,27 @@ void doFrame1()
 
 char superStr[4096];
 
+int countLines(char* str)
+{
+	if(!str)return 0;
+	int cnt; for(cnt=1;*str=='\n'?++cnt:*str;str++);
+	return cnt;
+}
+
+void cutLine(char* str)
+{
+	if(!str || !*str)return;
+	char* str2=str;	for(;*str2&&*(str2+1)&&*str2!='\n';str2++);	str2++;
+	memmove(str,str2,strlen(str2)+1);
+}
+
 void drawBottom()
 {
 	memset(gfxGetFramebuffer(GFX_BOTTOM, GFX_LEFT, NULL, NULL), 0x00, 240*320*3);
 	gfxDrawText(GFX_BOTTOM, GFX_LEFT, NULL, "3dscraft debug", 240-fontDefault.height, 0);
+	int i = countLines(superStr);
+	while(i>240/fontDefault.height-1){cutLine(superStr);i--;}
 	gfxDrawText(GFX_BOTTOM, GFX_LEFT, NULL, superStr, 240-fontDefault.height*2, 0);
-
-	gfxFlushBuffers();
-	gfxSwapBuffers();
 }
 
 extern u32* gxCmdBuf;
@@ -131,6 +144,8 @@ int main()
 
 			updatePlayer(&player);
 			updateWorld(&world);
+
+			print(pointInCameraFrustum(&player.camera, vect3Df(0.0f, CHUNK_HEIGHT*CLUSTER_SIZE/2+CLUSTER_SIZE, 0.0f))?"yes\n":"no\n");
 
 			GPUCMD_SetBuffer(gpuCmd, gpuCmdSize, 0);
 			doFrame1();

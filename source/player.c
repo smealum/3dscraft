@@ -42,11 +42,6 @@ void controlsPlayer(player_s* p)
 	rotateMatrixY((float*)p->camera.orientation, (cstick.dx*0.2f)/0x9c, false);
 }
 
-void updatePlayerFrustum(player_s* p)
-{
-	if(!p)return;
-}
-
 void updatePlayer(player_s* p)
 {
 	if(!p)return;
@@ -56,9 +51,10 @@ void updatePlayer(player_s* p)
 	p->camera.position=vaddf(p->camera.position, p->velocity);
 
 	p->velocity=vect3Df(0.0f, 0.0f, 0.0f);
+	
+	updateCamera(&p->camera);
 }
 
-//should be run on GS_MODELVIEW
 void setCameraPlayer(player_s* p)
 {
 	if(!p)return;
