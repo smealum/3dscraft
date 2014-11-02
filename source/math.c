@@ -122,3 +122,15 @@ vect3Df_s getMatrixRow(float* m, u8 i)
 	if(!m || i>=4)return vect3Df(0,0,0);
 	return vect3Df(m[i+0*4],m[i+1*4],m[i+2*4]);
 }
+
+vect4Df_s getMatrixColumn4(float* m, u8 i)
+{
+	if(!m || i>=4)return vect4Df(0,0,0,0);
+	return vect4Df(m[0+i*4],m[1+i*4],m[2+i*4],m[3+i*4]);
+}
+
+vect4Df_s getMatrixRow4(float* m, u8 i)
+{
+	if(!m || i>=4)return vect4Df(0,0,0,0);
+	return vect4Df(m[i+0*4],m[i+1*4],m[i+2*4],m[i+3*4]);
+}

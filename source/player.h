@@ -3,12 +3,13 @@
 
 #include <3ds/types.h>
 #include "math.h"
+#include "camera.h"
 
 typedef struct
 {
 	vect3Df_s position;
 	vect3Df_s velocity;
-	mtx44 orientation;
+	camera_s camera;
 }player_s;
 
 void initPlayer(player_s* p);

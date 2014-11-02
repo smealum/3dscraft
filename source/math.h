@@ -63,6 +63,32 @@ static inline vect3Df_s vi2f(vect3Di_s v)
 	return (vect3Df_s){(float)v.x,(float)v.y,(float)v.z};
 }
 
+typedef struct
+{
+	float x, y, z, w;
+}vect4Df_s;
+
+static inline vect4Df_s vect4Df(float x, float y, float z, float w)
+{
+	return (vect4Df_s){x,y,z,w};
+}
+
+static inline vect4Df_s vaddf4(vect4Df_s u, vect4Df_s v)
+{
+	return (vect4Df_s){u.x+v.x,u.y+v.y,u.z+v.z,u.w+v.w};
+}
+
+static inline vect4Df_s vmulf4(vect4Df_s v, float f)
+{
+	return (vect4Df_s){v.x*f,v.y*f,v.z*f,v.w*f};
+}
+
+static inline vect4Df_s vnormf4(vect4Df_s v)
+{
+	const float l=sqrtf(v.x*v.x+v.y*v.y+v.z*v.z+v.w*v.w);
+	return (vect4Df_s){v.x/l,v.y/l,v.z/l,v.w/l};
+}
+
 void loadIdentity44(float* m);
 void multMatrix44(float* m1, float* m2, float* m);
 
@@ -76,5 +102,7 @@ void initProjectionMatrix(float* m, float fovy, float aspect, float near, float 
 
 vect3Df_s getMatrixColumn(float* m, u8 i);
 vect3Df_s getMatrixRow(float* m, u8 i);
+vect4Df_s getMatrixColumn4(float* m, u8 i);
+vect4Df_s getMatrixRow4(float* m, u8 i);
 
 #endif

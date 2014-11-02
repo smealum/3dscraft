@@ -109,9 +109,6 @@ int main()
 	initWorld(&world);
 	print("generating world...\n");
 
-	gsMatrixMode(GS_PROJECTION);
-	gsProjectionMatrix(1.3962634f, 240.0f/400.0f, 0.01f, 10.0f);
-	
 	initPlayer(&player);
 
 	shader=SHDR_ParseSHBIN((u32*)test_vsh_shbin,test_vsh_shbin_size);
