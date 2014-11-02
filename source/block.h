@@ -48,7 +48,7 @@ typedef struct
 
 const extern blockType_s blockTypes[BLOCK_NUM];
 
-void blockGenerateFaceGeometry(blockFace_s* bf, gsVbo_s* vbo);
+void blockGenerateFaceGeometry(blockFace_s* bf, gsVbo_s* vbo, vect3Df_s off);
 
 s16 blockShouldBeFace(s16 currentBlock, s16 nextBlock);
 

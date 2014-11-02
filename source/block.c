@@ -51,12 +51,12 @@ s16 blockShouldBeFace(s16 currentBlock, s16 nextBlock)
 	return -1;
 }
 
-void blockGenerateFaceGeometry(blockFace_s* bf, gsVbo_s* vbo)
+void blockGenerateFaceGeometry(blockFace_s* bf, gsVbo_s* vbo, vect3Df_s off)
 {
 	if(!bf || !vbo)return;
 	if(vbo->maxSize-vbo->currentSize < FACE_VBO_SIZE)return;
 
-	const vect3Df_s p=vi2f(bf->position);
+	const vect3Df_s p=vaddf(vi2f(bf->position), off);
 	const orientation_t o=bf->orientation;
 	const vect3Df_s vertices[]=
 	{

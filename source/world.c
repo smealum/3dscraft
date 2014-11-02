@@ -64,10 +64,7 @@ void drawWorldCluster(worldCluster_s* wcl)
 	if(!wcl || !wcl->generated)return;
 	vect3Df_s v=clusterCoordToWorld(wcl->position);
 
-	gsPushMatrix();
-		gsTranslate(v.x, v.y, v.z);
-		gsVboDraw(&wcl->vbo);
-	gsPopMatrix();
+	gsVboDraw(&wcl->vbo);
 }
 
 void generateWorldClusterGeometry(worldCluster_s* wcl, world_s* w)
@@ -115,6 +112,7 @@ void generateWorldClusterGeometry(worldCluster_s* wcl, world_s* w)
 
 	//then, we set up VBO size to create the VBO
 	const u32 size=faceListSize*FACE_VBO_SIZE;
+	vect3Df_s off=clusterCoordToWorld(wcl->position);
 
 	if(!gsVboCreate(&wcl->vbo, size))
 	{
@@ -122,7 +120,7 @@ void generateWorldClusterGeometry(worldCluster_s* wcl, world_s* w)
 		blockFace_s* bf;
 		while((bf=popFace(faceList, faceListSize)))
 		{
-			blockGenerateFaceGeometry(bf, &wcl->vbo);
+			blockGenerateFaceGeometry(bf, &wcl->vbo, off);
 		}
 
 		gsVboFlushData(&wcl->vbo);
@@ -286,6 +284,7 @@ void drawWorld(world_s* w, camera_s* c)
 {
 	if(!w)return;
 
+	u64 val=svcGetSystemTick();
 	int i, j;
 	for(i=0; i<WORLD_SIZE; i++)
 	{
@@ -294,4 +293,5 @@ void drawWorld(world_s* w, camera_s* c)
 			drawWorldChunk(w->data[i][j], c);
 		}
 	}
+	debugValue[1]=(u32)(svcGetSystemTick()-val);
 }

@@ -135,6 +135,7 @@ int main()
 	APP_STATUS status;
 	while((status=aptGetStatus())!=APP_EXITING)
 	{
+		u64 val=svcGetSystemTick();
 		if(status==APP_RUNNING)
 		{
 			hidScanInput();
@@ -147,7 +148,7 @@ int main()
 			updatePlayer(&player);
 			updateWorld(&world);
 
-			print("drawing %d chunks...\n", (int)debugValue[0]);
+			// print("drawing %d chunks... (%d vs %d) (%f)\n", (int)debugValue[0], (int)debugValue[1], (int)debugValue[2], ((float)debugValue[1]*100)/debugValue[2]);
 			debugValue[0]=0;
 
 			GPUCMD_SetBuffer(gpuCmd, gpuCmdSize, 0);
@@ -164,6 +165,7 @@ int main()
 			gfxSwapBuffersGpu();
 		}
 		gspWaitForEvent(GSPEVENT_VBlank0, true);
+		debugValue[2]=(u32)(svcGetSystemTick()-val);
 	}
 
 	exitDispatcher(&dispatcher);
