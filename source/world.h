@@ -18,7 +18,7 @@ typedef struct
 	u8 data[CLUSTER_SIZE][CLUSTER_SIZE][CLUSTER_SIZE];
 	vect3Di_s position; //in cluster coordinates
 	gsVbo_s vbo;
-	bool generated;
+	bool generated, busy;
 }worldCluster_s;
 
 typedef struct worldChunk_s

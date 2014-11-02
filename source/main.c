@@ -147,6 +147,7 @@ int main()
 
 			updatePlayer(&player);
 			updateWorld(&world);
+			updateDispatcher(&dispatcher);
 
 			// print("drawing %d chunks... (%d vs %d) (%f)\n", (int)debugValue[0], (int)debugValue[1], (int)debugValue[2], ((float)debugValue[1]*100)/debugValue[2]);
 			debugValue[0]=0;

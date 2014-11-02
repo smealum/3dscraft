@@ -7,6 +7,22 @@ void producerMain(u32 arg)
 	producer_s* p=(producer_s*)arg;
 	while(!p->exit)
 	{
+		svcWaitSynchronization(p->requestMutex, U64_MAX);
+		appendJobQueue(&p->privateList, &p->requestList);
+		svcReleaseMutex(p->requestMutex);
+
+		jobQueue_s tmpQueue;
+		initJobQueue(&tmpQueue);
+		job_s* j=NULL; while((j=unqueueJob(&p->privateList)))
+		{
+			handleJob(j);
+			queueJob(&tmpQueue, j);
+		}
+
+		svcWaitSynchronization(p->responseMutex, U64_MAX);
+		appendJobQueue(&p->responseList, &tmpQueue);
+		svcReleaseMutex(p->responseMutex);
+
 		svcSleepThread(1000000);
 	}
 	svcExitThread();

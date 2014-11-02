@@ -13,6 +13,8 @@ typedef struct
 }dispatcher_s;
 
 void initDispatcher(dispatcher_s* d);
+void updateDispatcher(dispatcher_s* d);
+void dispatchJob(dispatcher_s* d, job_s* j);
 void exitDispatcher(dispatcher_s* d);
 
 #endif

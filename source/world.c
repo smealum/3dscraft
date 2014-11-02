@@ -52,6 +52,7 @@ void initWorldCluster(worldCluster_s* wcl, vect3Di_s pos)
 	wcl->position=pos;
 	gsVboInit(&wcl->vbo);
 	wcl->generated=false;
+	wcl->busy=false;
 }
 
 vect3Df_s clusterCoordToWorld(vect3Di_s v)
@@ -61,7 +62,7 @@ vect3Df_s clusterCoordToWorld(vect3Di_s v)
 
 void drawWorldCluster(worldCluster_s* wcl)
 {
-	if(!wcl || !wcl->generated)return;
+	if(!wcl || !wcl->generated || wcl->busy)return;
 	vect3Df_s v=clusterCoordToWorld(wcl->position);
 
 	gsVboDraw(&wcl->vbo);
@@ -158,7 +159,7 @@ void generateWorldClusterData(worldCluster_s* wcl)
 
 s16 getWorldClusterBlock(worldCluster_s* wcl, vect3Di_s p)
 {
-	if(!wcl)return -1;
+	if(!wcl || wcl->busy)return -1;
 	if(p.x<0 || p.y<0 || p.z<0)return -1;
 	if(p.x>=CLUSTER_SIZE || p.y>=CLUSTER_SIZE || p.z>=CLUSTER_SIZE)return -1;
 
