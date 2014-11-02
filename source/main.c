@@ -7,7 +7,7 @@
 #include "math.h"
 #include "gs.h"
 #include "world.h"
-#include "producer.h"
+#include "dispatcher.h"
 #include "player.h"
 #include "text.h"
 #include "test_vsh_shbin.h"
@@ -18,7 +18,7 @@ u32* texData;
 
 player_s player;
 world_s world;
-producer_s producer;
+dispatcher_s dispatcher;
 
 u32* gpuOut=(u32*)0x1F119400;
 u32* gpuDOut=(u32*)0x1F370800;
@@ -119,7 +119,7 @@ int main()
 	GSPGPU_FlushDataCache(NULL, (u8*)texData, terrain_bin_size);
 
 	print("welcome\n");
-	initProducer(&producer);
+	initDispatcher(&dispatcher);
 	initChunkPool();
 	initWorld(&world);
 	print("generating world...\n");
@@ -166,7 +166,7 @@ int main()
 		gspWaitForEvent(GSPEVENT_VBlank0, true);
 	}
 
-	exitProducer(&producer);
+	exitDispatcher(&dispatcher);
 	gsExit();
 	irrstExit();
 	hidExit();

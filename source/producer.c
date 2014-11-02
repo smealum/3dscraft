@@ -16,6 +16,10 @@ void initProducer(producer_s* p)
 {
 	if(!p)return;
 
+	initJobQueue(&p->privateList);
+	initJobQueue(&p->requestList);
+	initJobQueue(&p->responseList);
+
 	p->exit=false;
 	svcCreateMutex(&p->requestMutex, false);
 	svcCreateMutex(&p->responseMutex, false);

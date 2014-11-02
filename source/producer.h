@@ -2,22 +2,18 @@
 #define PRODUCER_H
 
 #include <3ds.h>
+#include "job.h"
 
 #define PRODUCER_STACKSIZE (0x1000)
-
-typedef struct job_s
-{
-	struct job_s* next;
-}job_s;
 
 typedef struct
 {
 	Handle thread;
 	Handle requestMutex, responseMutex;
 	bool exit;
-	job_s* privateList;
-	job_s* requestList;
-	job_s* responseList;
+	jobQueue_s privateList; //only accessible from producer
+	jobQueue_s requestList; //accessible by anyone, given they've locked requestMutex
+	jobQueue_s responseList; //accessible by anyone, given they've locked responseMutex
 	u64 stack[PRODUCER_STACKSIZE/8];
 }producer_s;
 
