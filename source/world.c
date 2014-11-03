@@ -147,9 +147,6 @@ void generateWorldClusterGeometry(worldCluster_s* wcl, world_s* w, blockFace_s* 
 		gsVboFlushData(&wcl->vbo);
 		wcl->status&=~WCL_GEOM_UNAVAILABLE;
 	}
-	// u64 val=svcGetSystemTick();
-	// debugValue[5]+=(u32)(svcGetSystemTick()-val);
-	// debugValue[6]++;
 }
 
 int getWorldElevation(vect3Di_s p)
@@ -321,7 +318,6 @@ void drawWorld(world_s* w, camera_s* c)
 {
 	if(!w)return;
 
-	u64 val=svcGetSystemTick();
 	int i, j;
 	for(i=0; i<WORLD_SIZE; i++)
 	{
@@ -330,5 +326,4 @@ void drawWorld(world_s* w, camera_s* c)
 			drawWorldChunk(w, w->data[i][j], c);
 		}
 	}
-	debugValue[1]=(u32)(svcGetSystemTick()-val);
 }

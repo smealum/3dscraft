@@ -143,41 +143,42 @@ int main()
 	gfxSwapBuffersGpu();
 
 	APP_STATUS status;
-	while((status=aptGetStatus())!=APP_EXITING)
+	while(aptMainLoop())
 	{
 		u64 val=svcGetSystemTick();
-		if(status==APP_RUNNING)
-		{
-			hidScanInput();
-			if(keysDown()&KEY_START)break;
-			controlsPlayer(&player);
 
-			if(keysDown()&KEY_A)translateWorld(&world, vect3Di(1,0,0));
-			if(keysDown()&KEY_B)translateWorld(&world, vect3Di(-1,0,0));
-			if(keysDown()&KEY_X)translateWorld(&world, vect3Di(0,0,1));
-			if(keysDown()&KEY_Y)translateWorld(&world, vect3Di(0,0,-1));
+		hidScanInput();
+		if(keysDown()&KEY_START)break;
+		controlsPlayer(&player);
 
-			updatePlayer(&player);
-			updateWorld(&world);
-			updateDispatcher(NULL);
+		if(keysDown()&KEY_A)translateWorld(&world, vect3Di(1,0,0));
+		if(keysDown()&KEY_B)translateWorld(&world, vect3Di(-1,0,0));
+		if(keysDown()&KEY_X)translateWorld(&world, vect3Di(0,0,1));
+		if(keysDown()&KEY_Y)translateWorld(&world, vect3Di(0,0,-1));
 
-			GPUCMD_SetBuffer(gpuCmd, gpuCmdSize, 0);
-			doFrame1();
-			GPUCMD_Finalize();
-			GPUCMD_Run(gxCmdBuf);
-			gspWaitForP3D();
+		updatePlayer(&player);
+		updateWorld(&world);
+		updateDispatcher(NULL);
 
-			GX_SetDisplayTransfer(gxCmdBuf, (u32*)gpuOut, 0x019001E0, (u32*)gfxGetFramebuffer(GFX_TOP, GFX_LEFT, NULL, NULL), 0x019001E0, 0x01001000);
-			gspWaitForPPF();
+		GPUCMD_SetBuffer(gpuCmd, gpuCmdSize, 0);
+		doFrame1();
+		GPUCMD_Finalize();
+		GPUCMD_FlushAndRun(gxCmdBuf);
+		gspWaitForP3D();
 
-			GX_SetMemoryFill(gxCmdBuf, (u32*)gpuOut, 0x404040FF, (u32*)&gpuOut[0x2EE00], 0x201, (u32*)gpuDOut, 0x00000000, (u32*)&gpuDOut[0x2EE00], 0x201);
-			gspWaitForPSC0();
-			gfxSwapBuffersGpu();
-		}
+		GX_SetDisplayTransfer(gxCmdBuf, (u32*)gpuOut, 0x019001E0, (u32*)gfxGetFramebuffer(GFX_TOP, GFX_LEFT, NULL, NULL), 0x019001E0, 0x01001000);
+		gspWaitForPPF();
+
+		GX_SetMemoryFill(gxCmdBuf, (u32*)gpuOut, 0x404040FF, (u32*)&gpuOut[0x2EE00], 0x201, (u32*)gpuDOut, 0x00000000, (u32*)&gpuDOut[0x2EE00], 0x201);
+		gspWaitForPSC0();
+		gfxSwapBuffersGpu();
+		
 		gspWaitForEvent(GSPEVENT_VBlank0, true);
 		debugValue[2]=(u32)(svcGetSystemTick()-val);
 
-		print("avg %d ticks (%d)\n", (int)(debugValue[5]/debugValue[6]), debugValue[6]);
+		// u64 val=svcGetSystemTick();
+		// debugValue[1]=(u32)(svcGetSystemTick()-val);
+		// print("avg %d ticks (%d)\n", (int)(debugValue[5]/debugValue[6]), debugValue[6]);
 		// print("drawing %d chunks... (%f vs %f)\n", (int)debugValue[0], (float)(debugValue[1]*100)/TICKS_PER_VBL, (float)(debugValue[2]*100)/TICKS_PER_VBL);
 		// debugValue[0]=0;
 	}

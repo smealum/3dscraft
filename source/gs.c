@@ -8,8 +8,6 @@
 static void gsInitMatrixStack();
 
 Handle linearAllocMutex;
-Handle flushMutex;
-bool gsGotToFlush;
 
 //----------------------
 //   GS SYSTEM STUFF
@@ -19,14 +17,11 @@ void gsInit(void)
 {
 	gsInitMatrixStack();
 	svcCreateMutex(&linearAllocMutex, false);
-	svcCreateMutex(&flushMutex, false);
-	gsGotToFlush=false;
 }
 
 void gsExit(void)
 {
 	svcCloseHandle(linearAllocMutex);
-	svcCloseHandle(flushMutex);
 }
 
 void* gsLinearAlloc(size_t size)
@@ -45,20 +40,6 @@ void gsLinearFree(void* mem)
 	svcWaitSynchronization(linearAllocMutex, U64_MAX);
 	linearFree(mem);
 	svcReleaseMutex(linearAllocMutex);
-}
-
-extern u32 __linear_heap_size;
-extern u32 __linear_heap;
-
-void gsFlush(void)
-{
-	svcWaitSynchronization(flushMutex, U64_MAX);
-	if(gsGotToFlush)
-	{
-		gsGotToFlush=false;
-		svcReleaseMutex(flushMutex);
-		GSPGPU_FlushDataCache(NULL, (u8*)__linear_heap, __linear_heap_size);
-	}else svcReleaseMutex(flushMutex);
 }
 
 //----------------------
@@ -290,10 +271,8 @@ int gsVboFlushData(gsVbo_s* vbo)
 {
 	if(!vbo)return -1;
 
+	//unnecessary if we use flushAndRun
 	// GSPGPU_FlushDataCache(NULL, vbo->data, vbo->currentSize);
-	svcWaitSynchronization(flushMutex, U64_MAX);
-	gsGotToFlush=true;
-	svcReleaseMutex(flushMutex);
 
 	return 0;
 }
@@ -312,7 +291,6 @@ int gsVboDraw(gsVbo_s* vbo)
 {
 	if(!vbo || !vbo->data || !vbo->currentSize || !vbo->maxSize)return -1;
 
-	gsFlush();
 	gsUpdateTransformation();
 
 	//TEMP : need to make it configurable
