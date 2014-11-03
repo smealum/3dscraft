@@ -47,6 +47,11 @@ static inline vect3Df_s vaddf(vect3Df_s u, vect3Df_s v)
 	return (vect3Df_s){u.x+v.x,u.y+v.y,u.z+v.z};
 }
 
+static inline vect3Df_s vsubf(vect3Df_s u, vect3Df_s v)
+{
+	return (vect3Df_s){u.x-v.x,u.y-v.y,u.z-v.z};
+}
+
 static inline vect3Df_s vmulf(vect3Df_s v, float f)
 {
 	return (vect3Df_s){v.x*f,v.y*f,v.z*f};
@@ -57,15 +62,20 @@ static inline vect3Df_s vscalef(vect3Df_s v1, vect3Df_s v2)
 	return (vect3Df_s){v1.x*v2.x,v1.y*v2.y,v1.z*v2.z};
 }
 
+static inline float vmagf(vect3Df_s v)
+{
+	return sqrtf(v.x*v.x+v.y*v.y+v.z*v.z);
+}
+
+static inline float vdistf(vect3Df_s v1, vect3Df_s v2)
+{
+	return sqrtf((v1.x-v2.x)*(v1.x-v2.x)+(v1.y-v2.y)*(v1.y-v2.y)+(v1.z-v2.z)*(v1.z-v2.z));
+}
+
 static inline vect3Df_s vnormf(vect3Df_s v)
 {
 	const float l=sqrtf(v.x*v.x+v.y*v.y+v.z*v.z);
 	return (vect3Df_s){v.x/l,v.y/l,v.z/l};
-}
-
-static inline vect3Df_s vi2f(vect3Di_s v)
-{
-	return (vect3Df_s){(float)v.x,(float)v.y,(float)v.z};
 }
 
 typedef struct
@@ -102,6 +112,17 @@ static inline vect4Df_s vnormf4(vect4Df_s v)
 {
 	const float l=sqrtf(v.x*v.x+v.y*v.y+v.z*v.z+v.w*v.w);
 	return (vect4Df_s){v.x/l,v.y/l,v.z/l,v.w/l};
+}
+
+//interstuff
+static inline vect3Di_s vf2i(vect3Df_s v)
+{
+	return (vect3Di_s){floorf(v.x),floorf(v.y),floorf(v.z)};
+}
+
+static inline vect3Df_s vi2f(vect3Di_s v)
+{
+	return (vect3Df_s){(float)v.x,(float)v.y,(float)v.z};
 }
 
 void loadIdentity44(float* m);

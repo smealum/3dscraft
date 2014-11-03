@@ -156,7 +156,7 @@ int main()
 		if(keysDown()&KEY_X)translateWorld(&world, vect3Di(0,0,1));
 		if(keysDown()&KEY_Y)translateWorld(&world, vect3Di(0,0,-1));
 
-		updatePlayer(&player);
+		updatePlayer(&player, &world);
 		updateWorld(&world);
 		updateDispatcher(NULL);
 
@@ -172,7 +172,7 @@ int main()
 		GX_SetMemoryFill(gxCmdBuf, (u32*)gpuOut, 0x404040FF, (u32*)&gpuOut[0x2EE00], 0x201, (u32*)gpuDOut, 0x00000000, (u32*)&gpuDOut[0x2EE00], 0x201);
 		gspWaitForPSC0();
 		gfxSwapBuffersGpu();
-		
+
 		gspWaitForEvent(GSPEVENT_VBlank0, true);
 		debugValue[2]=(u32)(svcGetSystemTick()-val);
 
@@ -181,6 +181,9 @@ int main()
 		// print("avg %d ticks (%d)\n", (int)(debugValue[5]/debugValue[6]), debugValue[6]);
 		// print("drawing %d chunks... (%f vs %f)\n", (int)debugValue[0], (float)(debugValue[1]*100)/TICKS_PER_VBL, (float)(debugValue[2]*100)/TICKS_PER_VBL);
 		// debugValue[0]=0;
+		// u64 val=svcGetSystemTick();
+		// debugValue[5]+=(u32)(svcGetSystemTick()-val);
+		// debugValue[6]++;
 	}
 
 	exitDispatcher(NULL);
