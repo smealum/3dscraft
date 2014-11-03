@@ -34,7 +34,7 @@ void controlsPlayer(player_s* p)
 	if(PAD&KEY_RIGHT)p->velocity=vaddf(p->velocity, vmulf(vy, -0.4f));
 	if(PAD&KEY_LEFT)p->velocity=vaddf(p->velocity, vmulf(vy, 0.4f));
 	if(PAD&KEY_R)p->velocity=vaddf(p->velocity, vmulf(vx, -0.8f));
-	if(hidKeysDown()&KEY_L)p->velocity=vaddf(p->velocity, vmulf(vx, 2.0f));
+	if(hidKeysDown()&KEY_L)p->velocity=vaddf(p->velocity, vmulf(vx, 1.0f));
 
 	// if(PAD&KEY_X)rotateMatrixX((float*)p->camera.orientation, 0.1f, false);
 	// if(PAD&KEY_B)rotateMatrixX((float*)p->camera.orientation, -0.1f, false);
@@ -114,7 +114,7 @@ vect3Di_s performRayMarch(world_s* w, vect3Df_s localBlockPosf, vect3Df_s localB
 					float targetY=(cur.y)*1.0f;
 					if(stepY<0)targetY+=1.0f;
 					float r=(targetY-localBlockPosf.y)/u.y;
-					targetY-=0.1f*stepY; //margin
+					targetY-=0.04f*stepY; //margin
 					*out=vaddf(localBlockPosf, vmulf(u,r)); out->y=targetY;
 				}
 				break;
@@ -151,28 +151,38 @@ void updatePlayer(player_s* p, world_s* w)
 	if(!p)return;
 
 	//gravity
-	p->velocity=vaddf(p->velocity, vect3Df(0.0f, -0.2f, 0.0f));
+	// p->velocity=vaddf(p->velocity, vect3Df(0.0f, -0.05f, 0.0f));
 
-	//collisions
-	if(vmagf(p->velocity)>0.0001f)
-	{
-		vect3Df_s v=p->velocity;
-		int i;
-		for(i=0; i<8; i++)
-		{
-			vect3Df_s out;
-			vect3Df_s pt=vaddf(p->camera.position, playerBox[i]);
-			performRayMarch(w, pt, vaddf(pt, v), &out);
-			v=vsubf(out,pt);
-			if(vmagf(v)<=0.0001f)break;
-		}
-		p->velocity=v;
-	}
+	// //collisions
+	// if(vmagf(p->velocity)>0.0001f)
+	// {
+	// 	vect3Df_s v=p->velocity;
+	// 	int i;
+	// 	for(i=0; i<8; i++)
+	// 	{
+	// 		vect3Df_s out;
+	// 		vect3Df_s pt=vaddf(p->camera.position, playerBox[i]);
+	// 		performRayMarch(w, pt, vaddf(pt, v), &out);
+	// 		v=vsubf(out,pt);
+	// 		if(vmagf(v)<=0.0001f)break;
+	// 	}
+	// 	p->velocity=v;
+	// }
 
 	p->camera.position=vaddf(p->camera.position, p->velocity);
 
 	p->velocity=vect3Df(0.0f, p->velocity.y, 0.0f);
 	// p->velocity=vect3Df(0.0f, 0.0f, 0.0f);
+
+	if(w)
+	{
+		vect3Di_s off=vsubi(vf2i(vmulf(p->camera.position, 1.0f/CLUSTER_SIZE)), vaddi(w->position, vect3Di(WORLD_SIZE/2,0,WORLD_SIZE/2)));
+		if(off.x<=-2)translateWorld(w, vect3Di(-1,0,0));
+		if(off.x>=2)translateWorld(w, vect3Di(1,0,0));
+		if(off.z<=-2)translateWorld(w, vect3Di(0,0,-1));
+		if(off.z>=2)translateWorld(w, vect3Di(0,0,1));
+		print("%d %d\n",off.x,off.z);
+	}
 
 	updateCamera(&p->camera);
 }

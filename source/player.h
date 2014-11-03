@@ -8,7 +8,6 @@
 
 typedef struct
 {
-	vect3Df_s position;
 	vect3Df_s velocity;
 	camera_s camera;
 }player_s;

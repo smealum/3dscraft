@@ -53,11 +53,12 @@ void freeJob(job_s* j)
 typedef struct
 {
 	worldCluster_s* target;
+	worldChunk_s* chunk; //read-only
 }jobGenerateClusterData_s;
 
-job_s* createJobGenerateCluster(worldCluster_s* wcl)
+job_s* createJobGenerateCluster(worldCluster_s* wcl, worldChunk_s* wch)
 {
-	if(!wcl)return NULL;
+	if(!wcl || !wch)return NULL;
 	if(wcl->status&WCL_BUSY)return NULL;
 	if(!(wcl->status&WCL_DATA_UNAVAILABLE))return NULL;
 	job_s* j=createNewJob(JOB_GENERATE_CLUSTER_DATA);
@@ -66,6 +67,7 @@ job_s* createJobGenerateCluster(worldCluster_s* wcl)
 
 	d->target=wcl;
 	d->target->status|=WCL_DATA_UNAVAILABLE|WCL_BUSY;
+	d->chunk=wch;
 
 	return j;
 }
@@ -74,6 +76,8 @@ void jobGenerateClusterHandler(struct producer_s* p, job_s* j)
 {
 	if(!p || !j)return;
 	jobGenerateClusterData_s* d=(jobGenerateClusterData_s*)j->data;
+
+	if(d->chunk->next)return; //if chunk is in a list, it means it's being discarded in tmpChunkPool => do nothing
 
 	generateWorldClusterData(d->target);
 }
@@ -84,18 +88,20 @@ void jobGenerateClusterFinalizer(job_s* j)
 	jobGenerateClusterData_s* d=(jobGenerateClusterData_s*)j->data;
 
 	d->target->status&=~(WCL_DATA_UNAVAILABLE|WCL_BUSY);
+	fixChunk(d->chunk);
 }
 
 //JOB_GENERATE_CLUSTER_GEOM
 typedef struct
 {
 	worldCluster_s* target;
+	worldChunk_s* chunk; //read-only
 	world_s* world; //read-only
 }jobGenerateClusterGeometryData_s;
 
-job_s* createJobGenerateClusterGeometry(worldCluster_s* wcl, world_s* w)
+job_s* createJobGenerateClusterGeometry(worldCluster_s* wcl, worldChunk_s* wch, world_s* w)
 {
-	if(!wcl || !w)return NULL;
+	if(!wcl || !wch || !w)return NULL;
 	if(wcl->status&WCL_BUSY)return NULL;
 	if(wcl->status&WCL_DATA_UNAVAILABLE)return NULL;
 	if(!(wcl->status&WCL_GEOM_UNAVAILABLE))return NULL;
@@ -105,6 +111,7 @@ job_s* createJobGenerateClusterGeometry(worldCluster_s* wcl, world_s* w)
 
 	d->target=wcl;
 	d->target->status|=WCL_GEOM_UNAVAILABLE|WCL_BUSY;
+	d->chunk=wch;
 	d->world=w;
 
 	return j;
@@ -115,6 +122,8 @@ void jobGenerateClusterGeometryHandler(struct producer_s* p, job_s* j)
 	if(!p || !j)return;
 	jobGenerateClusterGeometryData_s* d=(jobGenerateClusterGeometryData_s*)j->data;
 
+	if(d->chunk->next)return; //if chunk is in a list, it means it's being discarded in tmpChunkPool => do nothing
+
 	generateWorldClusterGeometry(d->target, d->world, (blockFace_s*)p->tmpBuffer, PRODUCER_TMPBUFSIZE);
 }
 
@@ -124,6 +133,7 @@ void jobGenerateClusterGeometryFinalizer(job_s* j)
 	jobGenerateClusterGeometryData_s* d=(jobGenerateClusterGeometryData_s*)j->data;
 
 	d->target->status&=~(WCL_GEOM_UNAVAILABLE|WCL_BUSY);
+	fixChunk(d->chunk);
 }
 
 jobType_s jobTypes[NUM_JOB_TYPES]= {

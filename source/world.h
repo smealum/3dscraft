@@ -47,6 +47,7 @@ void generateWorldClusterGeometry(worldCluster_s* wcl, world_s* w, blockFace_s* 
 void initChunkPool(void);
 worldChunk_s* getNewChunk(void);
 void freeChunk(worldChunk_s* wch);
+void fixChunk(worldChunk_s* wch);
 
 void initWorld(world_s* w);
 void translateWorld(world_s* w, vect3Di_s v);

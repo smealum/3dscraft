@@ -38,11 +38,33 @@ worldChunk_s* getNewChunk(void)
 	return wch;
 }
 
+bool isChunkBusy(worldChunk_s* wch)
+{
+	if(!wch)return false;
+	int i; for(i=0;i<CHUNK_HEIGHT;i++)if(wch->data[i].status&WCL_BUSY)return true;
+	return false;
+}
+
+void fixChunk(worldChunk_s* wch)
+{
+	if(!wch || !wch->next || isChunkBusy(wch))return;
+	wch->next=chunkPool;
+	chunkPool=wch;
+	debugValue[7]--;
+}
+
 void freeChunk(worldChunk_s* wch)
 {
 	if(!wch)return;
-	wch->next=chunkPool;
-	chunkPool=wch;
+	if(isChunkBusy(wch))
+	{
+		//put it aside if it might still have producers working on it
+		wch->next=(void*)0xFFFFFFFF;
+		debugValue[7]++;
+	}else{
+		wch->next=chunkPool;
+		chunkPool=wch;
+	}
 }
 
 void initWorldCluster(worldCluster_s* wcl, vect3Di_s pos)
@@ -60,12 +82,12 @@ vect3Df_s clusterCoordToWorld(vect3Di_s v)
 	return (vect3Df_s){v.x*CLUSTER_SIZE, v.y*CLUSTER_SIZE, v.z*CLUSTER_SIZE};
 }
 
-void drawWorldCluster(world_s* w, worldCluster_s* wcl)
+void drawWorldCluster(world_s* w, worldChunk_s* wch, worldCluster_s* wcl)
 {
-	if(!wcl || !w)return;
+	if(!wcl || !wch || !w)return;
 	if(wcl->status&WCL_GEOM_UNAVAILABLE)
 	{
-		if(!(wcl->status&WCL_BUSY) && !(wcl->status&WCL_DATA_UNAVAILABLE))dispatchJob(NULL, createJobGenerateClusterGeometry(wcl, w));
+		if(!(wcl->status&WCL_BUSY) && !(wcl->status&WCL_DATA_UNAVAILABLE))dispatchJob(NULL, createJobGenerateClusterGeometry(wcl, wch, w));
 		return;
 	}
 	vect3Df_s v=clusterCoordToWorld(wcl->position);
@@ -200,16 +222,7 @@ void generateWorldChunkData(worldChunk_s* wch)
 	if(!wch)return;
 
 	// int k; for(k=0; k<CHUNK_HEIGHT; k++)generateWorldClusterData(&wch->data[k]);
-	int k; for(k=0; k<CHUNK_HEIGHT; k++)dispatchJob(NULL, createJobGenerateCluster(&wch->data[k]));
-}
-
-//TEMP ?
-void generateWorldChunkGeometry(worldChunk_s* wch, world_s* w)
-{
-	if(!wch)return;
-
-	// int k; for(k=0; k<CHUNK_HEIGHT; k++)generateWorldClusterGeometry(&wch->data[k], w, NULL, 0);
-	int k; for(k=0; k<CHUNK_HEIGHT; k++)dispatchJob(NULL, createJobGenerateClusterGeometry(&wch->data[k], w));
+	int k; for(k=0; k<CHUNK_HEIGHT; k++)dispatchJob(NULL, createJobGenerateCluster(&wch->data[k], wch));
 }
 
 void drawWorldChunk(world_s* w, worldChunk_s* wch, camera_s* c)
@@ -219,7 +232,7 @@ void drawWorldChunk(world_s* w, worldChunk_s* wch, camera_s* c)
 	//baseline culling
 	if(!aabbInCameraFrustum(c, clusterCoordToWorld(wch->position), vect3Df(CLUSTER_SIZE,CLUSTER_SIZE*CHUNK_HEIGHT,CLUSTER_SIZE)))return;
 	debugValue[0]++;
-	int k; for(k=0; k<CHUNK_HEIGHT; k++)drawWorldCluster(w, &wch->data[k]);
+	int k; for(k=0; k<CHUNK_HEIGHT; k++)drawWorldCluster(w, wch, &wch->data[k]);
 }
 
 s16 getWorldChunkBlock(worldChunk_s* wc, vect3Di_s p)
