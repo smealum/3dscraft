@@ -94,6 +94,9 @@ void drawBottom()
 	int i = countLines(superStr);
 	while(i>240/fontDefault.height-1){cutLine(superStr);i--;}
 	gfxDrawText(GFX_BOTTOM, GFX_LEFT, NULL, superStr, 240-fontDefault.height*2, 0);
+
+	gfxFlushBuffers();
+	gfxSwapBuffers();
 }
 
 extern u32* gxCmdBuf;
@@ -105,6 +108,10 @@ int main()
 	gfxInit();
 	hidInit(NULL);
 	irrstInit(NULL);
+
+	aptOpenSession();
+	APT_SetAppCpuTimeLimit(NULL, 30);
+	aptCloseSession();
 	
 	GPU_Init(NULL);
 

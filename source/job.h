@@ -3,9 +3,12 @@
 
 #include "world.h"
 
+struct producer_s;
+
 typedef enum
 {
-	JOB_GENERATE_CLUSTER,
+	JOB_GENERATE_CLUSTER_DATA,
+	JOB_GENERATE_CLUSTER_GEOM,
 	NUM_JOB_TYPES
 }jobTypes_t;
 
@@ -23,22 +26,24 @@ job_s* createNewJob(jobTypes_t t);
 job_s* getNewJob(void);
 void freeJob(job_s* j);
 
-void handleJob(job_s* j);
+void handleJob(struct producer_s* p, job_s* j);
 void finalizeJob(job_s* j);
 
 //job type
-typedef void (*jobHandler_func)(job_s* j);
+typedef void (*jobHandler_func)(struct producer_s* p, job_s* j);
+typedef void (*jobFinalizer_func)(job_s* j);
 
 typedef struct
 {
-	jobHandler_func handler;
-	jobHandler_func finalizer;
+	jobHandler_func handler; //executed by one of the producer threads
+	jobFinalizer_func finalizer; //executed by main thread
 	u32 dataSize;
 }jobType_s;
 
 extern jobType_s jobTypes[NUM_JOB_TYPES];
 
-job_s* createJobGenerateCluster(worldCluster_s* wcl); //JOB_GENERATE_CLUSTER
+job_s* createJobGenerateCluster(worldCluster_s* wcl); //JOB_GENERATE_CLUSTER_DATA
+job_s* createJobGenerateClusterGeometry(worldCluster_s* wcl, world_s* w); //JOB_GENERATE_CLUSTER_GEOM
 
 //job queue (FIFO)
 typedef struct

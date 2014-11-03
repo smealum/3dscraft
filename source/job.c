@@ -2,6 +2,7 @@
 
 #include "world.h"
 #include "job.h"
+#include "producer.h"
 
 #define JOBPOOL_ALLOCSIZE (128)
 
@@ -48,7 +49,7 @@ void freeJob(job_s* j)
 	jobPool=j;
 }
 
-//JOB_GENERATE_CLUSTER
+//JOB_GENERATE_CLUSTER_DATA
 typedef struct
 {
 	worldCluster_s* target;
@@ -56,19 +57,22 @@ typedef struct
 
 job_s* createJobGenerateCluster(worldCluster_s* wcl)
 {
-	job_s* j=createNewJob(JOB_GENERATE_CLUSTER);
+	if(!wcl)return NULL;
+	if(wcl->status&WCL_BUSY)return NULL;
+	if(!(wcl->status&WCL_DATA_UNAVAILABLE))return NULL;
+	job_s* j=createNewJob(JOB_GENERATE_CLUSTER_DATA);
 	if(!j)return j;
 	jobGenerateClusterData_s* d=(jobGenerateClusterData_s*)j->data;
 
 	d->target=wcl;
-	d->target->busy=true;
+	d->target->status|=WCL_DATA_UNAVAILABLE|WCL_BUSY;
 
 	return j;
 }
 
-void jobGenerateClusterHandler(job_s* j)
+void jobGenerateClusterHandler(struct producer_s* p, job_s* j)
 {
-	if(!j)return;
+	if(!p || !j)return;
 	jobGenerateClusterData_s* d=(jobGenerateClusterData_s*)j->data;
 
 	generateWorldClusterData(d->target);
@@ -79,19 +83,60 @@ void jobGenerateClusterFinalizer(job_s* j)
 	if(!j)return;
 	jobGenerateClusterData_s* d=(jobGenerateClusterData_s*)j->data;
 
-	d->target->busy=false;
+	d->target->status&=~(WCL_DATA_UNAVAILABLE|WCL_BUSY);
+}
+
+//JOB_GENERATE_CLUSTER_GEOM
+typedef struct
+{
+	worldCluster_s* target;
+	world_s* world; //read-only
+}jobGenerateClusterGeometryData_s;
+
+job_s* createJobGenerateClusterGeometry(worldCluster_s* wcl, world_s* w)
+{
+	if(!wcl || !w)return NULL;
+	if(wcl->status&WCL_BUSY)return NULL;
+	if(wcl->status&WCL_DATA_UNAVAILABLE)return NULL;
+	if(!(wcl->status&WCL_GEOM_UNAVAILABLE))return NULL;
+	job_s* j=createNewJob(JOB_GENERATE_CLUSTER_GEOM);
+	if(!j)return j;
+	jobGenerateClusterGeometryData_s* d=(jobGenerateClusterGeometryData_s*)j->data;
+
+	d->target=wcl;
+	d->target->status|=WCL_GEOM_UNAVAILABLE|WCL_BUSY;
+	d->world=w;
+
+	return j;
+}
+
+void jobGenerateClusterGeometryHandler(struct producer_s* p, job_s* j)
+{
+	if(!p || !j)return;
+	jobGenerateClusterGeometryData_s* d=(jobGenerateClusterGeometryData_s*)j->data;
+
+	generateWorldClusterGeometry(d->target, d->world, (blockFace_s*)p->tmpBuffer, PRODUCER_TMPBUFSIZE);
+}
+
+void jobGenerateClusterGeometryFinalizer(job_s* j)
+{
+	if(!j)return;
+	jobGenerateClusterGeometryData_s* d=(jobGenerateClusterGeometryData_s*)j->data;
+
+	d->target->status&=~(WCL_GEOM_UNAVAILABLE|WCL_BUSY);
 }
 
 jobType_s jobTypes[NUM_JOB_TYPES]= {
-	(jobType_s){jobGenerateClusterHandler, jobGenerateClusterFinalizer, sizeof(jobGenerateClusterData_s)}, // JOB_GENERATE_CLUSTER
+	(jobType_s){jobGenerateClusterHandler, jobGenerateClusterFinalizer, sizeof(jobGenerateClusterData_s)}, // JOB_GENERATE_CLUSTER_DATA
+	(jobType_s){jobGenerateClusterGeometryHandler, jobGenerateClusterGeometryFinalizer, sizeof(jobGenerateClusterGeometryData_s)}, // JOB_GENERATE_CLUSTER_GEOM
 };
 
 //job
-void handleJob(job_s* j)
+void handleJob(producer_s* p, job_s* j)
 {
-	if(!j || j->type>=NUM_JOB_TYPES)return;
+	if(!p || !j || j->type>=NUM_JOB_TYPES)return;
 
-	jobTypes[j->type].handler(j);
+	jobTypes[j->type].handler(p,j);
 }
 void finalizeJob(job_s* j)
 {

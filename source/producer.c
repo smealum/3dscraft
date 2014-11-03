@@ -1,5 +1,6 @@
 #include <3ds.h>
 
+#include "text.h"
 #include "producer.h"
 
 void producerMain(u32 arg)
@@ -11,17 +12,21 @@ void producerMain(u32 arg)
 		appendJobQueue(&p->privateList, &p->requestList);
 		svcReleaseMutex(p->requestMutex);
 
-		jobQueue_s tmpQueue;
-		initJobQueue(&tmpQueue);
+		// bool debug=false;
+		// u64 val=svcGetSystemTick();
+		
 		job_s* j=NULL; while((j=unqueueJob(&p->privateList)))
 		{
-			handleJob(j);
-			queueJob(&tmpQueue, j);
+			handleJob(p, j);
+
+			svcWaitSynchronization(p->responseMutex, U64_MAX);
+			queueJob(&p->responseList, j);
+			svcReleaseMutex(p->responseMutex);
+			// debug=true;
+			// svcSleepThread(1);
 		}
 
-		svcWaitSynchronization(p->responseMutex, U64_MAX);
-		appendJobQueue(&p->responseList, &tmpQueue);
-		svcReleaseMutex(p->responseMutex);
+		// if(debug)print("%d ticks\n",(int)(svcGetSystemTick()-val));
 
 		svcSleepThread(1000000);
 	}
@@ -39,7 +44,8 @@ void initProducer(producer_s* p)
 	p->exit=false;
 	svcCreateMutex(&p->requestMutex, false);
 	svcCreateMutex(&p->responseMutex, false);
-	svcCreateThread(&p->thread, producerMain, (u32)p, (u32*)&p->stack[PRODUCER_STACKSIZE/8], 0x18, 0);
+	Result val = svcCreateThread(&p->thread, producerMain, (u32)p, (u32*)&p->stack[PRODUCER_STACKSIZE/8], 0x18, 1);
+	print("%08X\n",(unsigned int)val);
 }
 
 void exitProducer(producer_s* p)

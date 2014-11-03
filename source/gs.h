@@ -24,6 +24,9 @@ typedef struct
 void gsInit(void);
 void gsExit(void);
 
+void* gsLinearAlloc(size_t size);
+void gsLinearFree(void* mem);
+
 float* gsGetMatrix(GS_MATRIX m);
 int gsLoadMatrix(GS_MATRIX m, float* data);
 int gsPushMatrix();

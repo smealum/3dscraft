@@ -52,8 +52,7 @@ void initWorldCluster(worldCluster_s* wcl, vect3Di_s pos)
 	memset(wcl->data, 0x00, CLUSTER_SIZE*CLUSTER_SIZE*CLUSTER_SIZE);
 	wcl->position=pos;
 	gsVboInit(&wcl->vbo);
-	wcl->generated=false;
-	wcl->busy=false;
+	wcl->status=WCL_DATA_UNAVAILABLE|WCL_GEOM_UNAVAILABLE;
 }
 
 vect3Df_s clusterCoordToWorld(vect3Di_s v)
@@ -61,26 +60,36 @@ vect3Df_s clusterCoordToWorld(vect3Di_s v)
 	return (vect3Df_s){v.x*CLUSTER_SIZE, v.y*CLUSTER_SIZE, v.z*CLUSTER_SIZE};
 }
 
-void drawWorldCluster(worldCluster_s* wcl)
+void drawWorldCluster(world_s* w, worldCluster_s* wcl)
 {
-	if(!wcl || !wcl->generated || wcl->busy)return;
+	if(!wcl || !w)return;
+	if(wcl->status&WCL_GEOM_UNAVAILABLE)
+	{
+		if(!(wcl->status&WCL_BUSY) && !(wcl->status&WCL_DATA_UNAVAILABLE))dispatchJob(NULL, createJobGenerateClusterGeometry(wcl, w));
+		return;
+	}
 	vect3Df_s v=clusterCoordToWorld(wcl->position);
 
 	gsVboDraw(&wcl->vbo);
 }
 
-void generateWorldClusterGeometry(worldCluster_s* wcl, world_s* w)
+void generateWorldClusterGeometry(worldCluster_s* wcl, world_s* w, blockFace_s* tmpBuffer, int tmpBufferSize)
 {
 	if(!wcl)return;
-	if(wcl->generated)gsVboDestroy(&wcl->vbo);
+	if(!(wcl->status&WCL_GEOM_UNAVAILABLE))gsVboDestroy(&wcl->vbo);
 
-	wcl->generated=false;
+	wcl->status|=WCL_GEOM_UNAVAILABLE;
 
 	//first, we go through the whole cluster to generate a "list" of faces
-	static blockFace_s faceList[4096]; //TODO : calculate real max
-	int faceListSize=0;
+	const static int staticFaceBufferSize=4096*sizeof(blockFace_s); //TODO : calculate real max
+	static blockFace_s staticFaceList[4096];
 
-	memset(faceList, 0x00, 4096*sizeof(blockFace_s));
+	blockFace_s* faceList=staticFaceList;
+	int faceBufferSize=staticFaceBufferSize;
+	if(tmpBuffer){faceList=tmpBuffer;faceBufferSize=tmpBufferSize;}
+
+	int faceListSize=0;
+	memset(faceList, 0x00, faceBufferSize);
 
 	//TODO : optimize world block accesses
 	const vect3Di_s p = vmuli(wcl->position, CLUSTER_SIZE);
@@ -126,7 +135,7 @@ void generateWorldClusterGeometry(worldCluster_s* wcl, world_s* w)
 		}
 
 		gsVboFlushData(&wcl->vbo);
-		wcl->generated=true;
+		wcl->status&=~WCL_GEOM_UNAVAILABLE;
 	}
 }
 
@@ -138,7 +147,7 @@ int getWorldElevation(vect3Di_s p)
 void generateWorldClusterData(worldCluster_s* wcl)
 {
 	if(!wcl)return;
-	if(wcl->generated)gsVboDestroy(&wcl->vbo);
+	if(!(wcl->status&WCL_GEOM_UNAVAILABLE)){gsVboDestroy(&wcl->vbo);wcl->status|=WCL_GEOM_UNAVAILABLE;}
 
 	//TEMP
 	int i, j, k;
@@ -160,7 +169,7 @@ void generateWorldClusterData(worldCluster_s* wcl)
 
 s16 getWorldClusterBlock(worldCluster_s* wcl, vect3Di_s p)
 {
-	if(!wcl || wcl->busy)return -1;
+	if(!wcl || (wcl->status&WCL_DATA_UNAVAILABLE))return -1;
 	if(p.x<0 || p.y<0 || p.z<0)return -1;
 	if(p.x>=CLUSTER_SIZE || p.y>=CLUSTER_SIZE || p.z>=CLUSTER_SIZE)return -1;
 
@@ -189,17 +198,18 @@ void generateWorldChunkGeometry(worldChunk_s* wch, world_s* w)
 {
 	if(!wch)return;
 
-	int k; for(k=0; k<CHUNK_HEIGHT; k++)generateWorldClusterGeometry(&wch->data[k], w);
+	// int k; for(k=0; k<CHUNK_HEIGHT; k++)generateWorldClusterGeometry(&wch->data[k], w, NULL, 0);
+	int k; for(k=0; k<CHUNK_HEIGHT; k++)dispatchJob(NULL, createJobGenerateClusterGeometry(&wch->data[k], w));
 }
 
-void drawWorldChunk(worldChunk_s* wch, camera_s* c)
+void drawWorldChunk(world_s* w, worldChunk_s* wch, camera_s* c)
 {
 	if(!wch)return;
 
 	//baseline culling
 	if(!aabbInCameraFrustum(c, clusterCoordToWorld(wch->position), vect3Df(CLUSTER_SIZE,CLUSTER_SIZE*CHUNK_HEIGHT,CLUSTER_SIZE)))return;
 	debugValue[0]++;
-	int k; for(k=0; k<CHUNK_HEIGHT; k++)drawWorldCluster(&wch->data[k]);
+	int k; for(k=0; k<CHUNK_HEIGHT; k++)drawWorldCluster(w, &wch->data[k]);
 }
 
 s16 getWorldChunkBlock(worldChunk_s* wc, vect3Di_s p)
@@ -254,20 +264,10 @@ void updateWorld(world_s* w)
 				{
 					initWorldChunk(w->data[i][j], vect3Di(i+w->position.x,0,j+w->position.y));
 					generateWorldChunkData(w->data[i][j]);
-					// generateWorldChunkGeometry(w->data[i][j], w); //will miss faces, but this is TEMP anyway
 				}
 			}
 		}
 	}
-
-	if(keysDown()&KEY_X)
-		for(i=0; i<WORLD_SIZE; i++)
-		{
-			for(j=0; j<WORLD_SIZE; j++)
-			{
-				generateWorldChunkGeometry(w->data[i][j], w);
-			}
-		}
 }
 
 void translateWorld(world_s* w, vect3Di_s v)
@@ -302,7 +302,7 @@ void drawWorld(world_s* w, camera_s* c)
 	{
 		for(j=0; j<WORLD_SIZE; j++)
 		{
-			drawWorldChunk(w->data[i][j], c);
+			drawWorldChunk(w, w->data[i][j], c);
 		}
 	}
 	debugValue[1]=(u32)(svcGetSystemTick()-val);

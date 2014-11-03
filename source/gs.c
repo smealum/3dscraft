@@ -7,6 +7,8 @@
 
 static void gsInitMatrixStack();
 
+Handle linearAllocMutex;
+
 //----------------------
 //   GS SYSTEM STUFF
 //----------------------
@@ -14,11 +16,30 @@ static void gsInitMatrixStack();
 void gsInit(void)
 {
 	gsInitMatrixStack();
+	svcCreateMutex(&linearAllocMutex, false);
 }
 
 void gsExit(void)
 {
+	svcCloseHandle(linearAllocMutex);
+}
 
+void* gsLinearAlloc(size_t size)
+{
+	void* ret=NULL;
+
+	svcWaitSynchronization(linearAllocMutex, U64_MAX);
+	ret=linearAlloc(size);
+	svcReleaseMutex(linearAllocMutex);
+	
+	return ret;
+}
+
+void gsLinearFree(void* mem)
+{
+	svcWaitSynchronization(linearAllocMutex, U64_MAX);
+	linearFree(mem);
+	svcReleaseMutex(linearAllocMutex);
 }
 
 //----------------------
@@ -219,8 +240,7 @@ int gsVboCreate(gsVbo_s* vbo, u32 size)
 {
 	if(!vbo)return -1;
 
-	//TODO : implement some real allocation
-	vbo->data=linearAlloc(size);
+	vbo->data=gsLinearAlloc(size);
 	vbo->numVertices=0;
 	vbo->currentSize=0;
 	vbo->maxSize=size;

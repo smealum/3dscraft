@@ -1,7 +1,7 @@
 #ifndef WORLD_H
 #define WORLD_H
 
-#include <3ds/types.h>
+#include <3ds.h>
 #include "math.h"
 #include "block.h"
 #include "camera.h"
@@ -13,12 +13,19 @@
 #define WORLD_SIZE (16)
 // #define WORLD_SIZE (8)
 
+typedef enum
+{
+	WCL_DATA_UNAVAILABLE = BIT(1),
+	WCL_GEOM_UNAVAILABLE = BIT(2),
+	WCL_BUSY = BIT(3),
+}worldClusterStatus_t;
+
 typedef struct
 {
 	u8 data[CLUSTER_SIZE][CLUSTER_SIZE][CLUSTER_SIZE];
 	vect3Di_s position; //in cluster coordinates
 	gsVbo_s vbo;
-	bool generated, busy;
+	worldClusterStatus_t status;
 }worldCluster_s;
 
 typedef struct worldChunk_s
@@ -35,6 +42,7 @@ typedef struct
 }world_s;
 
 void generateWorldClusterData(worldCluster_s* wcl);
+void generateWorldClusterGeometry(worldCluster_s* wcl, world_s* w, blockFace_s* tmpBuffer, int tmpBufferSize);
 
 void initChunkPool(void);
 worldChunk_s* getNewChunk(void);
