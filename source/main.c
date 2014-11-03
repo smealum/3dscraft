@@ -95,8 +95,8 @@ void drawBottom()
 	while(i>240/fontDefault.height-1){cutLine(superStr);i--;}
 	gfxDrawText(GFX_BOTTOM, GFX_LEFT, NULL, superStr, 240-fontDefault.height*2, 0);
 
-	gfxFlushBuffers();
-	gfxSwapBuffers();
+	// gfxFlushBuffers();
+	// gfxSwapBuffers();
 }
 
 extern u32* gxCmdBuf;
@@ -108,6 +108,8 @@ int main()
 	gfxInit();
 	hidInit(NULL);
 	irrstInit(NULL);
+
+	memset(debugValue, 0x00, sizeof(debugValue));
 
 	aptOpenSession();
 	print("%d\n",APT_SetAppCpuTimeLimit(NULL, 30));
@@ -175,6 +177,7 @@ int main()
 		gspWaitForEvent(GSPEVENT_VBlank0, true);
 		debugValue[2]=(u32)(svcGetSystemTick()-val);
 
+		print("avg %d ticks\n", (int)(debugValue[5]/debugValue[6]));
 		// print("drawing %d chunks... (%f vs %f)\n", (int)debugValue[0], (float)(debugValue[1]*100)/TICKS_PER_VBL, (float)(debugValue[2]*100)/TICKS_PER_VBL);
 		// debugValue[0]=0;
 	}
