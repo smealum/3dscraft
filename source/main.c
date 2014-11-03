@@ -177,7 +177,7 @@ int main()
 		gspWaitForEvent(GSPEVENT_VBlank0, true);
 		debugValue[2]=(u32)(svcGetSystemTick()-val);
 
-		print("avg %d ticks\n", (int)(debugValue[5]/debugValue[6]));
+		print("avg %d ticks (%d)\n", (int)(debugValue[5]/debugValue[6]), debugValue[6]);
 		// print("drawing %d chunks... (%f vs %f)\n", (int)debugValue[0], (float)(debugValue[1]*100)/TICKS_PER_VBL, (float)(debugValue[2]*100)/TICKS_PER_VBL);
 		// debugValue[0]=0;
 	}

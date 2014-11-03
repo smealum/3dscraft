@@ -91,8 +91,6 @@ void generateWorldClusterGeometry(worldCluster_s* wcl, world_s* w, blockFace_s* 
 	int faceListSize=0;
 	memset(faceList, 0x00, faceBufferSize);
 
-	u64 val=svcGetSystemTick();
-
 	const vect3Di_s p = vmuli(wcl->position, CLUSTER_SIZE);
 	int i, j, k;
 	for(i=0; i<CLUSTER_SIZE; i++)
@@ -133,10 +131,6 @@ void generateWorldClusterGeometry(worldCluster_s* wcl, world_s* w, blockFace_s* 
 		}
 	}
 
-	// debugValue[5]+=(u32)(svcGetSystemTick()-val)*(CLUSTER_SIZE*CLUSTER_SIZE*CLUSTER_SIZE)/((CLUSTER_SIZE-2)*(CLUSTER_SIZE-2)*(CLUSTER_SIZE-2));
-	debugValue[5]+=(u32)(svcGetSystemTick()-val);
-	debugValue[6]++;
-
 	//then, we set up VBO size to create the VBO
 	const u32 size=faceListSize*FACE_VBO_SIZE;
 	vect3Df_s off=clusterCoordToWorld(wcl->position);
@@ -153,6 +147,9 @@ void generateWorldClusterGeometry(worldCluster_s* wcl, world_s* w, blockFace_s* 
 		gsVboFlushData(&wcl->vbo);
 		wcl->status&=~WCL_GEOM_UNAVAILABLE;
 	}
+	// u64 val=svcGetSystemTick();
+	// debugValue[5]+=(u32)(svcGetSystemTick()-val);
+	// debugValue[6]++;
 }
 
 int getWorldElevation(vect3Di_s p)
