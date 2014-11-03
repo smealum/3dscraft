@@ -139,6 +139,7 @@ void generateWorldClusterGeometry(worldCluster_s* wcl, world_s* w, blockFace_s* 
 	wclp[3]=getWorldBlockCluster(w, vaddi(p, vect3Di(0, -1, 0)));
 	wclp[4]=getWorldBlockCluster(w, vaddi(p, vect3Di(0, 0, +CLUSTER_SIZE)));
 	wclp[5]=getWorldBlockCluster(w, vaddi(p, vect3Di(0, 0, -1)));
+	for(i=0;i<6;i++)if(wclp[i] && wclp[i]->status&WCL_DATA_UNAVAILABLE)wclp[i]=NULL;
 	for(j=0; j<CLUSTER_SIZE; j++)
 	{
 		for(k=0; k<CLUSTER_SIZE; k++)
