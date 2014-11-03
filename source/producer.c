@@ -15,7 +15,8 @@ void producerMain(u32 arg)
 		// bool debug=false;
 		// u64 val=svcGetSystemTick();
 		
-		job_s* j=NULL; while((j=unqueueJob(&p->privateList)))
+		job_s* j=NULL;
+		while((j=unqueueJob(&p->privateList)) && !p->exit)
 		{
 			handleJob(p, j);
 

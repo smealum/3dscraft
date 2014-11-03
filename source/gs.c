@@ -280,8 +280,7 @@ int gsVboDestroy(gsVbo_s* vbo)
 {
 	if(!vbo)return -1;
 
-	//nothing to do until we have a real allocator
-	//so for now just reset it
+	if(vbo->data)gsLinearFree(vbo->data);
 	gsVboInit(vbo);
 
 	return 0;

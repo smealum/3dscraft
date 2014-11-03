@@ -110,7 +110,7 @@ int main()
 	irrstInit(NULL);
 
 	aptOpenSession();
-	APT_SetAppCpuTimeLimit(NULL, 30);
+	print("%d\n",APT_SetAppCpuTimeLimit(NULL, 30));
 	aptCloseSession();
 	
 	GPU_Init(NULL);
@@ -152,6 +152,8 @@ int main()
 
 			if(keysDown()&KEY_A)translateWorld(&world, vect3Di(1,0,0));
 			if(keysDown()&KEY_B)translateWorld(&world, vect3Di(-1,0,0));
+			if(keysDown()&KEY_X)translateWorld(&world, vect3Di(0,0,1));
+			if(keysDown()&KEY_Y)translateWorld(&world, vect3Di(0,0,-1));
 
 			updatePlayer(&player);
 			updateWorld(&world);

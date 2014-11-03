@@ -234,7 +234,7 @@ void initWorld(world_s* w)
 		}
 	}
 
-	w->position=vect3Di(0,0,0);
+	w->position=vect3Di(-WORLD_SIZE/2,0,-WORLD_SIZE/2);
 }
 
 s16 getWorldBlock(world_s* w, vect3Di_s p)
@@ -262,7 +262,7 @@ void updateWorld(world_s* w)
 				w->data[i][j]=getNewChunk();
 				if(w->data[i][j])
 				{
-					initWorldChunk(w->data[i][j], vect3Di(i+w->position.x,0,j+w->position.y));
+					initWorldChunk(w->data[i][j], vect3Di(i+w->position.x,0,j+w->position.z));
 					generateWorldChunkData(w->data[i][j]);
 				}
 			}
@@ -284,7 +284,7 @@ void translateWorld(world_s* w, vect3Di_s v)
 	{
 		for(j=0; j<WORLD_SIZE; j++)
 		{
-			if(i-v.x >= 0 && i-v.x < WORLD_SIZE && j-v.y >= 0 && j-v.y < WORLD_SIZE)w->data[i-v.x][j-v.y]=tmpData[i][j];
+			if(i-v.x >= 0 && i-v.x < WORLD_SIZE && j-v.z >= 0 && j-v.z < WORLD_SIZE)w->data[i-v.x][j-v.z]=tmpData[i][j];
 			else{freeChunk(tmpData[i][j]); tmpData[i][j]=NULL;}
 		}
 	}
