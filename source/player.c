@@ -29,12 +29,12 @@ void controlsPlayer(player_s* p)
 	vect3Df_s vy=vnormf(getMatrixColumn((float*)p->camera.orientation, 1));
 	vect3Df_s vz=vnormf(getMatrixColumn((float*)p->camera.orientation, 2));
 
-	if(PAD&KEY_UP)p->velocity=vaddf(p->velocity, vmulf(vz, -0.2f));
-	if(PAD&KEY_DOWN)p->velocity=vaddf(p->velocity, vmulf(vz, 0.2f));
-	if(PAD&KEY_RIGHT)p->velocity=vaddf(p->velocity, vmulf(vy, -0.2f));
-	if(PAD&KEY_LEFT)p->velocity=vaddf(p->velocity, vmulf(vy, 0.2f));
-	if(PAD&KEY_R)p->velocity=vaddf(p->velocity, vmulf(vx, -0.2f));
-	if(PAD&KEY_L)p->velocity=vaddf(p->velocity, vmulf(vx, 0.2f));
+	if(PAD&KEY_UP)p->velocity=vaddf(p->velocity, vmulf(vz, -0.4f));
+	if(PAD&KEY_DOWN)p->velocity=vaddf(p->velocity, vmulf(vz, 0.4f));
+	if(PAD&KEY_RIGHT)p->velocity=vaddf(p->velocity, vmulf(vy, -0.4f));
+	if(PAD&KEY_LEFT)p->velocity=vaddf(p->velocity, vmulf(vy, 0.4f));
+	if(PAD&KEY_R)p->velocity=vaddf(p->velocity, vmulf(vx, -0.8f));
+	if(hidKeysDown()&KEY_L)p->velocity=vaddf(p->velocity, vmulf(vx, 2.0f));
 
 	// if(PAD&KEY_X)rotateMatrixX((float*)p->camera.orientation, 0.1f, false);
 	// if(PAD&KEY_B)rotateMatrixX((float*)p->camera.orientation, -0.1f, false);
@@ -135,23 +135,44 @@ vect3Di_s performRayMarch(world_s* w, vect3Df_s localBlockPosf, vect3Df_s localB
 
 extern u32 debugValue[];
 
+#define PLAYERSIZE (0.25f)
+#define PLAYERHEIGHT (0.4f)
+vect3Df_s playerBox[]={(vect3Df_s){-PLAYERSIZE,-PLAYERHEIGHT,-PLAYERSIZE},
+						(vect3Df_s){+PLAYERSIZE,-PLAYERHEIGHT,-PLAYERSIZE},
+						(vect3Df_s){-PLAYERSIZE,+PLAYERHEIGHT,-PLAYERSIZE},
+						(vect3Df_s){-PLAYERSIZE,-PLAYERHEIGHT,+PLAYERSIZE},
+						(vect3Df_s){+PLAYERSIZE,+PLAYERHEIGHT,-PLAYERSIZE},
+						(vect3Df_s){+PLAYERSIZE,-PLAYERHEIGHT,+PLAYERSIZE},
+						(vect3Df_s){-PLAYERSIZE,+PLAYERHEIGHT,+PLAYERSIZE},
+						(vect3Df_s){+PLAYERSIZE,+PLAYERHEIGHT,+PLAYERSIZE}};
+
 void updatePlayer(player_s* p, world_s* w)
 {
 	if(!p)return;
 
-	//gravity goes here
-	//collisions go here
-	vect3Df_s out;
-	if(vmagf(p->velocity)>0.0f)
+	//gravity
+	p->velocity=vaddf(p->velocity, vect3Df(0.0f, -0.2f, 0.0f));
+
+	//collisions
+	if(vmagf(p->velocity)>0.0001f)
 	{
-		performRayMarch(w, p->camera.position, vaddf(p->camera.position, p->velocity), &out);
-		p->camera.position=out;
-		// print("%f %f %f\n",p->camera.position.x,p->camera.position.y,p->camera.position.z);
+		vect3Df_s v=p->velocity;
+		int i;
+		for(i=0; i<8; i++)
+		{
+			vect3Df_s out;
+			vect3Df_s pt=vaddf(p->camera.position, playerBox[i]);
+			performRayMarch(w, pt, vaddf(pt, v), &out);
+			v=vsubf(out,pt);
+			if(vmagf(v)<=0.0001f)break;
+		}
+		p->velocity=v;
 	}
 
-	// p->camera.position=vaddf(p->camera.position, p->velocity);
+	p->camera.position=vaddf(p->camera.position, p->velocity);
 
-	p->velocity=vect3Df(0.0f, 0.0f, 0.0f);
+	p->velocity=vect3Df(0.0f, p->velocity.y, 0.0f);
+	// p->velocity=vect3Df(0.0f, 0.0f, 0.0f);
 
 	updateCamera(&p->camera);
 }
