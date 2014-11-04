@@ -37,6 +37,7 @@ void updateCamera(camera_s* c)
 	if(!c)return;
 
 	memcpy(c->modelview, c->orientation, sizeof(mtx44));
+	rotateMatrixZ((float*)c->modelview, M_PI/2, true); //because framebuffer is sideways...
 	translateMatrix((float*)c->modelview, -c->position.x, -c->position.y, -c->position.z);
 
 	updateCameraFrustum(c);

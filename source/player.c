@@ -12,8 +12,6 @@ void initPlayer(player_s* p)
 	initCamera(&p->camera);
 	p->camera.position=vect3Df(0.0f, CHUNK_HEIGHT*CLUSTER_SIZE/2+CLUSTER_SIZE, 0.0f);
 	loadIdentity44((float*)p->camera.orientation);
-	rotateMatrixZ((float*)p->camera.orientation, M_PI/2, false);
-	rotateMatrixY((float*)p->camera.orientation, M_PI, false);
 	p->velocity=vect3Df(0.0f, 0.0f, 0.0f);
 
 	initCursor(&p->cursor);
@@ -135,18 +133,13 @@ void controlsPlayer(player_s* p, world_s* w)
 	vect3Df_s vx=vnormf(getMatrixColumn((float*)p->camera.orientation, 0));
 	vect3Df_s vy=vnormf(getMatrixColumn((float*)p->camera.orientation, 1));
 	vect3Df_s vz=vnormf(getMatrixColumn((float*)p->camera.orientation, 2));
+	vect3Df_s vz2=vnormf(vect3Df(vz.x,0.0f,vz.z));
 
-	if(PAD&KEY_UP)p->velocity=vaddf(p->velocity, vmulf(vz, -0.4f));
-	if(PAD&KEY_DOWN)p->velocity=vaddf(p->velocity, vmulf(vz, 0.4f));
-	if(PAD&KEY_RIGHT)p->velocity=vaddf(p->velocity, vmulf(vy, -0.4f));
-	if(PAD&KEY_LEFT)p->velocity=vaddf(p->velocity, vmulf(vy, 0.4f));
-	if(PAD&KEY_R)p->velocity=vaddf(p->velocity, vmulf(vx, -0.8f));
-	if(hidKeysDown()&KEY_L)p->velocity=vaddf(p->velocity, vmulf(vx, 0.7f));
-
-	// if(PAD&KEY_X)rotateMatrixX((float*)p->camera.orientation, 0.1f, false);
-	// if(PAD&KEY_B)rotateMatrixX((float*)p->camera.orientation, -0.1f, false);
-	// if(PAD&KEY_A)rotateMatrixY((float*)p->camera.orientation, 0.1f, false);
-	// if(PAD&KEY_Y)rotateMatrixY((float*)p->camera.orientation, -0.1f, false);
+	if(PAD&KEY_UP)p->velocity=vaddf(p->velocity, vmulf(vz2, -0.2f));
+	if(PAD&KEY_DOWN)p->velocity=vaddf(p->velocity, vmulf(vz2, 0.2f));
+	if(PAD&KEY_LEFT)p->velocity=vaddf(p->velocity, vmulf(vx, -0.2f));
+	if(PAD&KEY_RIGHT)p->velocity=vaddf(p->velocity, vmulf(vx, 0.2f));
+	if(hidKeysDown()&KEY_L)p->velocity=vaddf(p->velocity, vmulf(vy, 0.6f));
 
 	if(w)
 	{
@@ -159,11 +152,13 @@ void controlsPlayer(player_s* p, world_s* w)
 			p->cursor.active=true;
 			p->cursor.position=out;
 			p->cursor.direction=dir;
-			if(hidKeysDown()&KEY_A)alterWorldBlock(w, out, 1, true);
+			if(hidKeysDown()&KEY_R)alterWorldBlock(w, out, 1, true);
+			if(hidKeysDown()&KEY_ZR)alterWorldBlock(w, out, 0, true);
 		}else p->cursor.active=false;
 	}
 
-	rotateMatrixY((float*)p->camera.orientation, (cstick.dx*0.2f)/0x9c, false);
+	rotateMatrixX((float*)p->camera.orientation, (cstick.dy*0.07f)/0x9c, true);
+	rotateMatrixY((float*)p->camera.orientation, (cstick.dx*0.07f)/0x9c, false);
 }
 
 extern u32 debugValue[];
