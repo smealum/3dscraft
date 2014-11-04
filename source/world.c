@@ -295,6 +295,35 @@ s16 getWorldBlock(world_s* w, vect3Di_s p)
 	return getWorldChunkBlock(w->data[p.x/CLUSTER_SIZE][p.z/CLUSTER_SIZE], vect3Di(p.x%CLUSTER_SIZE, p.y, p.z%CLUSTER_SIZE));
 }
 
+void alterWorldClusterBlock(worldCluster_s* wcl, world_s* w, vect3Di_s p, u8 block, bool regenerate)
+{
+	if(!wcl || (wcl->status&WCL_DATA_UNAVAILABLE))return;
+	if(p.x<0 || p.y<0 || p.z<0)return;
+	if(p.x>=CLUSTER_SIZE || p.y>=CLUSTER_SIZE || p.z>=CLUSTER_SIZE)return;
+
+	wcl->data[p.x][p.y][p.z]=block;
+	if(regenerate)generateWorldClusterGeometry(wcl, w, NULL, 0);
+}
+
+void alterWorldChunkBlock(worldChunk_s* wc, world_s* w, vect3Di_s p, u8 block, bool regenerate)
+{
+	if(!wc)return;
+	if(p.x<0 || p.y<0 || p.z<0)return;
+	if(p.x>=CLUSTER_SIZE || p.y>=CHUNK_HEIGHT*CLUSTER_SIZE || p.z>=CLUSTER_SIZE)return;
+
+	alterWorldClusterBlock(&wc->data[p.y/CLUSTER_SIZE], w, vect3Di(p.x, p.y%CLUSTER_SIZE, p.z), block, regenerate);
+}
+
+void alterWorldBlock(world_s* w, vect3Di_s p, u8 block, bool regenerate)
+{
+	if(!w)return;
+	p=vaddi(p,vmuli(w->position,-CLUSTER_SIZE));
+	if(p.x<0 || p.y<0 || p.z<0)return;
+	if(p.x>=WORLD_SIZE*CLUSTER_SIZE || p.y>=CHUNK_HEIGHT*CLUSTER_SIZE || p.z>=WORLD_SIZE*CLUSTER_SIZE)return;
+
+	alterWorldChunkBlock(w->data[p.x/CLUSTER_SIZE][p.z/CLUSTER_SIZE], w, vect3Di(p.x%CLUSTER_SIZE, p.y, p.z%CLUSTER_SIZE), block, regenerate);
+}
+
 void updateWorld(world_s* w)
 {
 	if(!w)return;

@@ -13,7 +13,7 @@ typedef struct
 }player_s;
 
 void initPlayer(player_s* p);
-void controlsPlayer(player_s* p);
+void controlsPlayer(player_s* p, world_s* w);
 void updatePlayer(player_s* p, world_s* w);
 void setCameraPlayer(player_s* p);
 

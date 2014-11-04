@@ -24,7 +24,7 @@ void producerMain(u32 arg)
 			queueJob(&p->responseList, j);
 			svcReleaseMutex(p->responseMutex);
 			// debug=true;
-			// svcSleepThread(1);
+			svcSleepThread(1);
 		}
 
 		// if(debug)print("%d ticks\n",(int)(svcGetSystemTick()-val));

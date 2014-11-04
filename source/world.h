@@ -64,5 +64,6 @@ void drawWorld(world_s* w, camera_s* c);
 
 s16 getWorldBlock(world_s* w, vect3Di_s p);
 worldCluster_s* getWorldBlockCluster(world_s* w, vect3Di_s p);
+void alterWorldBlock(world_s* w, vect3Di_s p, u8 block, bool regenerate);
 
 #endif

@@ -93,7 +93,7 @@ void drawBottom()
 {
 	memset(gfxGetFramebuffer(GFX_BOTTOM, GFX_LEFT, NULL, NULL), 0x00, 240*320*3);
 	static char str[256];
-	sprintf(str, "3dscraft debug : %dKB LINEAR, %dKB REGULAR", linearSpaceFree()/1024, getMemFree()/1024);
+	sprintf(str, "3dscraft debug : %dKB LINEAR, %dKB REGULAR", (int)linearSpaceFree()/1024, (int)getMemFree()/1024);
 	gfxDrawText(GFX_BOTTOM, GFX_LEFT, NULL, str, 240-fontDefault.height, 0);
 	int i = countLines(superStr);
 	while(i>240/fontDefault.height-1){cutLine(superStr);i--;}
@@ -152,12 +152,7 @@ int main()
 
 		hidScanInput();
 		if(keysDown()&KEY_START)break;
-		controlsPlayer(&player);
-
-		if(keysDown()&KEY_A)translateWorld(&world, vect3Di(1,0,0));
-		if(keysDown()&KEY_B)translateWorld(&world, vect3Di(-1,0,0));
-		if(keysDown()&KEY_X)translateWorld(&world, vect3Di(0,0,1));
-		if(keysDown()&KEY_Y)translateWorld(&world, vect3Di(0,0,-1));
+		controlsPlayer(&player, &world);
 
 		updatePlayer(&player, &world);
 		updateWorld(&world);
@@ -188,7 +183,7 @@ int main()
 		// u64 val=svcGetSystemTick();
 		// debugValue[5]+=(u32)(svcGetSystemTick()-val);
 		// debugValue[6]++;
-		print("");
+		drawBottom(); //DEBUG
 	}
 
 	exitDispatcher(NULL);

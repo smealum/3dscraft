@@ -17,39 +17,14 @@ void initPlayer(player_s* p)
 	p->velocity=vect3Df(0.0f, 0.0f, 0.0f);
 }
 
-void controlsPlayer(player_s* p)
-{
-	if(!p)return;
-
-	const u32 PAD=hidKeysHeld();
-	circlePosition cstick;
-	hidCstickRead(&cstick);
-
-	vect3Df_s vx=vnormf(getMatrixColumn((float*)p->camera.orientation, 0));
-	vect3Df_s vy=vnormf(getMatrixColumn((float*)p->camera.orientation, 1));
-	vect3Df_s vz=vnormf(getMatrixColumn((float*)p->camera.orientation, 2));
-
-	if(PAD&KEY_UP)p->velocity=vaddf(p->velocity, vmulf(vz, -0.4f));
-	if(PAD&KEY_DOWN)p->velocity=vaddf(p->velocity, vmulf(vz, 0.4f));
-	if(PAD&KEY_RIGHT)p->velocity=vaddf(p->velocity, vmulf(vy, -0.4f));
-	if(PAD&KEY_LEFT)p->velocity=vaddf(p->velocity, vmulf(vy, 0.4f));
-	if(PAD&KEY_R)p->velocity=vaddf(p->velocity, vmulf(vx, -0.8f));
-	if(hidKeysDown()&KEY_L)p->velocity=vaddf(p->velocity, vmulf(vx, 1.0f));
-
-	// if(PAD&KEY_X)rotateMatrixX((float*)p->camera.orientation, 0.1f, false);
-	// if(PAD&KEY_B)rotateMatrixX((float*)p->camera.orientation, -0.1f, false);
-	// if(PAD&KEY_A)rotateMatrixY((float*)p->camera.orientation, 0.1f, false);
-	// if(PAD&KEY_Y)rotateMatrixY((float*)p->camera.orientation, -0.1f, false);
-
-	rotateMatrixY((float*)p->camera.orientation, (cstick.dx*0.2f)/0x9c, false);
-}
-
 //TODO : cleanup ?
-vect3Di_s performRayMarch(world_s* w, vect3Df_s localBlockPosf, vect3Df_s localBlockPosf2, vect3Df_s* out)
+vect3Di_s performRayMarch(world_s* w, vect3Df_s localBlockPosf, vect3Df_s localBlockPosf2, vect3Df_s* out, bool* collided)
 {
 	vect3Di_s cur=vf2i(localBlockPosf);
 	vect3Df_s u=vnormf(vsubf(localBlockPosf2, localBlockPosf));
 	const float d=vdistf(localBlockPosf2,localBlockPosf);
+	
+	if(!w)return cur;
 
 	const int stepX=(localBlockPosf2.x>localBlockPosf.x)?1:-1;
 	const int stepY=(localBlockPosf2.y>localBlockPosf.y)?1:-1;
@@ -66,6 +41,8 @@ vect3Di_s performRayMarch(world_s* w, vect3Df_s localBlockPosf, vect3Df_s localB
 	else tMaxY=fabs((localBlockPosf.y-floorf(localBlockPosf.y)+((localBlockPosf2.y>localBlockPosf.y)?-1.0f:0.0f))/u.y);
 	if(fabs(u.z)<0.001f)tMaxZ=d;
 	else tMaxZ=fabs((localBlockPosf.z-floorf(localBlockPosf.z)+((localBlockPosf2.z>localBlockPosf.z)?-1.0f:0.0f))/u.z);
+
+	if(collided)*collided=false;
 
 	u8 dir=0;
 	if(out)*out=localBlockPosf2;
@@ -95,6 +72,8 @@ vect3Di_s performRayMarch(world_s* w, vect3Df_s localBlockPosf, vect3Df_s localB
 			}
 		}
 	}while(getWorldBlock(w, cur)==0);
+
+	if(collided)*collided=true;
 
 	if(out)
 	{
@@ -133,6 +112,44 @@ vect3Di_s performRayMarch(world_s* w, vect3Df_s localBlockPosf, vect3Df_s localB
 	return cur;
 }
 
+void controlsPlayer(player_s* p, world_s* w)
+{
+	if(!p)return;
+
+	const u32 PAD=hidKeysHeld();
+	circlePosition cstick;
+	hidCstickRead(&cstick);
+
+	vect3Df_s vx=vnormf(getMatrixColumn((float*)p->camera.orientation, 0));
+	vect3Df_s vy=vnormf(getMatrixColumn((float*)p->camera.orientation, 1));
+	vect3Df_s vz=vnormf(getMatrixColumn((float*)p->camera.orientation, 2));
+
+	if(PAD&KEY_UP)p->velocity=vaddf(p->velocity, vmulf(vz, -0.4f));
+	if(PAD&KEY_DOWN)p->velocity=vaddf(p->velocity, vmulf(vz, 0.4f));
+	if(PAD&KEY_RIGHT)p->velocity=vaddf(p->velocity, vmulf(vy, -0.4f));
+	if(PAD&KEY_LEFT)p->velocity=vaddf(p->velocity, vmulf(vy, 0.4f));
+	if(PAD&KEY_R)p->velocity=vaddf(p->velocity, vmulf(vx, -0.8f));
+	if(hidKeysDown()&KEY_L)p->velocity=vaddf(p->velocity, vmulf(vx, 1.0f));
+
+	// if(PAD&KEY_X)rotateMatrixX((float*)p->camera.orientation, 0.1f, false);
+	// if(PAD&KEY_B)rotateMatrixX((float*)p->camera.orientation, -0.1f, false);
+	// if(PAD&KEY_A)rotateMatrixY((float*)p->camera.orientation, 0.1f, false);
+	// if(PAD&KEY_Y)rotateMatrixY((float*)p->camera.orientation, -0.1f, false);
+
+	if(w)
+	{
+		const vect3Df_s v=vmulf(vz, -5.0f);
+		bool collided=false;
+		vect3Di_s out=performRayMarch(w, p->camera.position, vaddf(p->camera.position, v), NULL, &collided);
+		if(collided)
+		{
+			if(hidKeysDown()&KEY_A)alterWorldBlock(w, out, 1, true);
+		}
+	}
+
+	rotateMatrixY((float*)p->camera.orientation, (cstick.dx*0.2f)/0x9c, false);
+}
+
 extern u32 debugValue[];
 
 #define PLAYERSIZE (0.25f)
@@ -162,7 +179,7 @@ void updatePlayer(player_s* p, world_s* w)
 		{
 			vect3Df_s out;
 			vect3Df_s pt=vaddf(p->camera.position, playerBox[i]);
-			performRayMarch(w, pt, vaddf(pt, v), &out);
+			performRayMarch(w, pt, vaddf(pt, v), &out, NULL);
 			v=vsubf(out,pt);
 			if(vmagf(v)<=0.0001f)break;
 		}
