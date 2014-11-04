@@ -68,6 +68,7 @@ void doFrame1()
 		gsPushMatrix();
 			setCameraPlayer(&player);
 			drawWorld(&world, &player.camera);
+			drawCursor(&player.cursor);
 		gsPopMatrix();
 }
 

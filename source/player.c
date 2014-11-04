@@ -15,10 +15,12 @@ void initPlayer(player_s* p)
 	rotateMatrixZ((float*)p->camera.orientation, M_PI/2, false);
 	rotateMatrixY((float*)p->camera.orientation, M_PI, false);
 	p->velocity=vect3Df(0.0f, 0.0f, 0.0f);
+
+	initCursor(&p->cursor);
 }
 
 //TODO : cleanup ?
-vect3Di_s performRayMarch(world_s* w, vect3Df_s localBlockPosf, vect3Df_s localBlockPosf2, vect3Df_s* out, bool* collided)
+vect3Di_s performRayMarch(world_s* w, vect3Df_s localBlockPosf, vect3Df_s localBlockPosf2, vect3Df_s* out, bool* collided, u8* dirout)
 {
 	vect3Di_s cur=vf2i(localBlockPosf);
 	vect3Df_s u=vnormf(vsubf(localBlockPosf2, localBlockPosf));
@@ -74,39 +76,49 @@ vect3Di_s performRayMarch(world_s* w, vect3Df_s localBlockPosf, vect3Df_s localB
 	}while(getWorldBlock(w, cur)==0);
 
 	if(collided)*collided=true;
+	if(dirout)*dirout=dir*2;
 
-	if(out)
+	switch(dir)
 	{
-		switch(dir)
-		{
-			case 0:
+		case 0:
+			{
+				float targetX=(cur.x)*1.0f;
+				if(stepX<0)targetX+=1.0f;
+				else if(dirout)(*dirout)++;
+				if(out)
 				{
-					float targetX=(cur.x)*1.0f;
-					if(stepX<0)targetX+=1.0f;
 					float r=(targetX-localBlockPosf.x)/u.x;
 					targetX-=0.1f*stepX; //margin
 					*out=vaddf(localBlockPosf, vmulf(u,r)); out->x=targetX;
 				}
-				break;
-			case 1:
+			}
+			break;
+		case 1:
+			{
+				float targetY=(cur.y)*1.0f;
+				if(stepY<0)targetY+=1.0f;
+				else if(dirout)(*dirout)++;
+				if(out)
 				{
-					float targetY=(cur.y)*1.0f;
-					if(stepY<0)targetY+=1.0f;
 					float r=(targetY-localBlockPosf.y)/u.y;
 					targetY-=0.04f*stepY; //margin
 					*out=vaddf(localBlockPosf, vmulf(u,r)); out->y=targetY;
 				}
-				break;
-			case 2:
+			}
+			break;
+		case 2:
+			{
+				float targetZ=(cur.z)*1.0f;
+				if(stepZ<0)targetZ+=1.0f;
+				else if(dirout)(*dirout)++;
+				if(out)
 				{
-					float targetZ=(cur.z)*1.0f;
-					if(stepZ<0)targetZ+=1.0f;
 					float r=(targetZ-localBlockPosf.z)/u.z;
 					targetZ-=0.1f*stepZ; //margin
 					*out=vaddf(localBlockPosf, vmulf(u,r)); out->z=targetZ;
 				}
-				break;
-		}
+			}
+			break;
 	}
 
 	return cur;
@@ -129,7 +141,7 @@ void controlsPlayer(player_s* p, world_s* w)
 	if(PAD&KEY_RIGHT)p->velocity=vaddf(p->velocity, vmulf(vy, -0.4f));
 	if(PAD&KEY_LEFT)p->velocity=vaddf(p->velocity, vmulf(vy, 0.4f));
 	if(PAD&KEY_R)p->velocity=vaddf(p->velocity, vmulf(vx, -0.8f));
-	if(hidKeysDown()&KEY_L)p->velocity=vaddf(p->velocity, vmulf(vx, 1.0f));
+	if(hidKeysDown()&KEY_L)p->velocity=vaddf(p->velocity, vmulf(vx, 0.7f));
 
 	// if(PAD&KEY_X)rotateMatrixX((float*)p->camera.orientation, 0.1f, false);
 	// if(PAD&KEY_B)rotateMatrixX((float*)p->camera.orientation, -0.1f, false);
@@ -140,11 +152,15 @@ void controlsPlayer(player_s* p, world_s* w)
 	{
 		const vect3Df_s v=vmulf(vz, -5.0f);
 		bool collided=false;
-		vect3Di_s out=performRayMarch(w, p->camera.position, vaddf(p->camera.position, v), NULL, &collided);
+		u8 dir;
+		vect3Di_s out=performRayMarch(w, p->camera.position, vaddf(p->camera.position, v), NULL, &collided, &dir);
 		if(collided)
 		{
+			p->cursor.active=true;
+			p->cursor.position=out;
+			p->cursor.direction=dir;
 			if(hidKeysDown()&KEY_A)alterWorldBlock(w, out, 1, true);
-		}
+		}else p->cursor.active=false;
 	}
 
 	rotateMatrixY((float*)p->camera.orientation, (cstick.dx*0.2f)/0x9c, false);
@@ -179,7 +195,7 @@ void updatePlayer(player_s* p, world_s* w)
 		{
 			vect3Df_s out;
 			vect3Df_s pt=vaddf(p->camera.position, playerBox[i]);
-			performRayMarch(w, pt, vaddf(pt, v), &out, NULL);
+			performRayMarch(w, pt, vaddf(pt, v), &out, NULL, NULL);
 			v=vsubf(out,pt);
 			if(vmagf(v)<=0.0001f)break;
 		}
@@ -189,8 +205,8 @@ void updatePlayer(player_s* p, world_s* w)
 	p->camera.position=vaddf(p->camera.position, p->velocity);
 
 	p->velocity=vect3Df(0.0f, p->velocity.y, 0.0f);
-	// p->velocity=vect3Df(0.0f, 0.0f, 0.0f);
 
+	//world streaming
 	if(w)
 	{
 		vect3Di_s off=vsubi(vf2i(vmulf(p->camera.position, 1.0f/CLUSTER_SIZE)), vaddi(w->position, vect3Di(WORLD_SIZE/2,0,WORLD_SIZE/2)));

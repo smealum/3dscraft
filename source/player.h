@@ -5,11 +5,13 @@
 #include "math.h"
 #include "world.h"
 #include "camera.h"
+#include "cursor.h"
 
 typedef struct
 {
 	vect3Df_s velocity;
 	camera_s camera;
+	cursor_s cursor;
 }player_s;
 
 void initPlayer(player_s* p);
