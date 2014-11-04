@@ -87,10 +87,14 @@ void cutLine(char* str)
 	memmove(str,str2,strlen(str2)+1);
 }
 
+size_t getMemFree();
+
 void drawBottom()
 {
 	memset(gfxGetFramebuffer(GFX_BOTTOM, GFX_LEFT, NULL, NULL), 0x00, 240*320*3);
-	gfxDrawText(GFX_BOTTOM, GFX_LEFT, NULL, "3dscraft debug", 240-fontDefault.height, 0);
+	static char str[256];
+	sprintf(str, "3dscraft debug : %dKB LINEAR, %dKB REGULAR", linearSpaceFree()/1024, getMemFree()/1024);
+	gfxDrawText(GFX_BOTTOM, GFX_LEFT, NULL, str, 240-fontDefault.height, 0);
 	int i = countLines(superStr);
 	while(i>240/fontDefault.height-1){cutLine(superStr);i--;}
 	gfxDrawText(GFX_BOTTOM, GFX_LEFT, NULL, superStr, 240-fontDefault.height*2, 0);
@@ -184,6 +188,7 @@ int main()
 		// u64 val=svcGetSystemTick();
 		// debugValue[5]+=(u32)(svcGetSystemTick()-val);
 		// debugValue[6]++;
+		print("");
 	}
 
 	exitDispatcher(NULL);

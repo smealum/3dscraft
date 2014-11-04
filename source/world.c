@@ -48,9 +48,14 @@ bool isChunkBusy(worldChunk_s* wch)
 void fixChunk(worldChunk_s* wch)
 {
 	if(!wch || !wch->next || isChunkBusy(wch))return;
-	wch->next=chunkPool;
-	chunkPool=wch;
-	debugValue[7]--;
+	wch->next=NULL;
+	freeChunk(wch);
+}
+
+void freeCluster(worldCluster_s* wcl)
+{
+	if(!wcl || wcl->status&WCL_BUSY)return;
+	if(!(wcl->status&WCL_GEOM_UNAVAILABLE))gsVboDestroy(&wcl->vbo);
 }
 
 void freeChunk(worldChunk_s* wch)
@@ -64,6 +69,7 @@ void freeChunk(worldChunk_s* wch)
 	}else{
 		wch->next=chunkPool;
 		chunkPool=wch;
+		int i; for(i=0; i<CHUNK_HEIGHT; i++)freeCluster(&wch->data[i]);
 	}
 }
 
