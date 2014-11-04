@@ -112,7 +112,7 @@ int main()
 	memset(debugValue, 0x00, sizeof(debugValue));
 
 	aptOpenSession();
-	print("%d\n",APT_SetAppCpuTimeLimit(NULL, 30));
+	print("%08X\n",(unsigned int)APT_SetAppCpuTimeLimit(NULL, 30));
 	aptCloseSession();
 	
 	GPU_Init(NULL);
@@ -142,7 +142,6 @@ int main()
 	// gspWaitForPSC0();
 	gfxSwapBuffersGpu();
 
-	APP_STATUS status;
 	while(aptMainLoop())
 	{
 		u64 val=svcGetSystemTick();
@@ -178,7 +177,7 @@ int main()
 
 		// u64 val=svcGetSystemTick();
 		// debugValue[1]=(u32)(svcGetSystemTick()-val);
-		print("%d\n", (int)debugValue[7]);
+		// print("%d\n", (int)debugValue[7]);
 		// print("avg %d ticks (%d)\n", (int)(debugValue[5]/debugValue[6]), debugValue[6]);
 		// print("drawing %d chunks... (%f vs %f)\n", (int)debugValue[0], (float)(debugValue[1]*100)/TICKS_PER_VBL, (float)(debugValue[2]*100)/TICKS_PER_VBL);
 		// debugValue[0]=0;

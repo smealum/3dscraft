@@ -90,8 +90,6 @@ void drawWorldCluster(world_s* w, worldChunk_s* wch, worldCluster_s* wcl)
 		if(!(wcl->status&WCL_BUSY) && !(wcl->status&WCL_DATA_UNAVAILABLE))dispatchJob(NULL, createJobGenerateClusterGeometry(wcl, wch, w));
 		return;
 	}
-	vect3Df_s v=clusterCoordToWorld(wcl->position);
-
 	gsVboDraw(&wcl->vbo);
 }
 
@@ -177,9 +175,9 @@ int getWorldElevation(vect3Di_s p)
 	return (int)(sdnoise2(((float)p.x)/(CLUSTER_SIZE*4), ((float)p.z)/(CLUSTER_SIZE*4), NULL, NULL)*CLUSTER_SIZE)+(CHUNK_HEIGHT*CLUSTER_SIZE/2);
 }
 
-void generateWorldClusterData(worldCluster_s* wcl)
+void generateWorldClusterData(worldCluster_s* wcl, worldChunk_s* wch)
 {
-	if(!wcl)return;
+	if(!wcl || !wch)return;
 	if(!(wcl->status&WCL_GEOM_UNAVAILABLE)){gsVboDestroy(&wcl->vbo);wcl->status|=WCL_GEOM_UNAVAILABLE;}
 
 	//TEMP
@@ -190,7 +188,7 @@ void generateWorldClusterData(worldCluster_s* wcl)
 		{
 			//TEMP
 			const vect3Di_s p=vect3Di(i+wcl->position.x*CLUSTER_SIZE, wcl->position.y*CLUSTER_SIZE, k+wcl->position.z*CLUSTER_SIZE);
-			int height=getWorldElevation(p);
+			const int height=wch->info[i][k].elevation;
 			for(j=0; j<CLUSTER_SIZE; j++)
 			{
 				if(p.y+j < height)wcl->data[i][j][k]=BLOCK_GRASS;
@@ -217,13 +215,21 @@ void initWorldChunk(worldChunk_s* wch, vect3Di_s pos)
 	wch->position=pos;
 }
 
-//TEMP ?
 void generateWorldChunkData(worldChunk_s* wch)
 {
 	if(!wch)return;
 
-	// int k; for(k=0; k<CHUNK_HEIGHT; k++)generateWorldClusterData(&wch->data[k]);
-	int k; for(k=0; k<CHUNK_HEIGHT; k++)dispatchJob(NULL, createJobGenerateCluster(&wch->data[k], wch));
+	int i, j, k;
+	for(i=0; i<CLUSTER_SIZE; i++)
+	{
+		for(k=0; k<CLUSTER_SIZE; k++)
+		{
+			const vect3Di_s p=vect3Di(i+wch->position.x*CLUSTER_SIZE, 0, k+wch->position.z*CLUSTER_SIZE);
+			wch->info[i][k].elevation=getWorldElevation(p);
+		}
+	}
+
+	for(j=0; j<CHUNK_HEIGHT; j++)generateWorldClusterData(&wch->data[j], wch);
 }
 
 void drawWorldChunk(world_s* w, worldChunk_s* wch, camera_s* c)
@@ -299,7 +305,7 @@ void updateWorld(world_s* w)
 				if(w->data[i][j])
 				{
 					initWorldChunk(w->data[i][j], vect3Di(i+w->position.x,0,j+w->position.z));
-					generateWorldChunkData(w->data[i][j]);
+					dispatchJob(NULL, createJobGenerateChunkData(w->data[i][j]));
 				}
 			}
 		}

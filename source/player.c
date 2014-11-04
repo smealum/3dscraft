@@ -151,23 +151,23 @@ void updatePlayer(player_s* p, world_s* w)
 	if(!p)return;
 
 	//gravity
-	// p->velocity=vaddf(p->velocity, vect3Df(0.0f, -0.05f, 0.0f));
+	p->velocity=vaddf(p->velocity, vect3Df(0.0f, -0.05f, 0.0f));
 
-	// //collisions
-	// if(vmagf(p->velocity)>0.0001f)
-	// {
-	// 	vect3Df_s v=p->velocity;
-	// 	int i;
-	// 	for(i=0; i<8; i++)
-	// 	{
-	// 		vect3Df_s out;
-	// 		vect3Df_s pt=vaddf(p->camera.position, playerBox[i]);
-	// 		performRayMarch(w, pt, vaddf(pt, v), &out);
-	// 		v=vsubf(out,pt);
-	// 		if(vmagf(v)<=0.0001f)break;
-	// 	}
-	// 	p->velocity=v;
-	// }
+	//collisions
+	if(vmagf(p->velocity)>0.0001f)
+	{
+		vect3Df_s v=p->velocity;
+		int i;
+		for(i=0; i<8; i++)
+		{
+			vect3Df_s out;
+			vect3Df_s pt=vaddf(p->camera.position, playerBox[i]);
+			performRayMarch(w, pt, vaddf(pt, v), &out);
+			v=vsubf(out,pt);
+			if(vmagf(v)<=0.0001f)break;
+		}
+		p->velocity=v;
+	}
 
 	p->camera.position=vaddf(p->camera.position, p->velocity);
 
@@ -181,7 +181,6 @@ void updatePlayer(player_s* p, world_s* w)
 		if(off.x>=2)translateWorld(w, vect3Di(1,0,0));
 		if(off.z<=-2)translateWorld(w, vect3Di(0,0,-1));
 		if(off.z>=2)translateWorld(w, vect3Di(0,0,1));
-		print("%d %d\n",off.x,off.z);
 	}
 
 	updateCamera(&p->camera);

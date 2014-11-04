@@ -7,7 +7,7 @@ struct producer_s;
 
 typedef enum
 {
-	JOB_GENERATE_CLUSTER_DATA,
+	JOB_GENERATE_CHUNK_DATA,
 	JOB_GENERATE_CLUSTER_GEOM,
 	NUM_JOB_TYPES
 }jobTypes_t;
@@ -42,7 +42,7 @@ typedef struct
 
 extern jobType_s jobTypes[NUM_JOB_TYPES];
 
-job_s* createJobGenerateCluster(worldCluster_s* wcl, worldChunk_s* wch); //JOB_GENERATE_CLUSTER_DATA
+job_s* createJobGenerateChunkData(worldChunk_s* wch); //JOB_GENERATE_CHUNK_DATA
 job_s* createJobGenerateClusterGeometry(worldCluster_s* wcl, worldChunk_s* wch, world_s* w); //JOB_GENERATE_CLUSTER_GEOM
 
 //job queue (FIFO)
