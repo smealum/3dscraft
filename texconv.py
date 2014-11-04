@@ -11,7 +11,7 @@ def parseTile(im, l, x, y):
 		i=tileOrder[k]%8
 		j=int((tileOrder[k]-i)/8)
 		pixel=im.getpixel((x+i,y+j))
-		l.append(((pixel[0]&0xFF)<<24)|((pixel[1]&0xFF)<<16)|((pixel[2]&0xFF)<<8)|(0xFF))
+		l.append(((pixel[0]&0xFF)<<24)|((pixel[1]&0xFF)<<16)|((pixel[2]&0xFF)<<8)|(pixel[3]&0xFF))
 
 srcfn=sys.argv[1]
 dstname=sys.argv[2]
