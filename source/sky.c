@@ -30,13 +30,17 @@ void initSky(void)
 	gsVboAddData(&cloudVbo, (void*)cloudVboData, sizeof(cloudVboData), sizeof(cloudVboData)/sizeof(faceVertex_s));
 	gsVboFlushData(&cloudVbo);
 
-	cloudTexture=(u32*)linearAlloc(cloud_bin_size);
-	memcpy(cloudTexture, cloud_bin, cloud_bin_size);
-	GSPGPU_FlushDataCache(NULL, (u8*)cloudTexture, cloud_bin_size);
+	cloudTexture=(u32*)(((u32)linearAlloc(cloud_bin_size+0x80)+0x7F)&(~0x7F));
+	if(cloudTexture)
+	{
+		memcpy(cloudTexture, cloud_bin, cloud_bin_size);
+		GSPGPU_FlushDataCache(NULL, (u8*)cloudTexture, cloud_bin_size);
+	}
 }
 
 void drawSky(void)
 {
+	GPU_SetTexture(GPU_TEXUNIT0, (u32*)osConvertVirtToPhys((u32)cloudTexture),256,256,0x6,GPU_RGBA8);
 	gsPushMatrix();
 		gsTranslate(0.5f, CLUSTER_SIZE*CHUNK_HEIGHT, 0.5f);
 		gsScale(WORLD_SIZE*CLUSTER_SIZE*4,1.0f,WORLD_SIZE*CLUSTER_SIZE*4);

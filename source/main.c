@@ -108,11 +108,14 @@ void cutLine(char* str)
 
 size_t getMemFree();
 
+extern u32* cloudTexture;
+
 void drawBottom()
 {
 	memset(gfxGetFramebuffer(GFX_BOTTOM, GFX_LEFT, NULL, NULL), 0x00, 240*320*3);
 	static char str[256];
-	sprintf(str, "3dscraft debug : %dKB LINEAR, %dKB REGULAR", (int)linearSpaceFree()/1024, (int)getMemFree()/1024);
+	// sprintf(str, "3dscraft debug : %dKB LINEAR, %dKB REGULAR", (int)linearSpaceFree()/1024, (int)getMemFree()/1024);
+	sprintf(str, "3dscraft debug : %08X %08X", (unsigned int)texData, (unsigned int)cloudTexture);
 	gfxDrawText(GFX_BOTTOM, GFX_LEFT, NULL, str, 240-fontDefault.height, 0);
 	int i = countLines(superStr);
 	while(i>240/fontDefault.height-1){cutLine(superStr);i--;}
@@ -147,7 +150,7 @@ int main()
 
 	GPU_Reset(gxCmdBuf, gpuCmd, gpuCmdSize);
 
-	texData=(u32*)linearAlloc(terrain_bin_size);
+	texData=(u32*)(((u32)linearAlloc(terrain_bin_size+0x80)+0x7F)&(~0x7F));
 	memcpy(texData, terrain_bin, terrain_bin_size);
 	GSPGPU_FlushDataCache(NULL, (u8*)texData, terrain_bin_size);
 
