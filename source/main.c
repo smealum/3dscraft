@@ -179,6 +179,7 @@ int main()
 
 		updatePlayer(&player, &world);
 		updateWorld(&world);
+		updateSky();
 		updateDispatcher(NULL);
 
 		GPUCMD_SetBuffer(gpuCmd, gpuCmdSize, 0);
