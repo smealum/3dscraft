@@ -33,7 +33,7 @@ void initSky(void)
 	gsVboAddData(&cloudVbo, (void*)cloudVboData, sizeof(cloudVboData), sizeof(cloudVboData)/sizeof(faceVertex_s));
 	gsVboFlushData(&cloudVbo);
 
-	cloudTexture=(u32*)(((u32)linearAlloc(cloud_bin_size+0x80)+0x7F)&(~0x7F));
+	cloudTexture=(u32*)linearMemAlign(cloud_bin_size, 0x80);
 	if(cloudTexture)
 	{
 		memcpy(cloudTexture, cloud_bin, cloud_bin_size);

@@ -123,6 +123,16 @@ vect3Di_s performRayMarch(world_s* w, vect3Df_s localBlockPosf, vect3Df_s localB
 	return cur;
 }
 
+const vect3Di_s directionVector[]=
+{
+	{+1,0,0},
+	{-1,0,0},
+	{0,+1,0},
+	{0,-1,0},
+	{0,0,+1},
+	{0,0,-1},
+};
+
 void controlsPlayer(player_s* p, world_s* w)
 {
 	if(!p)return;
@@ -158,7 +168,7 @@ void controlsPlayer(player_s* p, world_s* w)
 				p->cursor.active=true;
 				p->cursor.position=out;
 				p->cursor.direction=dir;
-				if(hidKeysDown()&KEY_R)alterWorldBlock(w, out, 1, true);
+				if(hidKeysDown()&KEY_R)alterWorldBlock(w, vaddi(out, directionVector[dir]), 1, true);
 				if(hidKeysDown()&KEY_ZR)alterWorldBlock(w, out, 0, true);
 			}else p->cursor.active=false;
 		}

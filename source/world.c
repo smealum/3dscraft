@@ -311,7 +311,15 @@ void alterWorldChunkBlock(worldChunk_s* wc, world_s* w, vect3Di_s p, u8 block, b
 	if(p.x<0 || p.y<0 || p.z<0)return;
 	if(p.x>=CLUSTER_SIZE || p.y>=CHUNK_HEIGHT*CLUSTER_SIZE || p.z>=CLUSTER_SIZE)return;
 
-	alterWorldClusterBlock(&wc->data[p.y/CLUSTER_SIZE], w, vect3Di(p.x, p.y%CLUSTER_SIZE, p.z), block, regenerate);
+	u16 clusterY=p.y/CLUSTER_SIZE;
+	p.y%=CLUSTER_SIZE;
+	alterWorldClusterBlock(&wc->data[clusterY], w, vect3Di(p.x, p.y, p.z), block, regenerate);
+
+	if(regenerate)
+	{
+		if(!p.y && clusterY)generateWorldClusterGeometry(&wc->data[clusterY-1], w, NULL, 0);
+		else if(p.y==CLUSTER_SIZE-1 && clusterY<CHUNK_HEIGHT-1)generateWorldClusterGeometry(&wc->data[clusterY+1], w, NULL, 0);
+	}
 }
 
 void alterWorldBlock(world_s* w, vect3Di_s p, u8 block, bool regenerate)
@@ -321,7 +329,18 @@ void alterWorldBlock(world_s* w, vect3Di_s p, u8 block, bool regenerate)
 	if(p.x<0 || p.y<0 || p.z<0)return;
 	if(p.x>=WORLD_SIZE*CLUSTER_SIZE || p.y>=CHUNK_HEIGHT*CLUSTER_SIZE || p.z>=WORLD_SIZE*CLUSTER_SIZE)return;
 
-	alterWorldChunkBlock(w->data[p.x/CLUSTER_SIZE][p.z/CLUSTER_SIZE], w, vect3Di(p.x%CLUSTER_SIZE, p.y, p.z%CLUSTER_SIZE), block, regenerate);
+	u16 clusterX=p.x/CLUSTER_SIZE, clusterZ=p.z/CLUSTER_SIZE;
+	p.x%=CLUSTER_SIZE; p.z%=CLUSTER_SIZE;
+	alterWorldChunkBlock(w->data[clusterX][clusterZ], w, vect3Di(p.x, p.y, p.z), block, regenerate);
+
+	if(regenerate)
+	{
+		u16 clusterY=p.y/CLUSTER_SIZE;
+		if(!p.x && clusterX && w->data[clusterX-1][clusterZ])generateWorldClusterGeometry(&w->data[clusterX-1][clusterZ]->data[clusterY], w, NULL, 0);
+		else if(p.x==CLUSTER_SIZE-1 && clusterX<WORLD_SIZE-1 && w->data[clusterX+1][clusterZ])generateWorldClusterGeometry(&w->data[clusterX+1][clusterZ]->data[clusterY], w, NULL, 0);
+		if(!p.z && clusterZ && w->data[clusterX][clusterZ-1])generateWorldClusterGeometry(&w->data[clusterX][clusterZ-1]->data[clusterY], w, NULL, 0);
+		else if(p.z==CLUSTER_SIZE-1 && clusterZ<WORLD_SIZE-1 && w->data[clusterX][clusterZ+1])generateWorldClusterGeometry(&w->data[clusterX][clusterZ+1]->data[clusterY], w, NULL, 0);
+	}
 }
 
 void updateWorld(world_s* w)
