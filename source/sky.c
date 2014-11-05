@@ -47,7 +47,7 @@ void initSky(void)
 void updateSky(void)
 {
 	cloudOffset.x+=0.00001f;
-	cloudOffset.y+=0.00003f;
+	cloudOffset.y-=0.00003f;
 
 	//update VBO texcoords
 	faceVertex_s* vboData=(faceVertex_s*)cloudVbo.data;
@@ -73,7 +73,7 @@ void updateSky(void)
 
 void drawSky(void)
 {
-	GPU_SetTexture(GPU_TEXUNIT0, (u32*)osConvertVirtToPhys((u32)cloudTexture),256,256,0x6,GPU_RGBA8);
+	GPU_SetTexture(GPU_TEXUNIT0, (u32*)osConvertVirtToPhys((u32)cloudTexture),256,256,GPU_TEXTURE_MAG_FILTER(GPU_NEAREST)|GPU_TEXTURE_MIN_FILTER(GPU_NEAREST)|GPU_TEXTURE_WRAP_S(GPU_REPEAT)|GPU_TEXTURE_WRAP_T(GPU_REPEAT),GPU_RGBA8);
 	gsPushMatrix();
 		gsTranslate(0.5f, CLUSTER_SIZE*CHUNK_HEIGHT, 0.5f);
 		gsScale(WORLD_SIZE*CLUSTER_SIZE*8,1.0f,WORLD_SIZE*CLUSTER_SIZE*8);

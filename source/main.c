@@ -58,7 +58,7 @@ void doFrame1()
 	//setup shader
 		SHDR_UseProgram(shader, 0);
 	
-	GPU_SetAlphaBlending(GPU_BLEND_ADD, GPU_BLEND_ADD, GPU_ONE, GPU_ZERO, GPU_ONE, GPU_ZERO);
+	GPU_SetAlphaBlending(GPU_BLEND_ADD, GPU_BLEND_ADD, GPU_SRC_ALPHA, GPU_ONE_MINUS_SRC_ALPHA, GPU_SRC_ALPHA, GPU_ONE_MINUS_SRC_ALPHA);
 	GPU_SetAlphaTest(false, GPU_ALWAYS, 0x00);
 	
 	GPU_SetTextureEnable(GPU_TEXUNIT0);
@@ -77,7 +77,7 @@ void doFrame1()
 	GPU_SetDummyTexEnv(5);
 
 	//texturing stuff
-		GPU_SetTexture(GPU_TEXUNIT0, (u32*)osConvertVirtToPhys((u32)texData),256,256,0x6,GPU_RGBA8);
+		GPU_SetTexture(GPU_TEXUNIT0, (u32*)osConvertVirtToPhys((u32)texData),256,256,GPU_TEXTURE_MAG_FILTER(GPU_NEAREST)|GPU_TEXTURE_MIN_FILTER(GPU_NEAREST),GPU_RGBA8);
 
 	//draw world
 		gsMatrixMode(GS_MODELVIEW);
