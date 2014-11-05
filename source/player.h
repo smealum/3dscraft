@@ -12,6 +12,7 @@ typedef struct
 	vect3Df_s velocity;
 	camera_s camera;
 	cursor_s cursor;
+	bool flying;
 }player_s;
 
 void initPlayer(player_s* p);

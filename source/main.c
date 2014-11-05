@@ -6,6 +6,7 @@
 
 #include "math.h"
 #include "gs.h"
+#include "sky.h"
 #include "world.h"
 #include "dispatcher.h"
 #include "player.h"
@@ -26,39 +27,54 @@ u32* gpuDOut=(u32*)0x1F370800;
 
 u32 debugValue[128];
 
+//stolen from staplebutt
+void GPU_SetDummyTexEnv(u8 num)
+{
+	GPU_SetTexEnv(num, 
+		GPU_TEVSOURCES(GPU_PREVIOUS, 0, 0), 
+		GPU_TEVSOURCES(GPU_PREVIOUS, 0, 0), 
+		GPU_TEVOPERANDS(0,0,0), 
+		GPU_TEVOPERANDS(0,0,0), 
+		GPU_REPLACE, 
+		GPU_REPLACE, 
+		0xFFFFFFFF);
+}
+
 // topscreen
 void doFrame1()
 {
-	//general setup
-		GPU_SetViewport((u32*)osConvertVirtToPhys((u32)gpuDOut),(u32*)osConvertVirtToPhys((u32)gpuOut),0,0,240*2,400);
-
-		GPU_DepthRange(-1.0f, 0.0f);
-
-		GPU_SetFaceCulling(GPU_CULL_BACK_CCW);
-		GPU_SetStencilTest(false, GPU_ALWAYS, 0x00, 0x00, 0x00);
-		GPU_SetDepthTestAndWriteMask(true, GPU_GREATER, GPU_WRITE_ALL);
-
-	// ?
-		GPUCMD_AddSingleParam(0x00010062, 0x00000000); //param always 0x0 according to code
-		GPUCMD_AddSingleParam(0x000F0118, 0x00000000);
-
+	GPU_SetViewport((u32*)osConvertVirtToPhys((u32)gpuDOut),(u32*)osConvertVirtToPhys((u32)gpuOut),0,0,240*2,400);
+	
+	GPU_DepthRange(-1.0f, 0.0f);
+	GPU_SetFaceCulling(GPU_CULL_BACK_CCW);
+	GPU_SetStencilTest(false, GPU_ALWAYS, 0x00, 0xFF, 0x00);
+	GPU_SetStencilOp(GPU_KEEP, GPU_KEEP, GPU_KEEP);
+	GPU_SetBlendingColor(0,0,0,0);
+	GPU_SetDepthTestAndWriteMask(true, GPU_GREATER, GPU_WRITE_ALL);
+	
+	GPUCMD_AddSingleParam(0x00010062, 0); 
+	GPUCMD_AddSingleParam(0x000F0118, 0);
+	
 	//setup shader
 		SHDR_UseProgram(shader, 0);
-
-	//?
-		GPUCMD_AddSingleParam(0x000F0100, 0x00E40100);
-		GPUCMD_AddSingleParam(0x000F0101, 0x01010000);
-		GPUCMD_AddSingleParam(0x000F0104, 0x00000010);
 	
-	//texturing stuff
-		GPUCMD_AddSingleParam(0x0002006F, 0x00000100);
-		GPUCMD_AddSingleParam(0x000F0080, 0x00011001); //enables/disables texturing
+	GPU_SetAlphaBlending(GPU_BLEND_ADD, GPU_BLEND_ADD, GPU_ONE, GPU_ZERO, GPU_ONE, GPU_ZERO);
+	GPU_SetAlphaTest(false, GPU_ALWAYS, 0x00);
 	
-	//texenv
-		GPU_SetTexEnv(3, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00000000);
-		GPU_SetTexEnv(4, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00000000);
-		GPU_SetTexEnv(5, GPU_TEVSOURCES(GPU_TEXTURE0, GPU_PRIMARY_COLOR, GPU_PRIMARY_COLOR), GPU_TEVSOURCES(GPU_TEXTURE0, GPU_PRIMARY_COLOR, GPU_PRIMARY_COLOR),
-			GPU_TEVOPERANDS(0,0,0), GPU_TEVOPERANDS(0,0,0), GPU_MODULATE, GPU_MODULATE, 0xFFFFFFFF);
+	GPU_SetTextureEnable(GPU_TEXUNIT0);
+	
+	GPU_SetTexEnv(0, 
+		GPU_TEVSOURCES(GPU_TEXTURE0, GPU_PRIMARY_COLOR, GPU_PRIMARY_COLOR), 
+		GPU_TEVSOURCES(GPU_TEXTURE0, GPU_PRIMARY_COLOR, GPU_PRIMARY_COLOR),
+		GPU_TEVOPERANDS(0,0,0), 
+		GPU_TEVOPERANDS(0,0,0), 
+		GPU_MODULATE, GPU_MODULATE, 
+		0xFFFFFFFF);
+	GPU_SetDummyTexEnv(1);
+	GPU_SetDummyTexEnv(2);
+	GPU_SetDummyTexEnv(3);
+	GPU_SetDummyTexEnv(4);
+	GPU_SetDummyTexEnv(5);
 
 	//texturing stuff
 		GPU_SetTexture(GPU_TEXUNIT0, (u32*)osConvertVirtToPhys((u32)texData),256,256,0x6,GPU_RGBA8);
@@ -69,7 +85,9 @@ void doFrame1()
 			setCameraPlayer(&player);
 			drawWorld(&world, &player.camera);
 			drawCursor(&player.cursor);
+			drawSky();
 		gsPopMatrix();
+	GPU_FinishDrawing();
 }
 
 char superStr[4096];
@@ -140,6 +158,7 @@ int main()
 	print("generating world...\n");
 
 	initPlayer(&player);
+	initSky();
 
 	shader=SHDR_ParseSHBIN((u32*)test_vsh_shbin,test_vsh_shbin_size);
 

@@ -13,6 +13,7 @@ void initPlayer(player_s* p)
 	p->camera.position=vect3Df(0.0f, CHUNK_HEIGHT*CLUSTER_SIZE/2+CLUSTER_SIZE, 0.0f);
 	loadIdentity44((float*)p->camera.orientation);
 	p->velocity=vect3Df(0.0f, 0.0f, 0.0f);
+	p->flying=false;
 
 	initCursor(&p->cursor);
 }
@@ -133,28 +134,37 @@ void controlsPlayer(player_s* p, world_s* w)
 	vect3Df_s vx=vnormf(getMatrixColumn((float*)p->camera.orientation, 0));
 	vect3Df_s vy=vnormf(getMatrixColumn((float*)p->camera.orientation, 1));
 	vect3Df_s vz=vnormf(getMatrixColumn((float*)p->camera.orientation, 2));
-	vect3Df_s vz2=vnormf(vect3Df(vz.x,0.0f,vz.z));
+	vect3Df_s vz2=(!p->flying)?vnormf(vect3Df(vz.x,0.0f,vz.z)):vz;
 
 	if(PAD&KEY_UP)p->velocity=vaddf(p->velocity, vmulf(vz2, -0.2f));
 	if(PAD&KEY_DOWN)p->velocity=vaddf(p->velocity, vmulf(vz2, 0.2f));
 	if(PAD&KEY_LEFT)p->velocity=vaddf(p->velocity, vmulf(vx, -0.2f));
 	if(PAD&KEY_RIGHT)p->velocity=vaddf(p->velocity, vmulf(vx, 0.2f));
-	if(hidKeysDown()&KEY_L)p->velocity=vaddf(p->velocity, vmulf(vy, 0.6f));
 
-	if(w)
+	if(hidKeysDown()&KEY_ZL)p->flying^=1;
+
+	if(!p->flying)
 	{
-		const vect3Df_s v=vmulf(vz, -5.0f);
-		bool collided=false;
-		u8 dir;
-		vect3Di_s out=performRayMarch(w, p->camera.position, vaddf(p->camera.position, v), NULL, &collided, &dir);
-		if(collided)
+		if(hidKeysDown()&KEY_L)p->velocity=vaddf(p->velocity, vmulf(vy, 0.6f));
+
+		if(w)
 		{
-			p->cursor.active=true;
-			p->cursor.position=out;
-			p->cursor.direction=dir;
-			if(hidKeysDown()&KEY_R)alterWorldBlock(w, out, 1, true);
-			if(hidKeysDown()&KEY_ZR)alterWorldBlock(w, out, 0, true);
-		}else p->cursor.active=false;
+			const vect3Df_s v=vmulf(vz, -5.0f);
+			bool collided=false;
+			u8 dir;
+			vect3Di_s out=performRayMarch(w, p->camera.position, vaddf(p->camera.position, v), NULL, &collided, &dir);
+			if(collided)
+			{
+				p->cursor.active=true;
+				p->cursor.position=out;
+				p->cursor.direction=dir;
+				if(hidKeysDown()&KEY_R)alterWorldBlock(w, out, 1, true);
+				if(hidKeysDown()&KEY_ZR)alterWorldBlock(w, out, 0, true);
+			}else p->cursor.active=false;
+		}
+	}else{
+		if(PAD&KEY_L)p->velocity=vaddf(p->velocity, vmulf(vy, 0.2f));
+		if(PAD&KEY_R)p->velocity=vaddf(p->velocity, vmulf(vy, -0.2f));
 	}
 
 	rotateMatrixX((float*)p->camera.orientation, (cstick.dy*0.07f)/0x9c, true);
@@ -179,7 +189,7 @@ void updatePlayer(player_s* p, world_s* w)
 	if(!p)return;
 
 	//gravity
-	p->velocity=vaddf(p->velocity, vect3Df(0.0f, -0.05f, 0.0f));
+	if(!p->flying)p->velocity=vaddf(p->velocity, vect3Df(0.0f, -0.05f, 0.0f));
 
 	//collisions
 	if(vmagf(p->velocity)>0.0001f)
@@ -199,7 +209,8 @@ void updatePlayer(player_s* p, world_s* w)
 
 	p->camera.position=vaddf(p->camera.position, p->velocity);
 
-	p->velocity=vect3Df(0.0f, p->velocity.y, 0.0f);
+	if(!p->flying)p->velocity=vect3Df(0.0f, p->velocity.y, 0.0f);
+	else p->velocity=vect3Df(0.0f, 0.0f, 0.0f);
 
 	//world streaming
 	if(w)

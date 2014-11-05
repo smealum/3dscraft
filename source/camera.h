@@ -7,7 +7,7 @@ typedef struct
 {
 	mtx44 projection;
 	mtx44 orientation;
-	mtx44 modelview; //modelview = orientation*translate(position)
+	mtx44 modelview[2]; //modelview = orientation*translate(position) + left/right adjustments for 3D
 	vect3Df_s position;
 	vect4Df_s frustumPlane[6];
 }camera_s;

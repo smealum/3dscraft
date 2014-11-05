@@ -17,7 +17,7 @@ void updateCameraFrustum(camera_s* c)
 	if(!c)return;
 
 	float final[4*4];
-	multMatrix44((float*)c->projection, (float*)c->modelview, final);
+	multMatrix44((float*)c->projection, (float*)c->modelview[0], final);
 
 	const vect4Df_s rowX = getMatrixColumn4(final, 0);
 	const vect4Df_s rowY = getMatrixColumn4(final, 1);
@@ -36,9 +36,9 @@ void updateCamera(camera_s* c)
 {
 	if(!c)return;
 
-	memcpy(c->modelview, c->orientation, sizeof(mtx44));
-	rotateMatrixZ((float*)c->modelview, M_PI/2, true); //because framebuffer is sideways...
-	translateMatrix((float*)c->modelview, -c->position.x, -c->position.y, -c->position.z);
+	memcpy(c->modelview[0], c->orientation, sizeof(mtx44));
+	rotateMatrixZ((float*)c->modelview[0], M_PI/2, true); //because framebuffer is sideways...
+	translateMatrix((float*)c->modelview[0], -c->position.x, -c->position.y, -c->position.z);
 
 	updateCameraFrustum(c);
 }
@@ -52,7 +52,7 @@ void setCamera(camera_s* c)
 	gsMultMatrix((float*)c->projection);
 
 	gsMatrixMode(GS_MODELVIEW);
-	gsMultMatrix((float*)c->modelview);
+	gsMultMatrix((float*)c->modelview[0]);
 }
 
 bool pointInCameraFrustum(camera_s* c, vect3Df_s pt)
