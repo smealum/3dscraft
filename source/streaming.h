@@ -4,7 +4,6 @@
 #include <3ds.h>
 
 #include "math.h"
-#include "world.h"
 
 #define STREAMPATH_LENGTH (256)
 #define FILELISTBLOCK_LENGTH (64)

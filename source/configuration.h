@@ -7,6 +7,7 @@ typedef struct
 {
 	char* path;
 	FS_archive sdmc;
+	char currentFile[32];
 }configuration_s;
 
 extern configuration_s configuration;

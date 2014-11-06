@@ -5,6 +5,7 @@
 #include "math.h"
 #include "block.h"
 #include "camera.h"
+#include "streaming.h"
 
 #define CLUSTER_SIZE (8)
 
@@ -45,6 +46,7 @@ typedef struct worldChunk_s
 
 typedef struct
 {
+	worldStream_s stream;
 	worldChunk_s* data[WORLD_SIZE][WORLD_SIZE];
 	vect3Di_s position; //in cluster coordinates (actually 2D)
 }world_s;
@@ -59,6 +61,7 @@ void fixChunk(worldChunk_s* wch);
 bool isChunkBusy(worldChunk_s* wch);
 
 void initWorld(world_s* w);
+void exitWorld(world_s* w);
 void translateWorld(world_s* w, vect3Di_s v);
 void generateWorld(world_s* w);
 void updateWorld(world_s* w);

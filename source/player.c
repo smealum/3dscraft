@@ -177,6 +177,9 @@ void controlsPlayer(player_s* p, world_s* w)
 		if(PAD&KEY_R)p->velocity=vaddf(p->velocity, vmulf(vy, -0.2f));
 	}
 
+	cstick.dx=(abs(cstick.dx)<5)?0:cstick.dx;
+	cstick.dy=(abs(cstick.dy)<5)?0:cstick.dy;
+
 	rotateMatrixX((float*)p->camera.orientation, (cstick.dy*0.07f)/0x9c, true);
 	rotateMatrixY((float*)p->camera.orientation, (cstick.dx*0.07f)/0x9c, false);
 }
