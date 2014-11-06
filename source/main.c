@@ -203,7 +203,7 @@ int main(int argc, char** argv)
 		// u64 val=svcGetSystemTick();
 		// debugValue[1]=(u32)(svcGetSystemTick()-val);
 		// print("%d\n", (int)debugValue[7]);
-		// print("avg %d ticks (%d)\n", (int)(debugValue[5]/debugValue[6]), debugValue[6]);
+		print("avg %d ticks (%d)\n", (int)(debugValue[5]/debugValue[6]), debugValue[6]);
 		// print("drawing %d chunks... (%f vs %f)\n", (int)debugValue[0], (float)(debugValue[1]*100)/TICKS_PER_VBL, (float)(debugValue[2]*100)/TICKS_PER_VBL);
 		// debugValue[0]=0;
 		// u64 val=svcGetSystemTick();
