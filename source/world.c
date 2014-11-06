@@ -61,10 +61,11 @@ void freeCluster(worldCluster_s* wcl)
 void freeChunk(worldChunk_s* wch)
 {
 	if(!wch)return;
-	if(isChunkBusy(wch))
+	if(isChunkBusy(wch) || wch->modified)
 	{
-		//put it aside if it might still have producers working on it
+		//put it aside if it might still have producers working on it or if we need to save it
 		wch->next=(void*)0xFFFFFFFF;
+		if(wch->modified)dispatchJob(NULL, createJobDiscardChunk(wch));
 		debugValue[7]++;
 	}else{
 		wch->next=chunkPool;
@@ -218,6 +219,7 @@ void initWorldChunk(worldChunk_s* wch, vect3Di_s pos)
 	if(!wch)return;
 
 	int j; for(j=0; j<CHUNK_HEIGHT; j++)initWorldCluster(&wch->data[j], vect3Di(pos.x, j, pos.z));
+	wch->modified=false;
 	wch->position=pos;
 }
 
@@ -305,20 +307,22 @@ void alterWorldClusterBlock(worldCluster_s* wcl, world_s* w, vect3Di_s p, u8 blo
 	if(regenerate)generateWorldClusterGeometry(wcl, w, NULL, 0);
 }
 
-void alterWorldChunkBlock(worldChunk_s* wc, world_s* w, vect3Di_s p, u8 block, bool regenerate)
+void alterWorldChunkBlock(worldChunk_s* wch, world_s* w, vect3Di_s p, u8 block, bool regenerate)
 {
-	if(!wc)return;
+	if(!wch)return;
 	if(p.x<0 || p.y<0 || p.z<0)return;
 	if(p.x>=CLUSTER_SIZE || p.y>=CHUNK_HEIGHT*CLUSTER_SIZE || p.z>=CLUSTER_SIZE)return;
 
 	u16 clusterY=p.y/CLUSTER_SIZE;
 	p.y%=CLUSTER_SIZE;
-	alterWorldClusterBlock(&wc->data[clusterY], w, vect3Di(p.x, p.y, p.z), block, regenerate);
+	alterWorldClusterBlock(&wch->data[clusterY], w, vect3Di(p.x, p.y, p.z), block, regenerate);
+
+	wch->modified=true;
 
 	if(regenerate)
 	{
-		if(!p.y && clusterY)generateWorldClusterGeometry(&wc->data[clusterY-1], w, NULL, 0);
-		else if(p.y==CLUSTER_SIZE-1 && clusterY<CHUNK_HEIGHT-1)generateWorldClusterGeometry(&wc->data[clusterY+1], w, NULL, 0);
+		if(!p.y && clusterY)generateWorldClusterGeometry(&wch->data[clusterY-1], w, NULL, 0);
+		else if(p.y==CLUSTER_SIZE-1 && clusterY<CHUNK_HEIGHT-1)generateWorldClusterGeometry(&wch->data[clusterY+1], w, NULL, 0);
 	}
 }
 

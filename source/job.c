@@ -134,9 +134,47 @@ void jobGenerateClusterGeometryFinalizer(job_s* j)
 	fixChunk(d->chunk);
 }
 
+//JOB_DISCARD_CHUNK
+typedef struct
+{
+	worldChunk_s* target;
+}jobDiscardChunk_s;
+
+job_s* createJobDiscardChunk(worldChunk_s* wch)
+{
+	if(!wch || !wch->next)return NULL;
+	if(isChunkBusy(wch))return NULL;
+	job_s* j=createNewJob(JOB_DISCARD_CHUNK);
+	if(!j)return j;
+	jobDiscardChunk_s* d=(jobDiscardChunk_s*)j->data;
+
+	d->target=wch;
+	int i; for(i=0; i<CHUNK_HEIGHT; i++)d->target->data[i].status|=WCL_DATA_UNAVAILABLE|WCL_BUSY;
+
+	return j;
+}
+
+void jobDiscardChunkHandler(struct producer_s* p, job_s* j)
+{
+	if(!p || !j)return;
+	jobDiscardChunk_s* d=(jobDiscardChunk_s*)j->data;
+
+	if(!d->target->next)return; //if chunk is *not* in a list, we should be discarding it
+}
+
+void jobDiscardChunkFinalizer(job_s* j)
+{
+	if(!j)return;
+	jobDiscardChunk_s* d=(jobDiscardChunk_s*)j->data;
+
+	int i; for(i=0; i<CHUNK_HEIGHT; i++)d->target->data[i].status&=~(WCL_DATA_UNAVAILABLE|WCL_BUSY);
+	fixChunk(d->target);
+}
+
 jobType_s jobTypes[NUM_JOB_TYPES]= {
 	(jobType_s){jobGenerateChunkDataHandler, jobGenerateChunkDataFinalizer, sizeof(jobGenerateChunkData_s)}, // JOB_GENERATE_CHUNK_DATA
 	(jobType_s){jobGenerateClusterGeometryHandler, jobGenerateClusterGeometryFinalizer, sizeof(jobGenerateClusterGeometryData_s)}, // JOB_GENERATE_CLUSTER_GEOM
+	(jobType_s){jobDiscardChunkHandler, jobDiscardChunkFinalizer, sizeof(jobDiscardChunk_s)}, // JOB_DISCARD_CHUNK
 };
 
 //job

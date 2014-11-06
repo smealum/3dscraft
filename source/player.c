@@ -155,7 +155,7 @@ void controlsPlayer(player_s* p, world_s* w)
 
 	if(!p->flying)
 	{
-		if(hidKeysDown()&KEY_L)p->velocity=vaddf(p->velocity, vmulf(vy, 0.6f));
+		if(hidKeysDown()&KEY_L)p->velocity=vaddf(p->velocity, vect3Df(0.0f, 0.6f, 0.0f));
 
 		if(w)
 		{

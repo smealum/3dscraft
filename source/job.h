@@ -9,6 +9,7 @@ typedef enum
 {
 	JOB_GENERATE_CHUNK_DATA,
 	JOB_GENERATE_CLUSTER_GEOM,
+	JOB_DISCARD_CHUNK,
 	NUM_JOB_TYPES
 }jobTypes_t;
 
@@ -44,6 +45,7 @@ extern jobType_s jobTypes[NUM_JOB_TYPES];
 
 job_s* createJobGenerateChunkData(worldChunk_s* wch); //JOB_GENERATE_CHUNK_DATA
 job_s* createJobGenerateClusterGeometry(worldCluster_s* wcl, worldChunk_s* wch, world_s* w); //JOB_GENERATE_CLUSTER_GEOM
+job_s* createJobDiscardChunk(worldChunk_s* wch); //JOB_DISCARD_CHUNK
 
 //job queue (FIFO)
 typedef struct

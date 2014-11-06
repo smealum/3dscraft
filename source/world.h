@@ -38,6 +38,7 @@ typedef struct worldChunk_s
 {
 	worldCluster_s data[CHUNK_HEIGHT];
 	worldColumnInfo_s info[CLUSTER_SIZE][CLUSTER_SIZE];
+	bool modified;
 	vect3Di_s position; //in cluster coordinates (actually 2D)
 	struct worldChunk_s* next; //for chunk pool and chunk cache
 }worldChunk_s;

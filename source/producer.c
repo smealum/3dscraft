@@ -24,7 +24,7 @@ void producerMain(u32 arg)
 			queueJob(&p->responseList, j);
 			svcReleaseMutex(p->responseMutex);
 			// debug=true;
-			svcSleepThread(1);
+			svcSleepThread(1000);
 		}
 
 		// if(debug)print("%d ticks\n",(int)(svcGetSystemTick()-val));
@@ -46,7 +46,11 @@ void initProducer(producer_s* p)
 	svcCreateMutex(&p->requestMutex, false);
 	svcCreateMutex(&p->responseMutex, false);
 	Result val = svcCreateThread(&p->thread, producerMain, (u32)p, (u32*)&p->stack[PRODUCER_STACKSIZE/8], 0x18, 1);
-	print("%08X\n",(unsigned int)val);
+	print("%08X (%08X)\n",(unsigned int)val,(unsigned int)p->thread);
+	if(val)
+	{
+		//thread creation failed ! what do we do ?!
+	}
 }
 
 void exitProducer(producer_s* p)

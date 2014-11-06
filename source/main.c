@@ -11,6 +11,8 @@
 #include "dispatcher.h"
 #include "player.h"
 #include "text.h"
+#include "configuration.h"
+
 #include "test_vsh_shbin.h"
 #include "terrain_bin.h"
 
@@ -124,13 +126,16 @@ void drawBottom()
 
 extern u32* gxCmdBuf;
 
-int main()
+int main(int argc, char** argv)
 {
 	srvInit();	
 	aptInit();
 	gfxInit();
+	fsInit();
 	hidInit(NULL);
 	irrstInit(NULL);
+
+	initConfiguration(NULL, argc, argv);
 
 	memset(debugValue, 0x00, sizeof(debugValue));
 
@@ -211,6 +216,7 @@ int main()
 	gsExit();
 	irrstExit();
 	hidExit();
+	fsExit();
 	gfxExit();
 	aptExit();
 	srvExit();
