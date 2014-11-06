@@ -92,29 +92,35 @@ void initProjectionMatrix(float* m, float fovy, float aspect, float near, float 
 {
 	float top = near*tan(fovy/2);
 	float right = (top*aspect);
+
+	float mp[4*4];
 	
-	*(m++) = near/right;
-	*(m++) = 0.0f;
-	*(m++) = 0.0f;
-	*(m++) = 0.0f;
+	mp[0x0] = near/right;
+	mp[0x1] = 0.0f;
+	mp[0x2] = 0.0f;
+	mp[0x3] = 0.0f;
 
-	*(m++) = 0.0f;
-	*(m++) = near/top;
-	*(m++) = 0.0f;
-	*(m++) = 0.0f;
+	mp[0x4] = 0.0f;
+	mp[0x5] = near/top;
+	mp[0x6] = 0.0f;
+	mp[0x7] = 0.0f;
 
-	*(m++) = 0.0f;
-	*(m++) = 0.0f;
-	// *(m++) = -(far+near)/(far-near);
-	*(m++) = 0.0f;
-	// *(m++) = -2.0f*(far*near)/(far-near);
-	// *(m++) = 1.0f;
-	*(m++) = -1.0f;
+	mp[0x8] = 0.0f;
+	mp[0x9] = 0.0f;
+	mp[0xA] = -(far+near)/(far-near);
+	mp[0xB] = -2.0f*(far*near)/(far-near);
 
-	*(m++) = 0.0f;
-	*(m++) = 0.0f;
-	*(m++) = -1.0f;
-	*(m++) = 0.0f;
+	mp[0xC] = 0.0f;
+	mp[0xD] = 0.0f;
+	mp[0xE] = -1.0f;
+	mp[0xF] = 0.0f;
+
+	float mp2[4*4];
+	loadIdentity44(mp2);
+	mp2[0xA]=0.5;
+	mp2[0xB]=-0.5;
+
+	multMatrix44(mp2, mp, m);
 }
 
 vect3Df_s getMatrixColumn(float* m, u8 i)
