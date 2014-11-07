@@ -37,7 +37,7 @@ typedef struct chunkInfo_s
 
 typedef struct
 {
-	//for now this is just a simple list, we do naive linear search...
+	//for now this is just a simple list, we do naive linear search... (replace with hashtable ?)
 	chunkInfo_s* first;
 	int length;
 }chunkRepository_s;
@@ -49,7 +49,7 @@ typedef struct
 	fileListHeader_s current;
 	char path[STREAMPATH_LENGTH];
 	Handle file;
-	u32 size;
+	u64 size;
 	bool flushed;
 }worldStream_s;
 
@@ -57,6 +57,7 @@ void initWorldStream(worldStream_s* ws, char* path);
 bool isChunkInStream(worldStream_s* ws, s32 x, s32 z);
 int getChunkFromStream(worldStream_s* ws, s32 x, s32 z, u8* dst);
 void saveChunk(worldStream_s* ws, s32 x, s32 z, u8* data);
+bool loadChunk(worldStream_s* ws, s32 x, s32 z, u8* dst);
 void exitWorldStream(worldStream_s* ws);
 
 #endif

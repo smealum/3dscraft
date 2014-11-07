@@ -36,6 +36,7 @@ worldChunk_s* getNewChunk(void)
 	worldChunk_s* wch=chunkPool;
 	chunkPool=wch->next;
 	wch->next=NULL;
+	wch->world=NULL;
 	return wch;
 }
 
@@ -215,13 +216,14 @@ s16 getWorldClusterBlock(worldCluster_s* wcl, vect3Di_s p)
 	return wcl->data[p.x][p.y][p.z];
 }
 
-void initWorldChunk(worldChunk_s* wch, vect3Di_s pos)
+void initWorldChunk(worldChunk_s* wch, world_s* w, vect3Di_s pos)
 {
-	if(!wch)return;
+	if(!wch || !w)return;
 
 	int j; for(j=0; j<CHUNK_HEIGHT; j++)initWorldCluster(&wch->data[j], vect3Di(pos.x, j, pos.z));
 	wch->modified=false;
 	wch->position=pos;
+	wch->world=w;
 }
 
 void getChunkPath(worldChunk_s* wch, char* out, int length)
@@ -396,7 +398,7 @@ void updateWorld(world_s* w)
 				w->data[i][j]=getNewChunk();
 				if(w->data[i][j])
 				{
-					initWorldChunk(w->data[i][j], vect3Di(i+w->position.x,0,j+w->position.z));
+					initWorldChunk(w->data[i][j], w, vect3Di(i+w->position.x,0,j+w->position.z));
 					dispatchJob(NULL, createJobGenerateChunkData(w->data[i][j]));
 				}
 			}

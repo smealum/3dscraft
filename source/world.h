@@ -35,6 +35,8 @@ typedef struct
 	u8 elevation;
 }worldColumnInfo_s;
 
+struct world_s;
+
 typedef struct worldChunk_s
 {
 	worldCluster_s data[CHUNK_HEIGHT];
@@ -42,9 +44,10 @@ typedef struct worldChunk_s
 	bool modified;
 	vect3Di_s position; //in cluster coordinates (actually 2D)
 	struct worldChunk_s* next; //for chunk pool and chunk cache
+	struct world_s* world; //parent
 }worldChunk_s;
 
-typedef struct
+typedef struct world_s
 {
 	worldStream_s stream;
 	worldChunk_s* data[WORLD_SIZE][WORLD_SIZE];

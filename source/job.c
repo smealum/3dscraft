@@ -53,11 +53,12 @@ void freeJob(job_s* j)
 typedef struct
 {
 	worldChunk_s* target;
+	world_s* world;
 }jobGenerateChunkData_s;
 
 job_s* createJobGenerateChunkData(worldChunk_s* wch)
 {
-	if(!wch)return NULL;
+	if(!wch || !wch->world)return NULL;
 	if(isChunkBusy(wch))return NULL;
 	// if(!(wcl->status&WCL_DATA_UNAVAILABLE))return NULL;
 	job_s* j=createNewJob(JOB_GENERATE_CHUNK_DATA);
@@ -65,6 +66,7 @@ job_s* createJobGenerateChunkData(worldChunk_s* wch)
 	jobGenerateChunkData_s* d=(jobGenerateChunkData_s*)j->data;
 
 	d->target=wch;
+	d->world=wch->world;
 	int i; for(i=0; i<CHUNK_HEIGHT; i++)d->target->data[i].status|=WCL_DATA_UNAVAILABLE|WCL_BUSY;
 
 	return j;
@@ -77,7 +79,11 @@ void jobGenerateChunkDataHandler(struct producer_s* p, job_s* j)
 
 	if(d->target->next)return; //if chunk is in a list, it means it's being discarded in tmpChunkPool => do nothing
 
-	generateWorldChunkData(d->target);
+	if(loadChunk(&d->world->stream, d->target->position.x, d->target->position.z, (u8*)p->tmpBuffer))
+	{
+		const u32 size=CLUSTER_SIZE*CLUSTER_SIZE*CLUSTER_SIZE;
+		int i; for(i=0;i<CHUNK_HEIGHT;i++)memcpy(d->target->data[i].data, &(((u8*)p->tmpBuffer)[i*size]), size);
+	}else generateWorldChunkData(d->target);
 }
 
 void jobGenerateChunkDataFinalizer(job_s* j)
@@ -138,17 +144,19 @@ void jobGenerateClusterGeometryFinalizer(job_s* j)
 typedef struct
 {
 	worldChunk_s* target;
+	world_s* world;
 }jobDiscardChunk_s;
 
 job_s* createJobDiscardChunk(worldChunk_s* wch)
 {
-	if(!wch || !wch->next)return NULL;
+	if(!wch || !wch->next || !wch->world || !wch->modified)return NULL;
 	if(isChunkBusy(wch))return NULL;
 	job_s* j=createNewJob(JOB_DISCARD_CHUNK);
 	if(!j)return j;
 	jobDiscardChunk_s* d=(jobDiscardChunk_s*)j->data;
 
 	d->target=wch;
+	d->world=wch->world;
 	int i; for(i=0; i<CHUNK_HEIGHT; i++)d->target->data[i].status|=WCL_DATA_UNAVAILABLE|WCL_BUSY;
 
 	return j;
@@ -159,7 +167,11 @@ void jobDiscardChunkHandler(struct producer_s* p, job_s* j)
 	if(!p || !j)return;
 	jobDiscardChunk_s* d=(jobDiscardChunk_s*)j->data;
 
-	if(!d->target->next)return; //if chunk is *not* in a list, we should be discarding it
+	if(!d->target->next)return; //if chunk is *not* in a list, we shouldn't be discarding it
+
+	const u32 size=CLUSTER_SIZE*CLUSTER_SIZE*CLUSTER_SIZE;
+	int i; for(i=0;i<CHUNK_HEIGHT;i++)memcpy(&(((u8*)p->tmpBuffer)[i*size]), d->target->data[i].data, size);
+	saveChunk(&d->world->stream, d->target->position.x, d->target->position.z, (u8*)p->tmpBuffer);
 }
 
 void jobDiscardChunkFinalizer(job_s* j)
@@ -167,6 +179,7 @@ void jobDiscardChunkFinalizer(job_s* j)
 	if(!j)return;
 	jobDiscardChunk_s* d=(jobDiscardChunk_s*)j->data;
 
+	d->target->modified=false;
 	int i; for(i=0; i<CHUNK_HEIGHT; i++)d->target->data[i].status&=~(WCL_DATA_UNAVAILABLE|WCL_BUSY);
 	fixChunk(d->target);
 }
