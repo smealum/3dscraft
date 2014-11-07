@@ -84,6 +84,7 @@ void initWorldCluster(worldCluster_s* wcl, vect3Di_s pos)
 	wcl->position=pos;
 	gsVboInit(&wcl->vbo);
 	wcl->status=WCL_DATA_UNAVAILABLE|WCL_GEOM_UNAVAILABLE;
+	wcl->directions=0;
 }
 
 vect3Df_s clusterCoordToWorld(vect3Di_s v)
@@ -108,6 +109,7 @@ void generateWorldClusterGeometry(worldCluster_s* wcl, world_s* w, blockFace_s* 
 	if(!(wcl->status&WCL_GEOM_UNAVAILABLE))gsVboDestroy(&wcl->vbo);
 
 	wcl->status|=WCL_GEOM_UNAVAILABLE;
+	wcl->directions=0;
 
 	//first, we go through the whole cluster to generate a "list" of faces
 	const static int staticFaceBufferSize=4096*sizeof(blockFace_s); //TODO : calculate real max
@@ -120,7 +122,6 @@ void generateWorldClusterGeometry(worldCluster_s* wcl, world_s* w, blockFace_s* 
 	int faceListSize=0;
 	memset(faceList, 0x00, faceBufferSize);
 
-	const vect3Di_s p = vmuli(wcl->position, CLUSTER_SIZE);
 	int i, j, k;
 	for(i=0; i<CLUSTER_SIZE; i++)
 	{
@@ -139,44 +140,103 @@ void generateWorldClusterGeometry(worldCluster_s* wcl, world_s* w, blockFace_s* 
 		}
 	}
 
-	worldCluster_s* wclp[6];
-	wclp[0]=getWorldBlockCluster(w, vaddi(p, vect3Di(+CLUSTER_SIZE, 0, 0)));
-	wclp[1]=getWorldBlockCluster(w, vaddi(p, vect3Di(-1, 0, 0)));
-	wclp[2]=getWorldBlockCluster(w, vaddi(p, vect3Di(0, +CLUSTER_SIZE, 0)));
-	wclp[3]=getWorldBlockCluster(w, vaddi(p, vect3Di(0, -1, 0)));
-	wclp[4]=getWorldBlockCluster(w, vaddi(p, vect3Di(0, 0, +CLUSTER_SIZE)));
-	wclp[5]=getWorldBlockCluster(w, vaddi(p, vect3Di(0, 0, -1)));
-	for(i=0;i<6;i++)if(wclp[i] && wclp[i]->status&WCL_DATA_UNAVAILABLE)wclp[i]=NULL;
+	//check for border faces
+	generateWorldAdditionalGeometryList(wcl, w, 0xFF, faceList, faceBufferSize, &faceListSize);
+
+	//then, we set up VBO size to create the VBO
+	const u32 size=faceListSize*FACE_VBO_SIZE;
+	if(!gsVboCreate(&wcl->vbo, size))buildClusterGeometry(wcl, faceList, faceBufferSize, faceListSize);
+}
+
+void generateWorldAdditionalClusterGeometry(worldCluster_s* wcl, world_s* w, u8 directions, blockFace_s* tmpBuffer, int tmpBufferSize)
+{
+	if(!wcl)return;
+	if(!(wcl->status&WCL_GEOM_UNAVAILABLE))gsVboDestroy(&wcl->vbo);
+
+	wcl->status|=WCL_GEOM_UNAVAILABLE;
+	wcl->directions=0;
+
+	//first, we go through the whole cluster to generate a "list" of faces
+	const static int staticFaceBufferSize=4096*sizeof(blockFace_s); //TODO : calculate real max
+	static blockFace_s staticFaceList[4096];
+
+	blockFace_s* faceList=staticFaceList;
+	int faceBufferSize=staticFaceBufferSize;
+	if(tmpBuffer){faceList=tmpBuffer;faceBufferSize=tmpBufferSize;}
+
+	int faceListSize=0;
+	memset(faceList, 0x00, faceBufferSize);
+
+	//check for border faces
+	generateWorldAdditionalGeometryList(wcl, w, 0xFF, faceList, faceBufferSize, &faceListSize);
+
+	//then, we set up VBO size to create the VBO
+	if(faceListSize>0)
+	{
+		//grab the vbo data, append new faces to it and be on our way
+		const u32 size=wcl->vbo.currentSize+faceListSize*FACE_VBO_SIZE;
+		gsVbo_s newVbo;
+		gsVboInit(&newVbo);
+		if(!gsVboCreate(&newVbo, size))
+		{
+			gsVboAddData(&newVbo, wcl->data, wcl->vbo.currentSize, wcl->vbo.numVertices);
+			buildClusterGeometry(wcl, faceList, faceBufferSize, faceListSize);
+			gsVboDestroy(&wcl->vbo);
+			wcl->vbo=newVbo;
+		}
+	}
+}
+
+void generateWorldAdditionalGeometryList(worldCluster_s* wcl, world_s* w, u8 directions, blockFace_s* faceList, int faceBufferSize, int* faceListSize)
+{
+	if(!wcl || !faceBufferSize || !faceList || !faceListSize)return;
+	if(wcl->status&WCL_GEOM_UNAVAILABLE)return; //this function is only to complete an existing VBO
+
+	wcl->status|=WCL_GEOM_UNAVAILABLE;
+
+	const vect3Di_s p = vmuli(wcl->position, CLUSTER_SIZE);
+	int j, k;
+
+	worldCluster_s* wclp[6] = {NULL,NULL,NULL,NULL,NULL,NULL};
+
+	if(directions&WCL_PX)wclp[0]=getWorldBlockCluster(w, vaddi(p, vect3Di(+CLUSTER_SIZE, 0, 0)));
+	if(directions&WCL_MX)wclp[1]=getWorldBlockCluster(w, vaddi(p, vect3Di(-1, 0, 0)));
+	if(directions&WCL_PY)wclp[2]=getWorldBlockCluster(w, vaddi(p, vect3Di(0, +CLUSTER_SIZE, 0)));
+	if(directions&WCL_MY)wclp[3]=getWorldBlockCluster(w, vaddi(p, vect3Di(0, -1, 0)));
+	if(directions&WCL_PZ)wclp[4]=getWorldBlockCluster(w, vaddi(p, vect3Di(0, 0, +CLUSTER_SIZE)));
+	if(directions&WCL_MZ)wclp[5]=getWorldBlockCluster(w, vaddi(p, vect3Di(0, 0, -1)));
+
+	wcl->directions|=directions;
 	for(j=0; j<CLUSTER_SIZE; j++)
 	{
 		for(k=0; k<CLUSTER_SIZE; k++)
 		{
 			u8 cb;
-			cb=wcl->data[CLUSTER_SIZE-1][j][k]; if(wclp[0] && blockShouldBeFace(cb, wclp[0]->data[0][j][k])             >=0) pushFace(faceList, faceListSize, blockFace(cb, FACE_PX, vect3Di(CLUSTER_SIZE-1,j,k)));
-			cb=wcl->data[0][j][k];              if(wclp[1] && blockShouldBeFace(cb, wclp[1]->data[CLUSTER_SIZE-1][j][k])>=0) pushFace(faceList, faceListSize, blockFace(cb, FACE_MX, vect3Di(0,j,k)));
-			cb=wcl->data[j][CLUSTER_SIZE-1][k]; if(wclp[2] && blockShouldBeFace(cb, wclp[2]->data[j][0][k])             >=0) pushFace(faceList, faceListSize, blockFace(cb, FACE_PY, vect3Di(j,CLUSTER_SIZE-1,k)));
-			cb=wcl->data[j][0][k];              if(wclp[3] && blockShouldBeFace(cb, wclp[3]->data[j][CLUSTER_SIZE-1][k])>=0) pushFace(faceList, faceListSize, blockFace(cb, FACE_MY, vect3Di(j,0,k)));
-			cb=wcl->data[j][k][CLUSTER_SIZE-1]; if(wclp[4] && blockShouldBeFace(cb, wclp[4]->data[j][k][0])             >=0) pushFace(faceList, faceListSize, blockFace(cb, FACE_PZ, vect3Di(j,k,CLUSTER_SIZE-1)));
-			cb=wcl->data[j][k][0];              if(wclp[5] && blockShouldBeFace(cb, wclp[5]->data[j][k][CLUSTER_SIZE-1])>=0) pushFace(faceList, faceListSize, blockFace(cb, FACE_MZ, vect3Di(j,k,0)));
+			cb=wcl->data[CLUSTER_SIZE-1][j][k]; if(wclp[0] && blockShouldBeFace(cb, wclp[0]->data[0][j][k])             >=0) pushFace(faceList, (*faceListSize), blockFace(cb, FACE_PX, vect3Di(CLUSTER_SIZE-1,j,k)));
+			cb=wcl->data[0][j][k];              if(wclp[1] && blockShouldBeFace(cb, wclp[1]->data[CLUSTER_SIZE-1][j][k])>=0) pushFace(faceList, (*faceListSize), blockFace(cb, FACE_MX, vect3Di(0,j,k)));
+			cb=wcl->data[j][CLUSTER_SIZE-1][k]; if(wclp[2] && blockShouldBeFace(cb, wclp[2]->data[j][0][k])             >=0) pushFace(faceList, (*faceListSize), blockFace(cb, FACE_PY, vect3Di(j,CLUSTER_SIZE-1,k)));
+			cb=wcl->data[j][0][k];              if(wclp[3] && blockShouldBeFace(cb, wclp[3]->data[j][CLUSTER_SIZE-1][k])>=0) pushFace(faceList, (*faceListSize), blockFace(cb, FACE_MY, vect3Di(j,0,k)));
+			cb=wcl->data[j][k][CLUSTER_SIZE-1]; if(wclp[4] && blockShouldBeFace(cb, wclp[4]->data[j][k][0])             >=0) pushFace(faceList, (*faceListSize), blockFace(cb, FACE_PZ, vect3Di(j,k,CLUSTER_SIZE-1)));
+			cb=wcl->data[j][k][0];              if(wclp[5] && blockShouldBeFace(cb, wclp[5]->data[j][k][CLUSTER_SIZE-1])>=0) pushFace(faceList, (*faceListSize), blockFace(cb, FACE_MZ, vect3Di(j,k,0)));
 		}
 	}
+}
 
-	//then, we set up VBO size to create the VBO
-	const u32 size=faceListSize*FACE_VBO_SIZE;
+void buildClusterGeometry(worldCluster_s* wcl, blockFace_s* faceList, int faceBufferSize, int faceListSize)
+{
+	if(!wcl || !faceList || !faceBufferSize || !faceListSize)return;
+
 	vect3Df_s off=clusterCoordToWorld(wcl->position);
 
-	if(!gsVboCreate(&wcl->vbo, size))
+	//and if that succeeds, we transfer all those faces to the VBO !
+	blockFace_s* bf;
+	while((bf=popFace(faceList, faceListSize)))
 	{
-		//and if that succeeds, we transfer all those faces to the VBO !
-		blockFace_s* bf;
-		while((bf=popFace(faceList, faceListSize)))
-		{
-			blockGenerateFaceGeometry(bf, &wcl->vbo, off);
-		}
-
-		gsVboFlushData(&wcl->vbo);
-		wcl->status&=~WCL_GEOM_UNAVAILABLE;
+		blockGenerateFaceGeometry(bf, &wcl->vbo, off);
 	}
+
+	gsVboFlushData(&wcl->vbo);
+	wcl->status&=~WCL_GEOM_UNAVAILABLE;
 }
 
 int getWorldElevation(vect3Di_s p)

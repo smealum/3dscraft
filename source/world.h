@@ -17,9 +17,19 @@
 
 typedef enum
 {
-	WCL_DATA_UNAVAILABLE = BIT(1),
-	WCL_GEOM_UNAVAILABLE = BIT(2),
-	WCL_BUSY = BIT(3),
+	WCL_PX = BIT(0),
+	WCL_MX = BIT(1),
+	WCL_PY = BIT(2),
+	WCL_MY = BIT(3),
+	WCL_PZ = BIT(4),
+	WCL_MZ = BIT(5),
+}worldClusterDirection_t;
+
+typedef enum
+{
+	WCL_DATA_UNAVAILABLE = BIT(0),
+	WCL_GEOM_UNAVAILABLE = BIT(1),
+	WCL_BUSY = BIT(2),
 }worldClusterStatus_t;
 
 typedef struct
@@ -27,6 +37,7 @@ typedef struct
 	u8 data[CLUSTER_SIZE][CLUSTER_SIZE][CLUSTER_SIZE];
 	vect3Di_s position; //in cluster coordinates
 	gsVbo_s vbo;
+	u8 directions; //directions that have been taken into account when generating the VBO
 	worldClusterStatus_t status;
 }worldCluster_s;
 
@@ -56,6 +67,8 @@ typedef struct world_s
 
 void generateWorldChunkData(worldChunk_s* wch);
 void generateWorldClusterGeometry(worldCluster_s* wcl, world_s* w, blockFace_s* tmpBuffer, int tmpBufferSize);
+void generateWorldAdditionalGeometryList(worldCluster_s* wcl, world_s* w, u8 directions, blockFace_s* faceList, int faceBufferSize, int* faceListSize);
+void buildClusterGeometry(worldCluster_s* wcl, blockFace_s* faceList, int faceBufferSize, int faceListSize);
 
 void initChunkPool(void);
 worldChunk_s* getNewChunk(void);
