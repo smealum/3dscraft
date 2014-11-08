@@ -67,6 +67,7 @@ typedef struct world_s
 
 void generateWorldChunkData(worldChunk_s* wch);
 void generateWorldClusterGeometry(worldCluster_s* wcl, world_s* w, blockFace_s* tmpBuffer, int tmpBufferSize);
+void generateWorldAdditionalClusterGeometry(worldCluster_s* wcl, world_s* w, u8 directions, blockFace_s* tmpBuffer, int tmpBufferSize);
 void generateWorldAdditionalGeometryList(worldCluster_s* wcl, world_s* w, u8 directions, blockFace_s* faceList, int faceBufferSize, int* faceListSize);
 void buildClusterGeometry(worldCluster_s* wcl, blockFace_s* faceList, int faceBufferSize, int faceListSize);
 
@@ -84,7 +85,8 @@ void updateWorld(world_s* w);
 void drawWorld(world_s* w, camera_s* c);
 
 s16 getWorldBlock(world_s* w, vect3Di_s p);
-worldCluster_s* getWorldBlockCluster(world_s* w, vect3Di_s p);
+worldChunk_s* getWorldChunk(world_s* w, vect3Di_s p); //in chunk coord
+worldCluster_s* getWorldBlockCluster(world_s* w, vect3Di_s p); //in block coord
 void alterWorldBlock(world_s* w, vect3Di_s p, u8 block, bool regenerate);
 
 #endif

@@ -3,6 +3,7 @@
 #include "world.h"
 #include "job.h"
 #include "producer.h"
+#include "dispatcher.h"
 
 #define JOBPOOL_ALLOCSIZE (128)
 
@@ -91,6 +92,17 @@ void jobGenerateChunkDataFinalizer(job_s* j)
 	if(!j)return;
 	jobGenerateChunkData_s* d=(jobGenerateChunkData_s*)j->data;
 
+	worldChunk_s* wch=NULL;
+
+	wch=getWorldChunk(d->world, vaddi(d->target->position, vect3Di(-1,0,0)));
+	if(wch)createJobsGenerateAdditionalClusterGeometry(wch, d->world, WCL_PX);
+	wch=getWorldChunk(d->world, vaddi(d->target->position, vect3Di(+1,0,0)));
+	if(wch)createJobsGenerateAdditionalClusterGeometry(wch, d->world, WCL_MX);
+	wch=getWorldChunk(d->world, vaddi(d->target->position, vect3Di(0,0,-1)));
+	if(wch)createJobsGenerateAdditionalClusterGeometry(wch, d->world, WCL_PZ);
+	wch=getWorldChunk(d->world, vaddi(d->target->position, vect3Di(0,0,+1)));
+	if(wch)createJobsGenerateAdditionalClusterGeometry(wch, d->world, WCL_MZ);
+
 	int i; for(i=0; i<CHUNK_HEIGHT; i++)d->target->data[i].status&=~(WCL_DATA_UNAVAILABLE|WCL_BUSY);
 	fixChunk(d->target);
 }
@@ -135,6 +147,65 @@ void jobGenerateClusterGeometryFinalizer(job_s* j)
 {
 	if(!j)return;
 	jobGenerateClusterGeometryData_s* d=(jobGenerateClusterGeometryData_s*)j->data;
+
+	d->target->status&=~(WCL_GEOM_UNAVAILABLE|WCL_BUSY);	
+	fixChunk(d->chunk);
+}
+
+//JOB_GENERATE_ADDITIONAL_CLUSTER_GEOM
+typedef struct
+{
+	worldCluster_s* target;
+	worldChunk_s* chunk; //read-only
+	world_s* world; //read-only
+	u8 direction;
+}jobGenerateAdditionalClusterGeometryData_s;
+
+job_s* createJobGenerateAdditionalClusterGeometry(worldCluster_s* wcl, worldChunk_s* wch, world_s* w, u8 direction)
+{
+	if(!wcl || !wch || !w)return NULL;
+	if(wcl->status&WCL_BUSY)return NULL;
+	if(wcl->status&WCL_DATA_UNAVAILABLE)return NULL;
+	if(!(wcl->status&WCL_GEOM_UNAVAILABLE))return NULL;
+	job_s* j=createNewJob(JOB_GENERATE_CLUSTER_GEOM);
+	if(!j)return j;
+	jobGenerateAdditionalClusterGeometryData_s* d=(jobGenerateAdditionalClusterGeometryData_s*)j->data;
+
+	d->target=wcl;
+	d->target->status|=WCL_GEOM_UNAVAILABLE|WCL_BUSY;
+	d->chunk=wch;
+	d->world=w;
+	d->direction=direction;
+
+	return j;
+}
+
+void createJobsGenerateAdditionalClusterGeometry(worldChunk_s* wch, world_s* w, u8 direction)
+{
+	if(!wch || !w || !direction)return;
+	int i;
+
+	for(i=0; i<CHUNK_HEIGHT; i++)
+	{
+		worldCluster_s* wcl=&wch->data[i];
+		if(!(wcl->status&WCL_BUSY) && !(wcl->status&WCL_GEOM_UNAVAILABLE) && !(wcl->directions&direction))dispatchJob(NULL, createJobGenerateAdditionalClusterGeometry(wcl, wch, w, direction));
+	}
+}
+
+void jobGenerateAdditionalClusterGeometryHandler(struct producer_s* p, job_s* j)
+{
+	if(!p || !j)return;
+	jobGenerateAdditionalClusterGeometryData_s* d=(jobGenerateAdditionalClusterGeometryData_s*)j->data;
+
+	if(d->chunk->next)return; //if chunk is in a list, it means it's being discarded in tmpChunkPool => do nothing
+
+	generateWorldAdditionalClusterGeometry(d->target, d->world, d->direction, (blockFace_s*)p->tmpBuffer, PRODUCER_TMPBUFSIZE);
+}
+
+void jobGenerateAdditionalClusterGeometryFinalizer(job_s* j)
+{
+	if(!j)return;
+	jobGenerateAdditionalClusterGeometryData_s* d=(jobGenerateAdditionalClusterGeometryData_s*)j->data;
 
 	d->target->status&=~(WCL_GEOM_UNAVAILABLE|WCL_BUSY);
 	fixChunk(d->chunk);
@@ -187,6 +258,7 @@ void jobDiscardChunkFinalizer(job_s* j)
 jobType_s jobTypes[NUM_JOB_TYPES]= {
 	(jobType_s){jobGenerateChunkDataHandler, jobGenerateChunkDataFinalizer, sizeof(jobGenerateChunkData_s)}, // JOB_GENERATE_CHUNK_DATA
 	(jobType_s){jobGenerateClusterGeometryHandler, jobGenerateClusterGeometryFinalizer, sizeof(jobGenerateClusterGeometryData_s)}, // JOB_GENERATE_CLUSTER_GEOM
+	(jobType_s){jobGenerateAdditionalClusterGeometryHandler, jobGenerateAdditionalClusterGeometryFinalizer, sizeof(jobGenerateAdditionalClusterGeometryData_s)}, // JOB_GENERATE_ADDITIONAL_CLUSTER_GEOM
 	(jobType_s){jobDiscardChunkHandler, jobDiscardChunkFinalizer, sizeof(jobDiscardChunk_s)}, // JOB_DISCARD_CHUNK
 };
 

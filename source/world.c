@@ -393,6 +393,16 @@ s16 getWorldBlock(world_s* w, vect3Di_s p)
 	return getWorldChunkBlock(w->data[p.x/CLUSTER_SIZE][p.z/CLUSTER_SIZE], vect3Di(p.x%CLUSTER_SIZE, p.y, p.z%CLUSTER_SIZE));
 }
 
+worldChunk_s* getWorldChunk(world_s* w, vect3Di_s p) //in chunk coord
+{
+	if(!w)return NULL;
+	p=vaddi(p,vmuli(w->position,-1));
+	if(p.x<0 || p.y<0 || p.z<0)return NULL;
+	if(p.x>=WORLD_SIZE || p.y>=CHUNK_HEIGHT || p.z>=WORLD_SIZE)return NULL;
+
+	return w->data[p.x][p.z];
+}
+
 void alterWorldClusterBlock(worldCluster_s* wcl, world_s* w, vect3Di_s p, u8 block, bool regenerate)
 {
 	if(!wcl || (wcl->status&WCL_DATA_UNAVAILABLE))return;
