@@ -6,7 +6,26 @@ const blockType_s blockTypes[BLOCK_NUM] =
 	{
 		(blockType_s){5,3,4}, //BLOCK_AIR
 		(blockType_s){2,2,2}, //BLOCK_DIRT
-		(blockType_s){0,2,3} //BLOCK_GRASS
+		(blockType_s){0,2,3}, //BLOCK_GRASS
+		(blockType_s){1,1,1}, // BLOCK_STONE
+		(blockType_s){16,16,16}, // BLOCK_COBBLESTONE
+		(blockType_s){4,4,4}, // BLOCK_PLANK
+		(blockType_s){7,7,7}, // BLOCK_BRICK
+		(blockType_s){17,17,17}, // BLOCK_BEDROCK
+		(blockType_s){18,18,18}, // BLOCK_SAND
+		(blockType_s){19,19,19}, // BLOCK_GRAVEL
+		(blockType_s){21,21,20}, // BLOCK_WOOD
+		(blockType_s){22,22,22}, // BLOCK_IRON
+		(blockType_s){23,23,23}, // BLOCK_GOLD
+		(blockType_s){24,24,24}, // BLOCK_DIAMOND
+		(blockType_s){25,25,25}, // BLOCK_EMERALD
+		(blockType_s){33,33,33}, // BLOCK_IRONORE
+		(blockType_s){32,32,32}, // BLOCK_GOLDORE
+		(blockType_s){50,50,50}, // BLOCK_DIAMONDORE
+		(blockType_s){34,34,34}, // BLOCK_COALORE
+		(blockType_s){36,36,36}, // BLOCK_MOSSSTONE
+		(blockType_s){37,37,37}, // BLOCK_OBSIDIAN
+		(blockType_s){49,49,49}, // BLOCK_GLASS
 	};
 
 const vect3Df_s fo[]={(vect3Df_s){0.0f,0.0f,0.0f}, //MX

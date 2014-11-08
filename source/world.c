@@ -258,7 +258,8 @@ void generateWorldClusterData(worldCluster_s* wcl, worldChunk_s* wch)
 			const int height=wch->info[i][k].elevation;
 			for(j=0; j<CLUSTER_SIZE; j++)
 			{
-				if(p.y+j < height)wcl->data[i][j][k]=BLOCK_GRASS;
+				if(p.y+j == height)wcl->data[i][j][k]=BLOCK_GRASS;
+				else if(p.y+j < height)wcl->data[i][j][k]=BLOCK_DIRT;
 				else wcl->data[i][j][k]=BLOCK_AIR;
 			}
 		}

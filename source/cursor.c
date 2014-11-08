@@ -56,8 +56,8 @@ void drawCursor(cursor_s* c)
 			case 1:
 				gsRotateZ(-M_PI/2);
 				break;
-			case 2:
-				gsRotateY(M_PI);
+			case 3:
+				gsRotateX(M_PI);
 				break;
 			case 4:
 				gsRotateX(-M_PI/2);
