@@ -94,14 +94,14 @@ void jobGenerateChunkDataFinalizer(job_s* j)
 
 	worldChunk_s* wch=NULL;
 
-	// wch=getWorldChunk(d->world, vaddi(d->target->position, vect3Di(-1,0,0)));
-	// if(wch)createJobsGenerateAdditionalClusterGeometry(wch, d->world, WCL_PX);
-	// wch=getWorldChunk(d->world, vaddi(d->target->position, vect3Di(+1,0,0)));
-	// if(wch)createJobsGenerateAdditionalClusterGeometry(wch, d->world, WCL_MX);
-	// wch=getWorldChunk(d->world, vaddi(d->target->position, vect3Di(0,0,-1)));
-	// if(wch)createJobsGenerateAdditionalClusterGeometry(wch, d->world, WCL_PZ);
-	// wch=getWorldChunk(d->world, vaddi(d->target->position, vect3Di(0,0,+1)));
-	// if(wch)createJobsGenerateAdditionalClusterGeometry(wch, d->world, WCL_MZ);
+	wch=getWorldChunk(d->world, vaddi(d->target->position, vect3Di(-1,0,0)));
+	if(wch)createJobsGenerateAdditionalClusterGeometry(wch, d->world, WCL_PX);
+	wch=getWorldChunk(d->world, vaddi(d->target->position, vect3Di(+1,0,0)));
+	if(wch)createJobsGenerateAdditionalClusterGeometry(wch, d->world, WCL_MX);
+	wch=getWorldChunk(d->world, vaddi(d->target->position, vect3Di(0,0,-1)));
+	if(wch)createJobsGenerateAdditionalClusterGeometry(wch, d->world, WCL_PZ);
+	wch=getWorldChunk(d->world, vaddi(d->target->position, vect3Di(0,0,+1)));
+	if(wch)createJobsGenerateAdditionalClusterGeometry(wch, d->world, WCL_MZ);
 
 	int i; for(i=0; i<CHUNK_HEIGHT; i++)d->target->data[i].status&=~(WCL_DATA_UNAVAILABLE|WCL_BUSY);
 	fixChunk(d->target);
@@ -158,24 +158,30 @@ typedef struct
 	worldCluster_s* target;
 	worldChunk_s* chunk; //read-only
 	world_s* world; //read-only
+	gsVbo_s vbo;
 	u8 direction;
+	int value;
 }jobGenerateAdditionalClusterGeometryData_s;
+
+#include "text.h"
 
 job_s* createJobGenerateAdditionalClusterGeometry(worldCluster_s* wcl, worldChunk_s* wch, world_s* w, u8 direction)
 {
-	if(!wcl || !wch || !w)return NULL;
+	if(!wcl || !wch || !w || !direction)return NULL;
 	if(wcl->status&WCL_BUSY)return NULL;
 	if(wcl->status&WCL_DATA_UNAVAILABLE)return NULL;
-	if(!(wcl->status&WCL_GEOM_UNAVAILABLE))return NULL;
-	job_s* j=createNewJob(JOB_GENERATE_CLUSTER_GEOM);
+	if(wcl->status&WCL_GEOM_UNAVAILABLE)return NULL;
+	job_s* j=createNewJob(JOB_GENERATE_ADDITIONAL_CLUSTER_GEOM);
 	if(!j)return j;
 	jobGenerateAdditionalClusterGeometryData_s* d=(jobGenerateAdditionalClusterGeometryData_s*)j->data;
 
 	d->target=wcl;
-	d->target->status|=WCL_GEOM_UNAVAILABLE|WCL_BUSY;
+	d->target->status|=WCL_BUSY;
 	d->chunk=wch;
 	d->world=w;
 	d->direction=direction;
+	d->value=0;
+	gsVboInit(&d->vbo);
 
 	return j;
 }
@@ -189,6 +195,7 @@ void createJobsGenerateAdditionalClusterGeometry(worldChunk_s* wch, world_s* w, 
 	{
 		worldCluster_s* wcl=&wch->data[i];
 		if(!(wcl->status&WCL_BUSY) && !(wcl->status&WCL_GEOM_UNAVAILABLE) && !(wcl->directions&direction))dispatchJob(NULL, createJobGenerateAdditionalClusterGeometry(wcl, wch, w, direction));
+		// if(!(wcl->status&WCL_BUSY) && !(wcl->status&WCL_GEOM_UNAVAILABLE)){print("%08X vs %08X\n",(unsigned int)wcl->directions,(unsigned int)direction);}
 	}
 }
 
@@ -199,7 +206,7 @@ void jobGenerateAdditionalClusterGeometryHandler(struct producer_s* p, job_s* j)
 
 	if(d->chunk->next)return; //if chunk is in a list, it means it's being discarded in tmpChunkPool => do nothing
 
-	generateWorldAdditionalClusterGeometry(d->target, d->world, d->direction, (blockFace_s*)p->tmpBuffer, PRODUCER_TMPBUFSIZE);
+	d->value=generateWorldAdditionalClusterGeometry(d->target, d->world, d->direction, (blockFace_s*)p->tmpBuffer, PRODUCER_TMPBUFSIZE, &d->vbo);
 }
 
 void jobGenerateAdditionalClusterGeometryFinalizer(job_s* j)
@@ -207,7 +214,12 @@ void jobGenerateAdditionalClusterGeometryFinalizer(job_s* j)
 	if(!j)return;
 	jobGenerateAdditionalClusterGeometryData_s* d=(jobGenerateAdditionalClusterGeometryData_s*)j->data;
 
-	d->target->status&=~(WCL_GEOM_UNAVAILABLE|WCL_BUSY);
+	if(d->value==1)
+	{
+		gsVboDestroy(&d->target->vbo);
+		d->target->vbo=d->vbo;
+	}
+	d->target->status&=~(WCL_BUSY);
 	fixChunk(d->chunk);
 }
 

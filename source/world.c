@@ -145,15 +145,14 @@ void generateWorldClusterGeometry(worldCluster_s* wcl, world_s* w, blockFace_s* 
 
 	//then, we set up VBO size to create the VBO
 	const u32 size=faceListSize*FACE_VBO_SIZE;
-	if(!gsVboCreate(&wcl->vbo, size))buildClusterGeometry(wcl, faceList, faceBufferSize, faceListSize);
+	if(!gsVboCreate(&wcl->vbo, size))buildClusterGeometry(wcl, faceList, faceBufferSize, faceListSize, NULL);
 }
 
-void generateWorldAdditionalClusterGeometry(worldCluster_s* wcl, world_s* w, u8 directions, blockFace_s* tmpBuffer, int tmpBufferSize)
+int generateWorldAdditionalClusterGeometry(worldCluster_s* wcl, world_s* w, u8 directions, blockFace_s* tmpBuffer, int tmpBufferSize, gsVbo_s* vbo)
 {
-	if(!wcl)return;
-	if(wcl->status&WCL_GEOM_UNAVAILABLE)return; //this function is only to complete an existing VBO
-
-	wcl->status|=WCL_GEOM_UNAVAILABLE;
+	if(!wcl || !vbo)return -1;
+	if(wcl->status&WCL_GEOM_UNAVAILABLE)return -2; //only do stuff if geometry is available
+	int ret=0;
 
 	//first, we go through the whole cluster to generate a "list" of faces
 	const static int staticFaceBufferSize=4096*sizeof(blockFace_s); //TODO : calculate real max
@@ -167,23 +166,23 @@ void generateWorldAdditionalClusterGeometry(worldCluster_s* wcl, world_s* w, u8 
 	memset(faceList, 0x00, faceBufferSize);
 
 	//check for border faces
-	generateWorldAdditionalGeometryList(wcl, w, 0xFF, faceList, faceBufferSize, &faceListSize);
+	generateWorldAdditionalGeometryList(wcl, w, directions, faceList, faceBufferSize, &faceListSize);
 
 	//then, we set up VBO size to create the VBO
 	if(faceListSize>0)
 	{
 		//grab the vbo data, append new faces to it and be on our way
 		const u32 size=wcl->vbo.currentSize+faceListSize*FACE_VBO_SIZE;
-		gsVbo_s newVbo;
-		gsVboInit(&newVbo);
-		if(!gsVboCreate(&newVbo, size))
+		gsVboInit(vbo);
+		if(!gsVboCreate(vbo, size))
 		{
-			gsVboAddData(&newVbo, wcl->data, wcl->vbo.currentSize, wcl->vbo.numVertices);
-			buildClusterGeometry(wcl, faceList, faceBufferSize, faceListSize);
-			gsVboDestroy(&wcl->vbo);
-			wcl->vbo=newVbo;
+			gsVboAddData(vbo, wcl->vbo.data, wcl->vbo.currentSize, wcl->vbo.numVertices);
+			buildClusterGeometry(wcl, faceList, faceBufferSize, faceListSize, vbo);
+			ret=1;
 		}
 	}
+
+	return ret;
 }
 
 void generateWorldAdditionalGeometryList(worldCluster_s* wcl, world_s* w, u8 directions, blockFace_s* faceList, int faceBufferSize, int* faceListSize)
@@ -203,9 +202,8 @@ void generateWorldAdditionalGeometryList(worldCluster_s* wcl, world_s* w, u8 dir
 	if(directions&WCL_MY)wclp[3]=getWorldBlockCluster(w, vaddi(p, vect3Di(0, -1, 0)));
 	if(directions&WCL_PZ)wclp[4]=getWorldBlockCluster(w, vaddi(p, vect3Di(0, 0, +CLUSTER_SIZE)));
 	if(directions&WCL_MZ)wclp[5]=getWorldBlockCluster(w, vaddi(p, vect3Di(0, 0, -1)));
-	for(i=0;i<6;i++)if(wclp[i] && wclp[i]->status&WCL_DATA_UNAVAILABLE)wclp[i]=NULL;
+	for(i=0;i<6;i++)if(wclp[i] && wclp[i]->status&WCL_DATA_UNAVAILABLE)wclp[i]=NULL; else if(wclp[i])wcl->directions|=(1<<i);
 
-	wcl->directions|=directions;
 	for(j=0; j<CLUSTER_SIZE; j++)
 	{
 		for(k=0; k<CLUSTER_SIZE; k++)
@@ -221,9 +219,10 @@ void generateWorldAdditionalGeometryList(worldCluster_s* wcl, world_s* w, u8 dir
 	}
 }
 
-void buildClusterGeometry(worldCluster_s* wcl, blockFace_s* faceList, int faceBufferSize, int faceListSize)
+void buildClusterGeometry(worldCluster_s* wcl, blockFace_s* faceList, int faceBufferSize, int faceListSize, gsVbo_s* vbo)
 {
 	if(!wcl || !faceList || !faceBufferSize || !faceListSize)return;
+	if(!vbo)vbo=&wcl->vbo;
 
 	vect3Df_s off=clusterCoordToWorld(wcl->position);
 
@@ -231,10 +230,10 @@ void buildClusterGeometry(worldCluster_s* wcl, blockFace_s* faceList, int faceBu
 	blockFace_s* bf;
 	while((bf=popFace(faceList, faceListSize)))
 	{
-		blockGenerateFaceGeometry(bf, &wcl->vbo, off);
+		blockGenerateFaceGeometry(bf, vbo, off);
 	}
 
-	gsVboFlushData(&wcl->vbo);
+	gsVboFlushData(vbo);
 	wcl->status&=~WCL_GEOM_UNAVAILABLE;
 }
 

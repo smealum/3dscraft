@@ -67,9 +67,9 @@ typedef struct world_s
 
 void generateWorldChunkData(worldChunk_s* wch);
 void generateWorldClusterGeometry(worldCluster_s* wcl, world_s* w, blockFace_s* tmpBuffer, int tmpBufferSize);
-void generateWorldAdditionalClusterGeometry(worldCluster_s* wcl, world_s* w, u8 directions, blockFace_s* tmpBuffer, int tmpBufferSize);
+int generateWorldAdditionalClusterGeometry(worldCluster_s* wcl, world_s* w, u8 directions, blockFace_s* tmpBuffer, int tmpBufferSize, gsVbo_s* vbo);
 void generateWorldAdditionalGeometryList(worldCluster_s* wcl, world_s* w, u8 directions, blockFace_s* faceList, int faceBufferSize, int* faceListSize);
-void buildClusterGeometry(worldCluster_s* wcl, blockFace_s* faceList, int faceBufferSize, int faceListSize);
+void buildClusterGeometry(worldCluster_s* wcl, blockFace_s* faceList, int faceBufferSize, int faceListSize, gsVbo_s* vbo);
 
 void initChunkPool(void);
 worldChunk_s* getNewChunk(void);
