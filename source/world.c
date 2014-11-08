@@ -154,7 +154,6 @@ void generateWorldAdditionalClusterGeometry(worldCluster_s* wcl, world_s* w, u8 
 	if(wcl->status&WCL_GEOM_UNAVAILABLE)return; //this function is only to complete an existing VBO
 
 	wcl->status|=WCL_GEOM_UNAVAILABLE;
-	wcl->directions=0;
 
 	//first, we go through the whole cluster to generate a "list" of faces
 	const static int staticFaceBufferSize=4096*sizeof(blockFace_s); //TODO : calculate real max
@@ -190,11 +189,11 @@ void generateWorldAdditionalClusterGeometry(worldCluster_s* wcl, world_s* w, u8 
 void generateWorldAdditionalGeometryList(worldCluster_s* wcl, world_s* w, u8 directions, blockFace_s* faceList, int faceBufferSize, int* faceListSize)
 {
 	if(!wcl || !faceBufferSize || !faceList || !faceListSize)return;
-
-	wcl->status|=WCL_GEOM_UNAVAILABLE;
+	directions&=~wcl->directions;
+	if(!directions)return;
 
 	const vect3Di_s p = vmuli(wcl->position, CLUSTER_SIZE);
-	int j, k;
+	int i, j, k;
 
 	worldCluster_s* wclp[6] = {NULL,NULL,NULL,NULL,NULL,NULL};
 
@@ -204,6 +203,7 @@ void generateWorldAdditionalGeometryList(worldCluster_s* wcl, world_s* w, u8 dir
 	if(directions&WCL_MY)wclp[3]=getWorldBlockCluster(w, vaddi(p, vect3Di(0, -1, 0)));
 	if(directions&WCL_PZ)wclp[4]=getWorldBlockCluster(w, vaddi(p, vect3Di(0, 0, +CLUSTER_SIZE)));
 	if(directions&WCL_MZ)wclp[5]=getWorldBlockCluster(w, vaddi(p, vect3Di(0, 0, -1)));
+	for(i=0;i<6;i++)if(wclp[i] && wclp[i]->status&WCL_DATA_UNAVAILABLE)wclp[i]=NULL;
 
 	wcl->directions|=directions;
 	for(j=0; j<CLUSTER_SIZE; j++)
