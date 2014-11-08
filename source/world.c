@@ -286,31 +286,9 @@ void initWorldChunk(worldChunk_s* wch, world_s* w, vect3Di_s pos)
 	wch->world=w;
 }
 
-void getChunkPath(worldChunk_s* wch, char* out, int length)
-{
-	if(!wch || !out)return;
-
-	// snprintf(out, length, "%s/%d_%d.wch", configuration.path, wch->position.x, wch->position.z);
-}
-
 void generateWorldChunkData(worldChunk_s* wch)
 {
 	if(!wch)return;
-
-	// // static char path[255];
-	// static u8 tmpBuffer[CLUSTER_SIZE*CLUSTER_SIZE*CLUSTER_SIZE*CHUNK_HEIGHT];
-	// u32 bytesRead;
-	// Handle fileHandle;
-	// // getChunkPath(wch, path, 255);
-	// FSUSER_OpenFile(NULL, &fileHandle, configuration.sdmc, FS_makePath(PATH_CHAR, "/3ds/3dscraft/boot.3dsx"), FS_OPEN_READ, FS_ATTRIBUTE_NONE);
-
-	// u64 val=svcGetSystemTick();
-	// FSFILE_Read(fileHandle, &bytesRead, 0, tmpBuffer, sizeof(tmpBuffer));
-	// debugValue[5]+=(u32)(svcGetSystemTick()-val);
-	// debugValue[6]++;
-
-	// FSFILE_Close(fileHandle);
-	// svcCloseHandle(fileHandle);
 
 	int i, j, k;
 	for(i=0; i<CLUSTER_SIZE; i++)
