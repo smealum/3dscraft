@@ -151,7 +151,7 @@ void generateWorldClusterGeometry(worldCluster_s* wcl, world_s* w, blockFace_s* 
 void generateWorldAdditionalClusterGeometry(worldCluster_s* wcl, world_s* w, u8 directions, blockFace_s* tmpBuffer, int tmpBufferSize)
 {
 	if(!wcl)return;
-	if(!(wcl->status&WCL_GEOM_UNAVAILABLE))gsVboDestroy(&wcl->vbo);
+	if(wcl->status&WCL_GEOM_UNAVAILABLE)return; //this function is only to complete an existing VBO
 
 	wcl->status|=WCL_GEOM_UNAVAILABLE;
 	wcl->directions=0;
@@ -190,7 +190,6 @@ void generateWorldAdditionalClusterGeometry(worldCluster_s* wcl, world_s* w, u8 
 void generateWorldAdditionalGeometryList(worldCluster_s* wcl, world_s* w, u8 directions, blockFace_s* faceList, int faceBufferSize, int* faceListSize)
 {
 	if(!wcl || !faceBufferSize || !faceList || !faceListSize)return;
-	if(wcl->status&WCL_GEOM_UNAVAILABLE)return; //this function is only to complete an existing VBO
 
 	wcl->status|=WCL_GEOM_UNAVAILABLE;
 

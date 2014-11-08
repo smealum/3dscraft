@@ -94,14 +94,14 @@ void jobGenerateChunkDataFinalizer(job_s* j)
 
 	worldChunk_s* wch=NULL;
 
-	wch=getWorldChunk(d->world, vaddi(d->target->position, vect3Di(-1,0,0)));
-	if(wch)createJobsGenerateAdditionalClusterGeometry(wch, d->world, WCL_PX);
-	wch=getWorldChunk(d->world, vaddi(d->target->position, vect3Di(+1,0,0)));
-	if(wch)createJobsGenerateAdditionalClusterGeometry(wch, d->world, WCL_MX);
-	wch=getWorldChunk(d->world, vaddi(d->target->position, vect3Di(0,0,-1)));
-	if(wch)createJobsGenerateAdditionalClusterGeometry(wch, d->world, WCL_PZ);
-	wch=getWorldChunk(d->world, vaddi(d->target->position, vect3Di(0,0,+1)));
-	if(wch)createJobsGenerateAdditionalClusterGeometry(wch, d->world, WCL_MZ);
+	// wch=getWorldChunk(d->world, vaddi(d->target->position, vect3Di(-1,0,0)));
+	// if(wch)createJobsGenerateAdditionalClusterGeometry(wch, d->world, WCL_PX);
+	// wch=getWorldChunk(d->world, vaddi(d->target->position, vect3Di(+1,0,0)));
+	// if(wch)createJobsGenerateAdditionalClusterGeometry(wch, d->world, WCL_MX);
+	// wch=getWorldChunk(d->world, vaddi(d->target->position, vect3Di(0,0,-1)));
+	// if(wch)createJobsGenerateAdditionalClusterGeometry(wch, d->world, WCL_PZ);
+	// wch=getWorldChunk(d->world, vaddi(d->target->position, vect3Di(0,0,+1)));
+	// if(wch)createJobsGenerateAdditionalClusterGeometry(wch, d->world, WCL_MZ);
 
 	int i; for(i=0; i<CHUNK_HEIGHT; i++)d->target->data[i].status&=~(WCL_DATA_UNAVAILABLE|WCL_BUSY);
 	fixChunk(d->target);
