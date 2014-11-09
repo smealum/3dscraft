@@ -17,6 +17,6 @@ void updateCamera(camera_s* c);
 void setCamera(camera_s* c);
 
 bool pointInCameraFrustum(camera_s* c, vect3Df_s pt);
-bool aabbInCameraFrustum(camera_s* c, vect3Df_s o, vect3Df_s s);
+bool aabbInCameraFrustum(camera_s* c, vect3Df_s o, vect3Df_s s, int planes);
 
 #endif

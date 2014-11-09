@@ -307,7 +307,7 @@ void drawWorldChunk(world_s* w, worldChunk_s* wch, camera_s* c)
 	if(!wch)return;
 
 	//baseline culling
-	if(!aabbInCameraFrustum(c, clusterCoordToWorld(wch->position), vect3Df(CLUSTER_SIZE,CLUSTER_SIZE*CHUNK_HEIGHT,CLUSTER_SIZE)))return;
+	if(!aabbInCameraFrustum(c, clusterCoordToWorld(wch->position), vect3Df(CLUSTER_SIZE,CLUSTER_SIZE*CHUNK_HEIGHT,CLUSTER_SIZE), 3))return;
 	debugValue[0]++;
 	int k; for(k=0; k<CHUNK_HEIGHT; k++)drawWorldCluster(w, wch, &wch->data[k]);
 }

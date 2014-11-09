@@ -18,6 +18,8 @@ typedef struct
 	u32 currentSize; // in bytes
 	u32 maxSize; // in bytes
 	u32 numVertices;
+	u32* commands;
+	u32 commandsSize;
 }gsVbo_s;
 
 

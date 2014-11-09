@@ -4,6 +4,7 @@
 
 #include "gs.h"
 #include "math.h"
+#include "text.h"
 
 static void gsInitMatrixStack();
 
@@ -232,6 +233,8 @@ int gsVboInit(gsVbo_s* vbo)
 	vbo->data=NULL;
 	vbo->currentSize=0;
 	vbo->maxSize=0;
+	vbo->commands=NULL;
+	vbo->commandsSize=0;
 
 	return 0;
 }
@@ -281,8 +284,38 @@ int gsVboDestroy(gsVbo_s* vbo)
 {
 	if(!vbo)return -1;
 
+	if(vbo->commands)free(vbo->commands);
 	if(vbo->data)gsLinearFree(vbo->data);
 	gsVboInit(vbo);
+
+	return 0;
+}
+
+extern u32 debugValue[];
+
+//not thread safe
+int gsVboPrecomputeCommands(gsVbo_s* vbo)
+{
+	if(!vbo || vbo->commands)return -1;
+
+	static u32 tmpBuffer[128];
+
+	u32* savedAdr; u32 savedSize, savedOffset;
+	GPUCMD_GetBuffer(&savedAdr, &savedSize, &savedOffset);
+	GPUCMD_SetBuffer(tmpBuffer, 128, 0);
+
+	//TEMP : need to make it configurable
+	GPU_SetAttributeBuffers(3, (u32*)osConvertVirtToPhys((u32)vbo->data),
+		GPU_ATTRIBFMT(0, 3, GPU_FLOAT)|GPU_ATTRIBFMT(1, 2, GPU_FLOAT)|GPU_ATTRIBFMT(2, 3, GPU_FLOAT),
+		0xFFC, 0x210, 1, (u32[]){0x00000000}, (u64[]){0x210}, (u8[]){3});
+	GPU_DrawArray(GPU_TRIANGLES, vbo->numVertices);
+	
+	GPUCMD_GetBuffer(NULL, NULL, &vbo->commandsSize);
+	vbo->commands=malloc(vbo->commandsSize*4);
+	if(!vbo->commands)return -1;
+	memcpy(vbo->commands, tmpBuffer, vbo->commandsSize*4);
+
+	GPUCMD_SetBuffer(savedAdr, savedSize, savedOffset);
 
 	return 0;
 }
@@ -293,11 +326,22 @@ int gsVboDraw(gsVbo_s* vbo)
 
 	gsUpdateTransformation();
 
-	//TEMP : need to make it configurable
-	GPU_SetAttributeBuffers(3, (u32*)osConvertVirtToPhys((u32)vbo->data),
-		GPU_ATTRIBFMT(0, 3, GPU_FLOAT)|GPU_ATTRIBFMT(1, 2, GPU_FLOAT)|GPU_ATTRIBFMT(2, 3, GPU_FLOAT),
-		0xFFC, 0x210, 1, (u32[]){0x00000000}, (u64[]){0x210}, (u8[]){3});
-	GPU_DrawArray(GPU_TRIANGLES, vbo->numVertices);
+	gsVboPrecomputeCommands(vbo);
+
+	u64 val=svcGetSystemTick();
+	if(vbo->commands)
+	{
+		GPUCMD_AddRawCommands(vbo->commands, vbo->commandsSize);
+	}else{
+		//TEMP : need to make it configurable
+		GPU_SetAttributeBuffers(3, (u32*)osConvertVirtToPhys((u32)vbo->data),
+			GPU_ATTRIBFMT(0, 3, GPU_FLOAT)|GPU_ATTRIBFMT(1, 2, GPU_FLOAT)|GPU_ATTRIBFMT(2, 3, GPU_FLOAT),
+			0xFFC, 0x210, 1, (u32[]){0x00000000}, (u64[]){0x210}, (u8[]){3});
+		GPU_DrawArray(GPU_TRIANGLES, vbo->numVertices);
+	}
+	debugValue[5]+=(u32)(svcGetSystemTick()-val);
+	debugValue[6]++;
+
 
 	return 0;
 }

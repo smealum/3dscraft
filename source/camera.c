@@ -24,12 +24,13 @@ void updateCameraFrustum(camera_s* c)
 	const vect4Df_s rowZ = getMatrixColumn4(final, 2);
 	const vect4Df_s rowW = getMatrixColumn4(final, 3);
 
-	c->frustumPlane[0] = vnormf4(vaddf4(rowW, rowX));
-	c->frustumPlane[1] = vnormf4(vsubf4(rowW, rowX));
-	c->frustumPlane[2] = vnormf4(vaddf4(rowW, rowY));
-	c->frustumPlane[3] = vnormf4(vsubf4(rowW, rowY));
-	c->frustumPlane[4] = vnormf4(vaddf4(rowW, rowZ));
-	c->frustumPlane[5] = vnormf4(vsubf4(rowW, rowZ));
+	//ordered by priority for culling
+	c->frustumPlane[0] = vnormf4(vsubf4(rowW, rowZ)); //near plane
+	c->frustumPlane[1] = vnormf4(vaddf4(rowW, rowX)); //right plane
+	c->frustumPlane[2] = vnormf4(vsubf4(rowW, rowX)); //left plane
+	c->frustumPlane[3] = vnormf4(vaddf4(rowW, rowY)); //top plane
+	c->frustumPlane[4] = vnormf4(vsubf4(rowW, rowY)); //bottom plane
+	c->frustumPlane[5] = vnormf4(vaddf4(rowW, rowZ)); //far plane
 }
 
 void updateCamera(camera_s* c)
@@ -73,11 +74,12 @@ vect3Df_s box[]={(vect3Df_s){0.f,0.f,0.f},
 				(vect3Df_s){1.f,1.f,1.f}};
 
 //et "Assarsson and Moller report that they found no observable penalty in the rendering when skipping further tests"
-bool aabbInCameraFrustum(camera_s* c, vect3Df_s o, vect3Df_s s)
+bool aabbInCameraFrustum(camera_s* c, vect3Df_s o, vect3Df_s s, int planes)
 {
 	if(!c)return false;
+	if(planes<=0 || planes>6)return false;
 	int i, j;
-	for(i=0;i<6;i++)
+	for(i=0;i<planes;i++)
 	{
 		int in=0, out=0;
 		for(j=0;j<8 && (!in || !out);j++)

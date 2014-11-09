@@ -85,7 +85,10 @@ void doFrame1()
 		gsMatrixMode(GS_MODELVIEW);
 		gsPushMatrix();
 			setCameraPlayer(&player);
+		debugValue[5]=0;
+		debugValue[6]=0;
 			drawWorld(&world, &player.camera);
+		// debugValue[6]=1;
 			drawCursor(&player.cursor);
 			drawSky();
 		gsPopMatrix();
@@ -173,7 +176,7 @@ int main(int argc, char** argv)
 
 	while(aptMainLoop())
 	{
-		u64 val=svcGetSystemTick();
+		// u64 val=svcGetSystemTick();
 
 		hidScanInput();
 		if(keysDown()&KEY_START)break;
@@ -198,12 +201,12 @@ int main(int argc, char** argv)
 		gfxSwapBuffersGpu();
 
 		gspWaitForEvent(GSPEVENT_VBlank0, true);
-		debugValue[2]=(u32)(svcGetSystemTick()-val);
+		// debugValue[2]=(u32)(svcGetSystemTick()-val);
 
 		// u64 val=svcGetSystemTick();
 		// debugValue[1]=(u32)(svcGetSystemTick()-val);
 		// print("%d\n", (int)debugValue[7]);
-		// print("avg %d ticks (%d)\n", (int)(debugValue[5]/debugValue[6]), debugValue[6]);
+		print("avg %d ticks (%d)\n", (int)(debugValue[5]/debugValue[6]), debugValue[6]);
 		// print("drawing %d chunks... (%f vs %f)\n", (int)debugValue[0], (float)(debugValue[1]*100)/TICKS_PER_VBL, (float)(debugValue[2]*100)/TICKS_PER_VBL);
 		// debugValue[0]=0;
 		// u64 val=svcGetSystemTick();
