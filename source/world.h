@@ -7,12 +7,13 @@
 #include "camera.h"
 #include "streaming.h"
 
-#define CLUSTER_SIZE (8)
+// #define CLUSTER_SIZE (8)
+#define CLUSTER_SIZE (12)
 
-#define CHUNK_HEIGHT (16)
+#define CHUNK_HEIGHT (10)
 
-#define WORLD_SIZE (16)
-// #define WORLD_SIZE (8)
+// #define WORLD_SIZE (16)
+#define WORLD_SIZE (12)
 
 typedef enum
 {

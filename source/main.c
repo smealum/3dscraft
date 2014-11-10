@@ -221,7 +221,7 @@ int main(int argc, char** argv)
 		// u64 val=svcGetSystemTick();
 		// debugValue[5]+=(u32)(svcGetSystemTick()-val);
 		// debugValue[6]++;
-		drawBottom(); //DEBUG
+		// drawBottom(); //DEBUG
 	}
 
 	exitDispatcher(NULL);

@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <string.h>
+#include <malloc.h>
 #include <3ds.h>
 
 #include "gs.h"
@@ -329,13 +330,28 @@ int gsVboPrecomputeCommands(gsVbo_s* vbo)
 	GPU_DrawArrayDirectly(GPU_TRIANGLES, vbo->data, vbo->numVertices);
 	
 	GPUCMD_GetBuffer(NULL, NULL, &vbo->commandsSize);
-	vbo->commands=malloc(vbo->commandsSize*4);
+	vbo->commands=memalign(0x4, vbo->commandsSize*4);
 	if(!vbo->commands)return -1;
 	memcpy(vbo->commands, tmpBuffer, vbo->commandsSize*4);
 
 	GPUCMD_SetBuffer(savedAdr, savedSize, savedOffset);
 
 	return 0;
+}
+
+extern u32* gpuCmdBuf;
+extern u32 gpuCmdBufSize;
+extern u32 gpuCmdBufOffset;
+
+void _vboMemcpy50(u32* dst, u32* src);
+
+void _GPUCMD_AddRawCommands(u32* cmd, u32 size)
+{
+	if(!cmd || !size)return;
+
+	if(size*4==0x50)_vboMemcpy50(&gpuCmdBuf[gpuCmdBufOffset], cmd);
+	else memcpy(&gpuCmdBuf[gpuCmdBufOffset], cmd, size*4);
+	gpuCmdBufOffset+=size;
 }
 
 int gsVboDraw(gsVbo_s* vbo)
@@ -349,13 +365,12 @@ int gsVboDraw(gsVbo_s* vbo)
 	// u64 val=svcGetSystemTick();
 	if(vbo->commands)
 	{
-		GPUCMD_AddRawCommands(vbo->commands, vbo->commandsSize);
+		_GPUCMD_AddRawCommands(vbo->commands, vbo->commandsSize);
 	}else{
 		GPU_DrawArrayDirectly(GPU_TRIANGLES, vbo->data, vbo->numVertices);
 	}
 	// debugValue[5]+=(u32)(svcGetSystemTick()-val);
 	// debugValue[6]++;
-
 
 	return 0;
 }
