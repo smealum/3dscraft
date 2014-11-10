@@ -80,13 +80,16 @@ void doFrame1()
 
 	//texturing stuff
 		GPU_SetTexture(GPU_TEXUNIT0, (u32*)osConvertVirtToPhys((u32)texData),256,256,GPU_TEXTURE_MAG_FILTER(GPU_NEAREST)|GPU_TEXTURE_MIN_FILTER(GPU_NEAREST),GPU_RGBA8);
+		GPU_SetAttributeBuffers(3, (u32*)osConvertVirtToPhys((u32)texData),
+			GPU_ATTRIBFMT(0, 3, GPU_FLOAT)|GPU_ATTRIBFMT(1, 2, GPU_FLOAT)|GPU_ATTRIBFMT(2, 3, GPU_FLOAT),
+			0xFFC, 0x210, 1, (u32[]){0x00000000}, (u64[]){0x210}, (u8[]){3});
 
 	//draw world
 		gsMatrixMode(GS_MODELVIEW);
 		gsPushMatrix();
 			setCameraPlayer(&player);
-		debugValue[5]=0;
-		debugValue[6]=0;
+		// debugValue[5]=0;
+		// debugValue[6]=0;
 			drawWorld(&world, &player.camera);
 		// debugValue[6]=1;
 			drawCursor(&player.cursor);
@@ -188,10 +191,16 @@ int main(int argc, char** argv)
 		updateDispatcher(NULL);
 
 		GPUCMD_SetBuffer(gpuCmd, gpuCmdSize, 0);
+	// u64 val=svcGetSystemTick();
 		doFrame1();
+	// debugValue[5]=(u32)(svcGetSystemTick()-val);
+	// debugValue[6]=1;
 		GPUCMD_Finalize();
+	// u64 val=svcGetSystemTick();
 		GPUCMD_FlushAndRun(gxCmdBuf);
 		gspWaitForP3D();
+	// debugValue[5]=(u32)(svcGetSystemTick()-val);
+	// debugValue[6]=1;
 
 		GX_SetDisplayTransfer(gxCmdBuf, (u32*)gpuOut, 0x019001E0, (u32*)gfxGetFramebuffer(GFX_TOP, GFX_LEFT, NULL, NULL), 0x019001E0, 0x01001000);
 		gspWaitForPPF();
@@ -206,7 +215,7 @@ int main(int argc, char** argv)
 		// u64 val=svcGetSystemTick();
 		// debugValue[1]=(u32)(svcGetSystemTick()-val);
 		// print("%d\n", (int)debugValue[7]);
-		print("avg %d ticks (%d)\n", (int)(debugValue[5]/debugValue[6]), debugValue[6]);
+		// print("avg %d ticks (%d)\n", (int)(debugValue[5]/debugValue[6]), debugValue[6]);
 		// print("drawing %d chunks... (%f vs %f)\n", (int)debugValue[0], (float)(debugValue[1]*100)/TICKS_PER_VBL, (float)(debugValue[2]*100)/TICKS_PER_VBL);
 		// debugValue[0]=0;
 		// u64 val=svcGetSystemTick();

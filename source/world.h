@@ -12,7 +12,6 @@
 #define CHUNK_HEIGHT (16)
 
 #define WORLD_SIZE (16)
-// #define WORLD_SIZE (16)
 // #define WORLD_SIZE (8)
 
 typedef enum

@@ -293,6 +293,28 @@ int gsVboDestroy(gsVbo_s* vbo)
 
 extern u32 debugValue[];
 
+void GPU_DrawArrayDirectly(GPU_Primitive_t primitive, u8* data, u32 n)
+{
+	//set attribute buffer address
+	GPUCMD_AddSingleParam(0x000F0200, (osConvertVirtToPhys((u32)data))>>3);
+	//set primitive type
+	GPUCMD_AddSingleParam(0x0002025E, primitive);
+	GPUCMD_AddSingleParam(0x0002025F, 0x00000001);
+	//index buffer not used for drawArrays but 0x000F0227 still required
+	GPUCMD_AddSingleParam(0x000F0227, 0x80000000);
+	//pass number of vertices
+	GPUCMD_AddSingleParam(0x000F0228, n);
+
+	GPUCMD_AddSingleParam(0x00010253, 0x00000001);
+
+	GPUCMD_AddSingleParam(0x00010245, 0x00000000);
+	GPUCMD_AddSingleParam(0x000F022E, 0x00000001);
+	GPUCMD_AddSingleParam(0x00010245, 0x00000001);
+	GPUCMD_AddSingleParam(0x000F0231, 0x00000001);
+
+	// GPUCMD_AddSingleParam(0x000F0111, 0x00000001); //breaks stuff
+}
+
 //not thread safe
 int gsVboPrecomputeCommands(gsVbo_s* vbo)
 {
@@ -304,11 +326,7 @@ int gsVboPrecomputeCommands(gsVbo_s* vbo)
 	GPUCMD_GetBuffer(&savedAdr, &savedSize, &savedOffset);
 	GPUCMD_SetBuffer(tmpBuffer, 128, 0);
 
-	//TEMP : need to make it configurable
-	GPU_SetAttributeBuffers(3, (u32*)osConvertVirtToPhys((u32)vbo->data),
-		GPU_ATTRIBFMT(0, 3, GPU_FLOAT)|GPU_ATTRIBFMT(1, 2, GPU_FLOAT)|GPU_ATTRIBFMT(2, 3, GPU_FLOAT),
-		0xFFC, 0x210, 1, (u32[]){0x00000000}, (u64[]){0x210}, (u8[]){3});
-	GPU_DrawArray(GPU_TRIANGLES, vbo->numVertices);
+	GPU_DrawArrayDirectly(GPU_TRIANGLES, vbo->data, vbo->numVertices);
 	
 	GPUCMD_GetBuffer(NULL, NULL, &vbo->commandsSize);
 	vbo->commands=malloc(vbo->commandsSize*4);
@@ -328,19 +346,15 @@ int gsVboDraw(gsVbo_s* vbo)
 
 	gsVboPrecomputeCommands(vbo);
 
-	u64 val=svcGetSystemTick();
+	// u64 val=svcGetSystemTick();
 	if(vbo->commands)
 	{
 		GPUCMD_AddRawCommands(vbo->commands, vbo->commandsSize);
 	}else{
-		//TEMP : need to make it configurable
-		GPU_SetAttributeBuffers(3, (u32*)osConvertVirtToPhys((u32)vbo->data),
-			GPU_ATTRIBFMT(0, 3, GPU_FLOAT)|GPU_ATTRIBFMT(1, 2, GPU_FLOAT)|GPU_ATTRIBFMT(2, 3, GPU_FLOAT),
-			0xFFC, 0x210, 1, (u32[]){0x00000000}, (u64[]){0x210}, (u8[]){3});
-		GPU_DrawArray(GPU_TRIANGLES, vbo->numVertices);
+		GPU_DrawArrayDirectly(GPU_TRIANGLES, vbo->data, vbo->numVertices);
 	}
-	debugValue[5]+=(u32)(svcGetSystemTick()-val);
-	debugValue[6]++;
+	// debugValue[5]+=(u32)(svcGetSystemTick()-val);
+	// debugValue[6]++;
 
 
 	return 0;
