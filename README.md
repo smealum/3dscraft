@@ -3,7 +3,7 @@
 
 ### Description
 
-3dscraft is a free, unofficial adaptation of the popular game Minecraft for the Nintendo 3DS. It is currently being worked on by smea alone and is still in very early stages. As we are still discovering the hardware (reverse engineering and writing the GPU as we go along, yay), the game may be unstable unstable.
+3dscraft is a free, unofficial adaptation of the popular game Minecraft for the Nintendo 3DS. It is currently being worked on by smea alone and is still in very early stages. As we are still discovering the hardware (reverse engineering and writing the GPU as we go along, yay), the game may be unstable.
 
 A first public release is planned for the November 21st-23rd weekend. This demo will be a basic adaptation of classic mode featuring infinite worlds generated in real time, ability to load/save worlds and place a bunch of blocks.
 
