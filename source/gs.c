@@ -7,23 +7,46 @@
 #include "math.h"
 #include "text.h"
 
+#define BUFFERMATRIXLIST_SIZE (GS_MATRIXSTACK_SIZE*4)
+
 static void gsInitMatrixStack();
 
 Handle linearAllocMutex;
+
+typedef struct
+{
+	u32 offset;
+	mtx44 data;
+}bufferMatrix_s;
+
+bufferMatrix_s bufferMatrixList[BUFFERMATRIXLIST_SIZE];
+int bufferMatrixListLength;
 
 //----------------------
 //   GS SYSTEM STUFF
 //----------------------
 
+void initBufferMatrixList()
+{
+	bufferMatrixListLength=0;
+}
+
 void gsInit(void)
 {
 	gsInitMatrixStack();
+	initBufferMatrixList();
 	svcCreateMutex(&linearAllocMutex, false);
 }
 
 void gsExit(void)
 {
 	svcCloseHandle(linearAllocMutex);
+}
+
+void gsStartFrame(void)
+{
+	GPUCMD_SetBufferOffset(0);
+	initBufferMatrixList();
 }
 
 void* gsLinearAlloc(size_t size)
@@ -216,11 +239,37 @@ static int gsUpdateTransformation()
 	{
 		if(gsMatrixStackUpdated[m])
 		{
+			if(m==GS_PROJECTION && bufferMatrixListLength<BUFFERMATRIXLIST_SIZE)
+			{
+				GPUCMD_GetBuffer(NULL, NULL, &bufferMatrixList[bufferMatrixListLength].offset);
+				memcpy(&bufferMatrixList[bufferMatrixListLength], gsGetMatrix(m), sizeof(mtx44));
+				bufferMatrixListLength++;
+			}
 			gsSetUniformMatrix(gsMatrixStackRegisters[m], gsGetMatrix(m));
 			gsMatrixStackUpdated[m]=false;
 		}
 	}
 	return 0;
+}
+
+void gsAdjustBufferMatrices(mtx44 transformation)
+{
+	int i;
+	u32* buffer;
+	u32 offset;
+	GPUCMD_GetBuffer(&buffer, NULL, &offset);
+	for(i=0; i<bufferMatrixListLength; i++)
+	{
+		u32 o=bufferMatrixList[i].offset;
+		if(o+2<offset) //TODO : better check, need to account for param size
+		{
+			mtx44 newMatrix;
+			GPUCMD_SetBufferOffset(o);
+			multMatrix44((float*)bufferMatrixList[i].data, (float*)transformation, (float*)newMatrix);
+			gsSetUniformMatrix(gsMatrixStackRegisters[GS_PROJECTION], (float*)newMatrix);
+		}
+	}
+	GPUCMD_SetBufferOffset(offset);
 }
 
 //----------------------

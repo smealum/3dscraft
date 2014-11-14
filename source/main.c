@@ -155,6 +155,7 @@ int main(int argc, char** argv)
 
 	u32 gpuCmdSize=0x40000;
 	u32* gpuCmd=(u32*)linearAlloc(gpuCmdSize*4);
+	u32* gpuCmdRight=(u32*)linearAlloc(gpuCmdSize*4);
 
 	GPU_Reset(gxCmdBuf, gpuCmd, gpuCmdSize);
 
@@ -190,20 +191,27 @@ int main(int argc, char** argv)
 		updateSky();
 		updateDispatcher(NULL);
 
-		GPUCMD_SetBuffer(gpuCmd, gpuCmdSize, 0);
-	// u64 val=svcGetSystemTick();
+		gsStartFrame();
 		doFrame1();
-	// debugValue[5]=(u32)(svcGetSystemTick()-val);
-	// debugValue[6]=1;
 		GPUCMD_Finalize();
-	// u64 val=svcGetSystemTick();
 		GPUCMD_FlushAndRun(gxCmdBuf);
-		gspWaitForP3D();
-	// debugValue[5]=(u32)(svcGetSystemTick()-val);
-	// debugValue[6]=1;
 
+		//while GPU starts drawing the left buffer, we generate the right one
+		GPUCMD_SetBuffer(gpuCmdRight, gpuCmdSize, 0);
+		mtx44 m; loadIdentity44((float*)m);
+		gsAdjustBufferMatrices(m);
+
+		//we wait for the left buffer to finish drawing
+		gspWaitForP3D();
 		GX_SetDisplayTransfer(gxCmdBuf, (u32*)gpuOut, 0x019001E0, (u32*)gfxGetFramebuffer(GFX_TOP, GFX_LEFT, NULL, NULL), 0x019001E0, 0x01001000);
 		gspWaitForPPF();
+
+		//we draw the right buffer, wait for it to finish and then switch back to left one
+		GPUCMD_FlushAndRun(gxCmdBuf);
+		gspWaitForP3D();
+		GX_SetDisplayTransfer(gxCmdBuf, (u32*)gpuOut, 0x019001E0, (u32*)gfxGetFramebuffer(GFX_TOP, GFX_RIGHT, NULL, NULL), 0x019001E0, 0x01001000);
+		gspWaitForPPF();
+		GPUCMD_SetBuffer(gpuCmd, gpuCmdSize, 0);
 
 		GX_SetMemoryFill(gxCmdBuf, (u32*)gpuOut, 0x68B0D8FF, (u32*)&gpuOut[0x2EE00], 0x201, (u32*)gpuDOut, 0x00000000, (u32*)&gpuDOut[0x2EE00], 0x201);
 		gspWaitForPSC0();

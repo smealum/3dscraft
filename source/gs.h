@@ -2,6 +2,7 @@
 #define GS_H
 
 #include <3ds/types.h>
+#include "math.h"
 
 #define GS_MATRIXSTACK_SIZE (8)
 
@@ -25,6 +26,9 @@ typedef struct
 
 void gsInit(void);
 void gsExit(void);
+
+void gsStartFrame(void);
+void gsAdjustBufferMatrices(mtx44 transformation);
 
 void* gsLinearAlloc(size_t size);
 void gsLinearFree(void* mem);
