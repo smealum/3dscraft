@@ -242,7 +242,7 @@ static int gsUpdateTransformation()
 			if(m==GS_PROJECTION && bufferMatrixListLength<BUFFERMATRIXLIST_SIZE)
 			{
 				GPUCMD_GetBuffer(NULL, NULL, &bufferMatrixList[bufferMatrixListLength].offset);
-				memcpy(&bufferMatrixList[bufferMatrixListLength], gsGetMatrix(m), sizeof(mtx44));
+				memcpy(bufferMatrixList[bufferMatrixListLength].data, gsGetMatrix(m), sizeof(mtx44));
 				bufferMatrixListLength++;
 			}
 			gsSetUniformMatrix(gsMatrixStackRegisters[m], gsGetMatrix(m));

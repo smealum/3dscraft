@@ -17,6 +17,8 @@
 #include "terrain_bin.h"
 
 #define TICKS_PER_VBL (268123480/60)
+#define CONFIG_3D_SLIDERSTATE (*(float*)0x1FF81080)
+
 
 DVLB_s* shader;
 u32* texData;
@@ -141,13 +143,17 @@ int main(int argc, char** argv)
 	hidInit(NULL);
 	irrstInit(NULL);
 
+	gfxSet3D(true);
+
 	initConfiguration(NULL, argc, argv);
 
 	memset(debugValue, 0x00, sizeof(debugValue));
 
 	aptOpenSession();
-	print("%08X\n",(unsigned int)APT_SetAppCpuTimeLimit(NULL, 30));
+	Result ret=APT_SetAppCpuTimeLimit(NULL, 30);
 	aptCloseSession();
+
+	print("%08X\n",(unsigned int)ret);
 	
 	GPU_Init(NULL);
 
@@ -180,7 +186,7 @@ int main(int argc, char** argv)
 
 	while(aptMainLoop())
 	{
-		// u64 val=svcGetSystemTick();
+		float slider=CONFIG_3D_SLIDERSTATE;
 
 		hidScanInput();
 		if(keysDown()&KEY_START)break;
@@ -194,33 +200,56 @@ int main(int argc, char** argv)
 		gsStartFrame();
 		doFrame1();
 		GPUCMD_Finalize();
-		GPUCMD_FlushAndRun(gxCmdBuf);
 
-		//while GPU starts drawing the left buffer, we generate the right one
-		GPUCMD_SetBuffer(gpuCmdRight, gpuCmdSize, 0);
-		mtx44 m; loadIdentity44((float*)m);
-		gsAdjustBufferMatrices(m);
+		if(slider>0.0f)
+		{
+			//new and exciting 3D !
+			//make a copy of left gpu buffer
+			u32 offset; GPUCMD_GetBuffer(NULL, NULL, &offset);
+			memcpy(gpuCmdRight, gpuCmd, offset*4);
 
-		//we wait for the left buffer to finish drawing
-		gspWaitForP3D();
-		GX_SetDisplayTransfer(gxCmdBuf, (u32*)gpuOut, 0x019001E0, (u32*)gfxGetFramebuffer(GFX_TOP, GFX_LEFT, NULL, NULL), 0x019001E0, 0x01001000);
-		gspWaitForPPF();
+			//setup interaxial
+			float interaxial=slider*0.12f;
 
-		//we draw the right buffer, wait for it to finish and then switch back to left one
-		GX_SetMemoryFill(gxCmdBuf, (u32*)gpuOut, 0x68B0D8FF, (u32*)&gpuOut[0x2EE00], 0x201, (u32*)gpuDOut, 0x00000000, (u32*)&gpuDOut[0x2EE00], 0x201);
-		gspWaitForPSC0();
-		GPUCMD_FlushAndRun(gxCmdBuf);
-		gspWaitForP3D();
-		GX_SetDisplayTransfer(gxCmdBuf, (u32*)gpuOut, 0x019001E0, (u32*)gfxGetFramebuffer(GFX_TOP, GFX_RIGHT, NULL, NULL), 0x019001E0, 0x01001000);
-		gspWaitForPPF();
-		GPUCMD_SetBuffer(gpuCmd, gpuCmdSize, 0);
+			//adjust left gpu buffer fo 3D !
+			{mtx44 m; loadIdentity44((float*)m); translateMatrix((float*)m, 0.0f, -interaxial*0.5f, 0.0f); gsAdjustBufferMatrices(m);}
+
+			//draw left framebuffer
+			GPUCMD_FlushAndRun(gxCmdBuf);
+
+			//while GPU starts drawing the left buffer, adjust right one for 3D !
+			GPUCMD_SetBuffer(gpuCmdRight, gpuCmdSize, offset);
+			{mtx44 m; loadIdentity44((float*)m); translateMatrix((float*)m, 0.0f, interaxial*0.5f, 0.0f); gsAdjustBufferMatrices(m);}
+
+			//we wait for the left buffer to finish drawing
+			gspWaitForP3D();
+			GX_SetDisplayTransfer(gxCmdBuf, (u32*)gpuOut, 0x019001E0, (u32*)gfxGetFramebuffer(GFX_TOP, GFX_LEFT, NULL, NULL), 0x019001E0, 0x01001000);
+			gspWaitForPPF();
+
+			//we draw the right buffer, wait for it to finish and then switch back to left one
+			GX_SetMemoryFill(gxCmdBuf, (u32*)gpuOut, 0x68B0D8FF, (u32*)&gpuOut[0x2EE00], 0x201, (u32*)gpuDOut, 0x00000000, (u32*)&gpuDOut[0x2EE00], 0x201);
+			gspWaitForPSC0();
+
+			GPUCMD_FlushAndRun(gxCmdBuf);
+			gspWaitForP3D();
+
+			GX_SetDisplayTransfer(gxCmdBuf, (u32*)gpuOut, 0x019001E0, (u32*)gfxGetFramebuffer(GFX_TOP, GFX_RIGHT, NULL, NULL), 0x019001E0, 0x01001000);
+			gspWaitForPPF();
+			GPUCMD_SetBuffer(gpuCmd, gpuCmdSize, 0);
+		}else{
+			//boring old 2D !
+			GPUCMD_FlushAndRun(gxCmdBuf);
+			gspWaitForP3D();
+
+			GX_SetDisplayTransfer(gxCmdBuf, (u32*)gpuOut, 0x019001E0, (u32*)gfxGetFramebuffer(GFX_TOP, GFX_LEFT, NULL, NULL), 0x019001E0, 0x01001000);
+			gspWaitForPPF();
+		}
 
 		GX_SetMemoryFill(gxCmdBuf, (u32*)gpuOut, 0x68B0D8FF, (u32*)&gpuOut[0x2EE00], 0x201, (u32*)gpuDOut, 0x00000000, (u32*)&gpuDOut[0x2EE00], 0x201);
 		gspWaitForPSC0();
 		gfxSwapBuffersGpu();
 
 		gspWaitForEvent(GSPEVENT_VBlank0, true);
-		// debugValue[2]=(u32)(svcGetSystemTick()-val);
 
 		// u64 val=svcGetSystemTick();
 		// debugValue[1]=(u32)(svcGetSystemTick()-val);
