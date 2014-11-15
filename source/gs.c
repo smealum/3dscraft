@@ -72,7 +72,7 @@ void gsLinearFree(void* mem)
 //----------------------
 
 static mtx44 gsMatrixStacks[GS_MATRIXTYPES][GS_MATRIXSTACK_SIZE];
-static u32 gsMatrixStackRegisters[GS_MATRIXTYPES]={0x20, 0x24};
+static u32 gsMatrixStackRegisters[GS_MATRIXTYPES]={0x00, 0x04};
 static u8 gsMatrixStackOffsets[GS_MATRIXTYPES];
 static bool gsMatrixStackUpdated[GS_MATRIXTYPES];
 static GS_MATRIX gsCurrentMatrixType;

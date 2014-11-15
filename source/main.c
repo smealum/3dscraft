@@ -91,7 +91,7 @@ void doFrame1()
 
 	//setup lighting
 		vect3Df_s lightDir=vnormf(vect3Df(cos(lightAngle), -1.0f, sin(lightAngle)));
-		GPU_SetUniform(0x28, (u32*)(float[]){0.0f, -lightDir.z, -lightDir.y, -lightDir.x, 0.7f, 0.4f, 0.4f, 0.4f}, 8); //second vector is ambient lighting and multiplier
+		GPU_SetUniform(0x08, (u32*)(float[]){0.0f, -lightDir.z, -lightDir.y, -lightDir.x, 0.7f, 0.4f, 0.4f, 0.4f}, 8); //second vector is ambient lighting and multiplier
 
 	//draw world
 		gsMatrixMode(GS_MODELVIEW);
