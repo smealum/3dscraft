@@ -217,33 +217,39 @@ void updatePlayer(player_s* p, world_s* w, float timeDelta)
 {
 	if(!p)return;
 
+	const float dt=1.0f/60;
+	float v;
+	
 	//gravity
 	if(!p->flying)p->acceleration=vaddf(p->acceleration, vect3Df(0.0f, -100.0f, 0.0f));
 
-	p->velocity=vaddf(p->velocity, vmulf(p->acceleration, timeDelta));
-	p->velocity=vaddf(vmulf(p->velocity, timeDelta), vmulf(p->acceleration, timeDelta*timeDelta/2));
-
-	//collisions
-	if(vmagf(p->velocity)>0.0001f)
+	for(v=0.0f; timeDelta-v > 0.001f; v+=dt)
 	{
-		vect3Df_s v=p->velocity;
-		int i;
-		for(i=0; i<12; i++)
+		p->velocity=vaddf(p->velocity, vmulf(p->acceleration, dt));
+		p->velocity=vaddf(vmulf(p->velocity, dt), vmulf(p->acceleration, dt*dt/2));
+
+		//collisions
+		if(vmagf(p->velocity)>0.0001f)
 		{
-			vect3Df_s out;
-			vect3Df_s pt=vaddf(p->position, playerBox[i]);
-			performRayMarch(w, pt, vaddf(pt, v), &out, NULL, NULL);
-			v=vsubf(out,pt);
-			if(vmagf(v)<=0.0001f)break;
+			vect3Df_s v=p->velocity;
+			int i;
+			for(i=0; i<12; i++)
+			{
+				vect3Df_s out;
+				vect3Df_s pt=vaddf(p->position, playerBox[i]);
+				performRayMarch(w, pt, vaddf(pt, v), &out, NULL, NULL);
+				v=vsubf(out,pt);
+				if(vmagf(v)<=0.0001f)break;
+			}
+			p->velocity=v;
 		}
-		p->velocity=v;
+
+		p->position=vaddf(p->position, p->velocity);
+		p->camera.position=vaddf(p->position,vect3Df(0.0f, cos(p->headbob)*0.05f, 0.0f));
+
+		if(!p->flying)p->velocity=vect3Df(0.0f, p->velocity.y/dt, 0.0f);
+		else p->velocity=vect3Df(0.0f, 0.0f, 0.0f);
 	}
-
-	p->position=vaddf(p->position, p->velocity);
-	p->camera.position=vaddf(p->position,vect3Df(0.0f, cos(p->headbob)*0.05f, 0.0f));
-
-	if(!p->flying)p->velocity=vect3Df(0.0f, p->velocity.y/timeDelta, 0.0f);
-	else p->velocity=vect3Df(0.0f, 0.0f, 0.0f);
 
 	p->acceleration=vect3Df(0.0f, 0.0f, 0.0f);
 
