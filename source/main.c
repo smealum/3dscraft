@@ -91,7 +91,8 @@ void doFrame1()
 
 	//setup lighting
 		vect3Df_s lightDir=vnormf(vect3Df(cos(lightAngle), -1.0f, sin(lightAngle)));
-		GPU_SetUniform(0x08, (u32*)(float[]){0.0f, -lightDir.z, -lightDir.y, -lightDir.x, 0.7f, 0.4f, 0.4f, 0.4f}, 8); //second vector is ambient lighting and multiplier
+		GPU_SetUniform(SHDR_GetUniformRegister(shader, "lightDirection", 0), (u32*)(float[]){0.0f, -lightDir.z, -lightDir.y, -lightDir.x}, 4);
+		GPU_SetUniform(SHDR_GetUniformRegister(shader, "lightAmbient", 0), (u32*)(float[]){0.7f, 0.4f, 0.4f, 0.4f}, 4);
 
 	//draw world
 		gsMatrixMode(GS_MODELVIEW);
@@ -161,7 +162,9 @@ int main(int argc, char** argv)
 	
 	GPU_Init(NULL);
 
-	gsInit();
+	shader=SHDR_ParseSHBIN((u32*)test_vsh_shbin,test_vsh_shbin_size);
+
+	gsInit(shader);
 
 	lightAngle=1.0f;
 
@@ -183,8 +186,6 @@ int main(int argc, char** argv)
 
 	initPlayer(&player);
 	initSky();
-
-	shader=SHDR_ParseSHBIN((u32*)test_vsh_shbin,test_vsh_shbin_size);
 
 	GX_SetMemoryFill(gxCmdBuf, (u32*)gpuOut, 0x68B0D8FF, (u32*)&gpuOut[0x2EE00], 0x201, (u32*)gpuDOut, 0x00000000, (u32*)&gpuDOut[0x2EE00], 0x201);
 	// gspWaitForPSC0();

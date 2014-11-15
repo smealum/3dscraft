@@ -9,6 +9,12 @@
 	.out o2, result.texcoord0
 	.out o3, result.texcoord1
 	.out o4, result.texcoord2
+
+; setup uniform map (required to use SHDR_GetUniformRegister)
+	.uniform 0, 3, projection      ; c0-c3 = projection matrix
+	.uniform 4, 7, modelview       ; c4-c7 = modelview matrix
+	.uniform 8, 8, lightDirection  ; c8    = light direction vector
+	.uniform 9, 9, lightAmbient    ; c9    = light ambient color
  
 ;code
 	main:

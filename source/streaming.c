@@ -65,7 +65,7 @@ int readWorldStream(worldStream_s* ws)
 		Result ret=FSFILE_Read(ws->file, &bytesRead, offset, buffer, sizeof(fileListHeader_s));
 		if(ret || bytesRead!=sizeof(fileListHeader_s))return -1;
 		ws->size+=bytesRead;
-		print("test %d\n",buffer->length);
+		// print("test %d\n",buffer->length);
 		int i; for(i=0;i<FILELISTBLOCK_LENGTH;i++)addChunkToRepository(&ws->chunks, buffer->list[i].x, buffer->list[i].z, buffer->list[i].offset);
 		offset=buffer->next;
 	}while(offset);
@@ -164,7 +164,7 @@ bool loadChunk(worldStream_s* ws, s32 x, s32 z, u8* dst)
 	chunkInfo_s* ci=getChunkFromRepository(&ws->chunks, x, z);
 	if(!ci)return false;
 
-	print("found %d %d\n",x,z);
+	// print("found %d %d\n",x,z);
 
 	u32 bytesRead=0;
 	Result ret=FSFILE_Read(ws->file, &bytesRead, ci->offset, dst, CHUNK_DATASIZE);
@@ -214,9 +214,9 @@ void initWorldStream(worldStream_s* ws, char* path)
 		if(createWorldStream(ws)){svcCloseHandle(ws->file); return;}
 	}else{
 		readWorldStreamHeader(ws);
-		print("STREAM HEADER %08X %08X %08X\n",ws->header.magic,ws->header.first,ws->header.last);
+		// print("STREAM HEADER %08X %08X %08X\n",ws->header.magic,ws->header.first,ws->header.last);
 		readWorldStream(ws);
-		print("STREAM %d chunks\n",ws->chunks.length);
+		// print("STREAM %d chunks\n",ws->chunks.length);
 	}
 	ret=FSFILE_GetSize(ws->file, &ws->size);
 	ws->flushed=true;

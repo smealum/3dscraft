@@ -13,6 +13,8 @@ static void gsInitMatrixStack();
 
 Handle linearAllocMutex;
 
+static u32 gsMatrixStackRegisters[GS_MATRIXTYPES];
+
 typedef struct
 {
 	u32 offset;
@@ -31,11 +33,16 @@ void initBufferMatrixList()
 	bufferMatrixListLength=0;
 }
 
-void gsInit(void)
+void gsInit(DVLB_s* shader)
 {
 	gsInitMatrixStack();
 	initBufferMatrixList();
 	svcCreateMutex(&linearAllocMutex, false);
+	if(shader)
+	{
+		gsMatrixStackRegisters[0]=SHDR_GetUniformRegister(shader, "projection", 0);
+		gsMatrixStackRegisters[1]=SHDR_GetUniformRegister(shader, "modelview", 0);
+	}
 }
 
 void gsExit(void)

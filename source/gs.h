@@ -1,7 +1,7 @@
 #ifndef GS_H
 #define GS_H
 
-#include <3ds/types.h>
+#include <3ds.h>
 #include "math.h"
 
 #define GS_MATRIXSTACK_SIZE (8)
@@ -24,7 +24,7 @@ typedef struct
 }gsVbo_s;
 
 
-void gsInit(void);
+void gsInit(DVLB_s* shader);
 void gsExit(void);
 
 void gsStartFrame(void);
