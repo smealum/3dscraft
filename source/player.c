@@ -14,6 +14,7 @@ void initPlayer(player_s* p)
 	p->position=vect3Df(0.0f, CHUNK_HEIGHT*CLUSTER_SIZE/2+CLUSTER_SIZE, 0.0f);
 	loadIdentity44((float*)p->camera.orientation);
 	p->velocity=vect3Df(0.0f, 0.0f, 0.0f);
+	p->acceleration=vect3Df(0.0f, 0.0f, 0.0f);
 	p->headbob=0.0f;
 	p->flying=false;
 	p->block=BLOCK_DIRT;
@@ -150,10 +151,10 @@ void controlsPlayer(player_s* p, world_s* w)
 	vect3Df_s vz=vnormf(getMatrixColumn((float*)p->camera.orientation, 2));
 	vect3Df_s vz2=(!p->flying)?vnormf(vect3Df(vz.x,0.0f,vz.z)):vz;
 
-	if(cpad.dy>20){p->velocity=vaddf(p->velocity, vmulf(vz2, -(cpad.dy*0.25f)/0x9C));if(!p->flying)p->headbob+=0.3f;}
-	if(cpad.dy<-20){p->velocity=vaddf(p->velocity, vmulf(vz2, -(cpad.dy*0.25f)/0x9C));if(!p->flying)p->headbob-=0.3f;}
-	if(cpad.dx>20){p->velocity=vaddf(p->velocity, vmulf(vx, (cpad.dx*0.25f)/0x9C));if(!p->flying)p->headbob+=0.3f;}
-	if(cpad.dx<-20){p->velocity=vaddf(p->velocity, vmulf(vx, (cpad.dx*0.25f)/0x9C));if(!p->flying)p->headbob+=0.3f;}
+	if(cpad.dy>20){p->acceleration=vaddf(p->acceleration, vmulf(vz2, -(cpad.dy*900.0f)/0x9C));if(!p->flying)p->headbob+=0.3f;}
+	if(cpad.dy<-20){p->acceleration=vaddf(p->acceleration, vmulf(vz2, -(cpad.dy*900.0f)/0x9C));if(!p->flying)p->headbob-=0.3f;}
+	if(cpad.dx>20){p->acceleration=vaddf(p->acceleration, vmulf(vx, (cpad.dx*900.0f)/0x9C));if(!p->flying)p->headbob+=0.3f;}
+	if(cpad.dx<-20){p->acceleration=vaddf(p->acceleration, vmulf(vx, (cpad.dx*900.0f)/0x9C));if(!p->flying)p->headbob+=0.3f;}
 
 	if(hidKeysDown()&KEY_DRIGHT)p->block++;
 	else if(hidKeysDown()&KEY_DLEFT)p->block--;
@@ -164,7 +165,7 @@ void controlsPlayer(player_s* p, world_s* w)
 
 	if(!p->flying)
 	{
-		if(hidKeysDown()&KEY_L)p->velocity=vaddf(p->velocity, vect3Df(0.0f, 0.6f, 0.0f));
+		if(hidKeysDown()&KEY_L)p->velocity=vaddf(p->velocity, vect3Df(0.0f, 35.0f, 0.0f)); //jumping acts on velocity directly
 
 		if(w)
 		{
@@ -182,8 +183,8 @@ void controlsPlayer(player_s* p, world_s* w)
 			}else p->cursor.active=false;
 		}
 	}else{
-		if(PAD&KEY_L)p->velocity=vaddf(p->velocity, vmulf(vy, 0.2f));
-		if(PAD&KEY_R)p->velocity=vaddf(p->velocity, vmulf(vy, -0.2f));
+		if(PAD&KEY_L)p->acceleration=vaddf(p->acceleration, vmulf(vy, 60.0f));
+		if(PAD&KEY_R)p->acceleration=vaddf(p->acceleration, vmulf(vy, -60.0f));
 	}
 
 	cstick.dx=(abs(cstick.dx)<5)?0:cstick.dx;
@@ -212,12 +213,15 @@ vect3Df_s playerBox[]={(vect3Df_s){-PLAYERSIZE,-PLAYERHEIGHT*3,-PLAYERSIZE},
 						(vect3Df_s){-PLAYERSIZE,+PLAYERHEIGHT,+PLAYERSIZE},
 						(vect3Df_s){+PLAYERSIZE,+PLAYERHEIGHT,+PLAYERSIZE}};
 
-void updatePlayer(player_s* p, world_s* w)
+void updatePlayer(player_s* p, world_s* w, float timeDelta)
 {
 	if(!p)return;
 
 	//gravity
-	if(!p->flying)p->velocity=vaddf(p->velocity, vect3Df(0.0f, -0.05f, 0.0f));
+	if(!p->flying)p->acceleration=vaddf(p->acceleration, vect3Df(0.0f, -100.0f, 0.0f));
+
+	p->velocity=vaddf(p->velocity, vmulf(p->acceleration, timeDelta));
+	p->velocity=vaddf(vmulf(p->velocity, timeDelta), vmulf(p->acceleration, timeDelta*timeDelta/2));
 
 	//collisions
 	if(vmagf(p->velocity)>0.0001f)
@@ -238,8 +242,10 @@ void updatePlayer(player_s* p, world_s* w)
 	p->position=vaddf(p->position, p->velocity);
 	p->camera.position=vaddf(p->position,vect3Df(0.0f, cos(p->headbob)*0.05f, 0.0f));
 
-	if(!p->flying)p->velocity=vect3Df(0.0f, p->velocity.y, 0.0f);
+	if(!p->flying)p->velocity=vect3Df(0.0f, p->velocity.y/timeDelta, 0.0f);
 	else p->velocity=vect3Df(0.0f, 0.0f, 0.0f);
+
+	p->acceleration=vect3Df(0.0f, 0.0f, 0.0f);
 
 	//world streaming
 	if(w)

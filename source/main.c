@@ -16,7 +16,8 @@
 #include "test_vsh_shbin.h"
 #include "terrain_bin.h"
 
-#define TICKS_PER_VBL (268123480/60)
+#define TICKS_PER_SEC (268123480)
+#define TICKS_PER_VBL (TICKS_PER_SEC/60)
 #define CONFIG_3D_SLIDERSTATE (*(float*)0x1FF81080)
 
 
@@ -188,10 +189,14 @@ int main(int argc, char** argv)
 	GX_SetMemoryFill(gxCmdBuf, (u32*)gpuOut, 0x68B0D8FF, (u32*)&gpuOut[0x2EE00], 0x201, (u32*)gpuDOut, 0x00000000, (u32*)&gpuDOut[0x2EE00], 0x201);
 	// gspWaitForPSC0();
 	gfxSwapBuffersGpu();
+	u64 lastTick=svcGetSystemTick();
 
 	while(aptMainLoop())
 	{
 		float slider=CONFIG_3D_SLIDERSTATE;
+		u64 newTick=svcGetSystemTick();
+		float timeDelta=((float)(newTick-lastTick))/TICKS_PER_SEC;
+		lastTick=newTick;
 
 		hidScanInput();
 		if(keysDown()&KEY_START)break;
@@ -199,7 +204,7 @@ int main(int argc, char** argv)
 		if(keysHeld()&KEY_B)lightAngle-=0.1f;
 		controlsPlayer(&player, &world);
 
-		updatePlayer(&player, &world);
+		updatePlayer(&player, &world, timeDelta);
 		updateWorld(&world);
 		updateSky();
 		updateDispatcher(NULL);

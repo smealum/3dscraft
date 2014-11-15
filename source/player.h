@@ -11,6 +11,7 @@ typedef struct
 {
 	vect3Df_s position;
 	vect3Df_s velocity;
+	vect3Df_s acceleration;
 	camera_s camera;
 	cursor_s cursor;
 	float headbob;
@@ -20,7 +21,7 @@ typedef struct
 
 void initPlayer(player_s* p);
 void controlsPlayer(player_s* p, world_s* w);
-void updatePlayer(player_s* p, world_s* w);
+void updatePlayer(player_s* p, world_s* w, float timeDelta);
 void setCameraPlayer(player_s* p);
 
 #endif
