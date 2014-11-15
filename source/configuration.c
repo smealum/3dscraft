@@ -14,6 +14,11 @@ void initConfiguration(configuration_s* c, int argc, char** argv)
 	if(argc && argv)
 	{
 		//grab path from arguments
+		int l;
+		for(l=strlen(argv[0]); l>=0 && argv[0][l]!='/'; l--);
+		c->path=malloc(l+1);
+		memcpy(c->path, argv[0], l);
+		c->path[l+1]=0x00;
 	}else{
 		c->path=(char*)defaultPath;
 	}
