@@ -10,7 +10,8 @@ A first public release is planned for the November 21st-23rd weekend. This demo 
 ### TODO list for that demo :
 
 - [x] add 3D rendering support
-- [ ] improve lighting
+- [x] improve lighting
+- [ ] improve world generation code
 - [ ] add "hand"
 - [ ] add basic menu and bottom screen interface
 
