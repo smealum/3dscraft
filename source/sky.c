@@ -11,13 +11,13 @@
 const faceVertex_s cloudVboData[]=
 {
 	//first triangle
-	{(vect3Df_s){-0.5f, 0.0f, -0.5f}, (float[]){0.0f, 0.0f}, (vect3Df_s){1.0f, 0.0f, 0.0f}},
-	{(vect3Df_s){+0.5f, 0.0f, -0.5f}, (float[]){1.0f, 0.0f}, (vect3Df_s){1.0f, 0.0f, 0.0f}},
-	{(vect3Df_s){+0.5f, 0.0f, +0.5f}, (float[]){1.0f, 1.0f}, (vect3Df_s){1.0f, 0.0f, 0.0f}},
+	{(vect3Df_s){-0.5f, 0.0f, -0.5f}, (float[]){0.0f, 0.0f}, (vect3Df_s){0.0f, 1.0f, 0.0f}},
+	{(vect3Df_s){+0.5f, 0.0f, -0.5f}, (float[]){1.0f, 0.0f}, (vect3Df_s){0.0f, 1.0f, 0.0f}},
+	{(vect3Df_s){+0.5f, 0.0f, +0.5f}, (float[]){1.0f, 1.0f}, (vect3Df_s){0.0f, 1.0f, 0.0f}},
 	//first triangle
-	{(vect3Df_s){+0.5f, 0.0f, +0.5f}, (float[]){1.0f, 1.0f}, (vect3Df_s){1.0f, 0.0f, 0.0f}},
-	{(vect3Df_s){-0.5f, 0.0f, +0.5f}, (float[]){0.0f, 1.0f}, (vect3Df_s){1.0f, 0.0f, 0.0f}},
-	{(vect3Df_s){-0.5f, 0.0f, -0.5f}, (float[]){0.0f, 0.0f}, (vect3Df_s){1.0f, 0.0f, 0.0f}},
+	{(vect3Df_s){+0.5f, 0.0f, +0.5f}, (float[]){1.0f, 1.0f}, (vect3Df_s){0.0f, 1.0f, 0.0f}},
+	{(vect3Df_s){-0.5f, 0.0f, +0.5f}, (float[]){0.0f, 1.0f}, (vect3Df_s){0.0f, 1.0f, 0.0f}},
+	{(vect3Df_s){-0.5f, 0.0f, -0.5f}, (float[]){0.0f, 0.0f}, (vect3Df_s){0.0f, 1.0f, 0.0f}},
 };
 
 vect3Df_s cloudOffset;

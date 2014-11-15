@@ -29,6 +29,8 @@ world_s world;
 u32* gpuOut=(u32*)0x1F119400;
 u32* gpuDOut=(u32*)0x1F370800;
 
+float lightAngle;
+
 u32 debugValue[128];
 
 //stolen from staplebutt
@@ -86,14 +88,15 @@ void doFrame1()
 			GPU_ATTRIBFMT(0, 3, GPU_FLOAT)|GPU_ATTRIBFMT(1, 2, GPU_FLOAT)|GPU_ATTRIBFMT(2, 3, GPU_FLOAT),
 			0xFFC, 0x210, 1, (u32[]){0x00000000}, (u64[]){0x210}, (u8[]){3});
 
+	//setup lighting
+		vect3Df_s lightDir=vnormf(vect3Df(cos(lightAngle), -1.0f, sin(lightAngle)));
+		GPU_SetUniform(0x28, (u32*)(float[]){0.0f, -lightDir.z, -lightDir.y, -lightDir.x, 0.7f, 0.4f, 0.4f, 0.4f}, 8); //second vector is ambient lighting and multiplier
+
 	//draw world
 		gsMatrixMode(GS_MODELVIEW);
 		gsPushMatrix();
 			setCameraPlayer(&player);
-		// debugValue[5]=0;
-		// debugValue[6]=0;
 			drawWorld(&world, &player.camera);
-		// debugValue[6]=1;
 			drawCursor(&player.cursor);
 			drawSky();
 		gsPopMatrix();
@@ -159,6 +162,8 @@ int main(int argc, char** argv)
 
 	gsInit();
 
+	lightAngle=1.0f;
+
 	u32 gpuCmdSize=0x40000;
 	u32* gpuCmd=(u32*)linearAlloc(gpuCmdSize*4);
 	u32* gpuCmdRight=(u32*)linearAlloc(gpuCmdSize*4);
@@ -190,6 +195,8 @@ int main(int argc, char** argv)
 
 		hidScanInput();
 		if(keysDown()&KEY_START)break;
+		if(keysHeld()&KEY_A)lightAngle+=0.1f;
+		if(keysHeld()&KEY_B)lightAngle-=0.1f;
 		controlsPlayer(&player, &world);
 
 		updatePlayer(&player, &world);

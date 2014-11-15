@@ -53,7 +53,7 @@ const vect3Df_s fd2[]={(vect3Df_s){0.0f,1.0f,0.0f}, //MX
 						};
 
 const vect3Df_s fn[]={(vect3Df_s){-1.0f,0.0f,0.0f}, //MX
-						(vect3Df_s){1.0f,0.0f,1.0f}, //PX
+						(vect3Df_s){1.0f,0.0f,0.0f}, //PX
 						(vect3Df_s){0.0f,-1.0f,0.0f}, //MY
 						(vect3Df_s){0.0f,1.0f,0.0f}, //PY
 						(vect3Df_s){0.0f,0.0f,-1.0f}, //MZ

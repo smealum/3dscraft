@@ -12,13 +12,13 @@ u32* cursorTexture;
 const faceVertex_s cursorVboData[]=
 {
 	//first triangle
-	{(vect3Df_s){-0.5f*CURSOR_SCALEFACT, 0.5f*CURSOR_SCALEFACT, -0.5f*CURSOR_SCALEFACT}, (float[]){0.125f, 1.0f-0.125f}, (vect3Df_s){1.0f, 0.0f, 0.0f}},
-	{(vect3Df_s){-0.5f*CURSOR_SCALEFACT, 0.5f*CURSOR_SCALEFACT, +0.5f*CURSOR_SCALEFACT}, (float[]){0.1875f, 1.0f-0.125f}, (vect3Df_s){1.0f, 0.0f, 0.0f}},
-	{(vect3Df_s){+0.5f*CURSOR_SCALEFACT, 0.5f*CURSOR_SCALEFACT, +0.5f*CURSOR_SCALEFACT}, (float[]){0.1875f, 1.0f-0.0625f}, (vect3Df_s){1.0f, 0.0f, 0.0f}},
+	{(vect3Df_s){-0.5f*CURSOR_SCALEFACT, 0.5f*CURSOR_SCALEFACT, -0.5f*CURSOR_SCALEFACT}, (float[]){0.125f, 1.0f-0.125f}, (vect3Df_s){0.0f, 1.0f, 0.0f}},
+	{(vect3Df_s){-0.5f*CURSOR_SCALEFACT, 0.5f*CURSOR_SCALEFACT, +0.5f*CURSOR_SCALEFACT}, (float[]){0.1875f, 1.0f-0.125f}, (vect3Df_s){0.0f, 1.0f, 0.0f}},
+	{(vect3Df_s){+0.5f*CURSOR_SCALEFACT, 0.5f*CURSOR_SCALEFACT, +0.5f*CURSOR_SCALEFACT}, (float[]){0.1875f, 1.0f-0.0625f}, (vect3Df_s){0.0f, 1.0f, 0.0f}},
 	//first triangle
-	{(vect3Df_s){+0.5f*CURSOR_SCALEFACT, 0.5f*CURSOR_SCALEFACT, +0.5f*CURSOR_SCALEFACT}, (float[]){0.1875f, 1.0f-0.0625f}, (vect3Df_s){1.0f, 0.0f, 0.0f}},
-	{(vect3Df_s){+0.5f*CURSOR_SCALEFACT, 0.5f*CURSOR_SCALEFACT, -0.5f*CURSOR_SCALEFACT}, (float[]){0.125f, 1.0f-0.0625f}, (vect3Df_s){1.0f, 0.0f, 0.0f}},
-	{(vect3Df_s){-0.5f*CURSOR_SCALEFACT, 0.5f*CURSOR_SCALEFACT, -0.5f*CURSOR_SCALEFACT}, (float[]){0.125f, 1.0f-0.125f}, (vect3Df_s){1.0f, 0.0f, 0.0f}},
+	{(vect3Df_s){+0.5f*CURSOR_SCALEFACT, 0.5f*CURSOR_SCALEFACT, +0.5f*CURSOR_SCALEFACT}, (float[]){0.1875f, 1.0f-0.0625f}, (vect3Df_s){0.0f, 1.0f, 0.0f}},
+	{(vect3Df_s){+0.5f*CURSOR_SCALEFACT, 0.5f*CURSOR_SCALEFACT, -0.5f*CURSOR_SCALEFACT}, (float[]){0.125f, 1.0f-0.0625f}, (vect3Df_s){0.0f, 1.0f, 0.0f}},
+	{(vect3Df_s){-0.5f*CURSOR_SCALEFACT, 0.5f*CURSOR_SCALEFACT, -0.5f*CURSOR_SCALEFACT}, (float[]){0.125f, 1.0f-0.125f}, (vect3Df_s){0.0f, 1.0f, 0.0f}},
 };
 
 void initCursor(cursor_s* c)
