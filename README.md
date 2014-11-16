@@ -9,10 +9,11 @@ A first public release is planned for the November 21st-23rd weekend. This demo 
 
 ### TODO list for that demo :
 
-- ~~add 3D rendering support~~
-- improve lighting
-- add "hand"
-- add basic menu and bottom screen interface
+- [x] add 3D rendering support
+- [x] improve lighting
+- [ ] improve world generation code
+- [ ] add "hand"
+- [ ] add basic menu and bottom screen interface
 
 ### License
 
