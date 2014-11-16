@@ -1,0 +1,62 @@
+.navSearch form {
+                width: auto;
+                margin: 30px 15px;
+}
+.navSearch .search {
+                padding:8px 15px;
+                color: white;
+                border:0px solid #dbdbdb;
+                
+                background: gray;
+}
+.navSearch .button {
+                position:relative;
+                padding:6px 25px;
+                left:-8px;
+                border:2px solid #006AC1;
+                background-color:#006AC1;
+                color: white;
+}
+.navSearch .button:hover  {
+                background-color:#1FAEFF;
+                border:2px solid #1FAEFF;
+                color:white;
+}
+@media only screen and (max-width : 930px) {
+ 
+    .navContainer {
+                width:100%;
+                display:table;
+                backgroun:red;
+    }
+ 
+	.navSearch {
+                width: 100%; 
+                top: 100px;
+                left: 0;
+                right: 0;
+                margin: 0 auto;
+                height: 30px;
+                overflow: hidden;
+                -webkit-box-sizing: border-box;
+                -moz-box-sizing: border-box;
+                box-sizing: border-box;
+    }
+    .navSearch form {
+                margin: 0 auto;
+    }
+    .navSearch .search {
+                    margin-left: 8px;
+                    float: left;
+                    width: 60%;
+                    position: absolute; 
+    }
+    .navSearch .button {
+                    float: left;
+                    margin-left: 60%; 
+                    width: 40%;
+    }
+    .mainContent{
+                 margin-top: 150px;
+    }
+}

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html class="no-js" lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>MinePocket</title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<!-- STYLESHEETS -->
+    <link href="css/mainStruct.css" rel="stylesheet">
+	<link href="css/~css.css" rel="stylesheet">
+	<link href="css/widgets.css" rel="stylesheet">
+	<link href="css/content.css" rel="stylesheet">
+    <link href="css/jquery.sidr.light.css" rel="stylesheet">
+	<link id="scrollUpTheme" href="css/scrollTop.css" rel="stylesheet">
+	
+	<!-- SCRIPTS  -->
+	<script src="js/jquery.min.js"></script>
+	<script src="js/jquery.sidr.min.js"></script>
+	<script src="js/jquery.scrollUp.js"></script>
+	<script src="js/mousewheel.js"></script>
+	
+	<!-- IN CASE OF IE 9 -->
+	<!--[if lt IE 9]> 
+ 		<script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script> 
+ 	<![endif]--> 
+</head>
+<body>
+	<script>
+		$(function () {
+            $.scrollUp({
+                animation: 'slide',
+				scrollImg: {
+            		active: true,
+                    type: 'background',
+                    src: 'img/top.png'
+                }
+            });
+        });
+
+			
+		jQuery(document).ready(function() {
+			var wrap = $("#nav");
+			$(window).scroll(function (event) {
+			    var scroll = $(window).scrollTop();
+			    if (scroll > 50) {
+			  		wrap.addClass("navLogo");
+				} else {
+				    wrap.removeClass("navLogo");
+				}
+			});
+		});
+	</script>
+
+	<div class="navSearch navContainer">
+          <form id="ffresult_sbox1" action="http://search.freefind.com/find.html" method="get" accept-charset="utf-8" target="_self">
+            <input class="search" type="text" placeholder="Search..." required>
+            <input class="button" name="query" type="submit" value="Search">
+			<input type="hidden" name="si" value="45751903">
+    		<input type="hidden" name="pid" value="r">
+    		<input type="hidden" name="n" value="0">
+    		<input type="hidden" name="_charset_" value="">
+    		<input type="hidden" name="bcd" value="&#247;">
+          </form>
+	</div>
+	<header class="header">
+		<div class="logo"></div>
+		<nav id="nav" class="nav navLogoMobile">
+			<div class="navLogo">
+				<!--img src="img/logo.png"/-->
+			</div>
+			<div class="content">
+				<a href="/"><h3>HOME</h3></a>
+				<a href="/"><h3>FORUMS</h3></a>
+				<a href="/"><h3>NEWS</h3></a>
+				<a href="/"><h3>SERVERS</h3></a>
+				<a href="#staff" id="STAFF"><h3>STAFF</h3></a>
+			</div>
+			</br>
+			<div class="extra">
+				<img src="http://imgur.com/CGLqpIL.png"/>
+				<div class="widget">
+				t
+				</div>
+			</div>
+		</nav>
+	</header>
+	<div class="mainContent">
+		<div class="actualContent">
+			<h1><strong>TEMPLATE TEXT</strong></h1>
+		</div>
+	</div>
+	<footer>
+		<div class="content">
+			© MinePocket 2013-2015, Website designed by <a href="http://www.filfatstudios.com">filfat Studio's</a>
+		</div>
+	</footer>
+	
+	<div id="staff-left">
+		<h1>OWNER</h1>
+			<p>KnightRider</p>
+		<h1>ADMINS</h1>
+			<p>filfat</p>
+			<p>EnderCreep</p>
+		<h1>MODS</h1>
+
+	</div>
+	 
+	<script>
+	$(document).ready(function() {
+		$('#STAFF').sidr({
+	      name: 'staff-left',
+	      side: 'left',
+		  displace: true,
+		  body: 'body'
+	    });
+	});
+	</script>
+
+</body>
+</html>
