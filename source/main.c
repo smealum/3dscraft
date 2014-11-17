@@ -9,6 +9,7 @@
 #include "sky.h"
 #include "world.h"
 #include "dispatcher.h"
+#include "generation.h"
 #include "player.h"
 #include "text.h"
 #include "configuration.h"
@@ -151,6 +152,7 @@ int main(int argc, char** argv)
 	gfxSet3D(true);
 
 	initConfiguration(NULL, argc, argv);
+	initGeneration();
 
 	memset(debugValue, 0x00, sizeof(debugValue));
 
@@ -278,6 +280,7 @@ int main(int argc, char** argv)
 
 	exitDispatcher(NULL);
 	exitWorld(&world);
+	exitGeneration();
 
 	gsExit();
 	irrstExit();

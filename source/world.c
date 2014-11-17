@@ -7,6 +7,7 @@
 #include "sdnoise.h"
 #include "text.h"
 #include "configuration.h"
+#include "generation.h"
 
 #define pushFace(l, s, f) ((l)[(s)++]=f)
 #define popFace(l, s) ((s)?(&((l)[--(s)])):NULL)
@@ -237,33 +238,12 @@ void buildClusterGeometry(worldCluster_s* wcl, blockFace_s* faceList, int faceBu
 	wcl->status&=~WCL_GEOM_UNAVAILABLE;
 }
 
-int getWorldElevation(vect3Di_s p)
-{
-	return (int)(sdnoise2(((float)p.x)/(CLUSTER_SIZE*4), ((float)p.z)/(CLUSTER_SIZE*4), NULL, NULL)*CLUSTER_SIZE)+(CHUNK_HEIGHT*CLUSTER_SIZE/2);
-}
-
 void generateWorldClusterData(worldCluster_s* wcl, worldChunk_s* wch)
 {
 	if(!wcl || !wch)return;
 	if(!(wcl->status&WCL_GEOM_UNAVAILABLE)){gsVboDestroy(&wcl->vbo);wcl->status|=WCL_GEOM_UNAVAILABLE;}
 
-	//TEMP
-	int i, j, k;
-	for(i=0; i<CLUSTER_SIZE; i++)
-	{
-		for(k=0; k<CLUSTER_SIZE; k++)
-		{
-			//TEMP
-			const vect3Di_s p=vect3Di(i+wcl->position.x*CLUSTER_SIZE, wcl->position.y*CLUSTER_SIZE, k+wcl->position.z*CLUSTER_SIZE);
-			const int height=wch->info[i][k].elevation;
-			for(j=0; j<CLUSTER_SIZE; j++)
-			{
-				if(p.y+j == height)wcl->data[i][j][k]=BLOCK_GRASS;
-				else if(p.y+j < height)wcl->data[i][j][k]=BLOCK_DIRT;
-				else wcl->data[i][j][k]=BLOCK_AIR;
-			}
-		}
-	}
+	generateWorldCluster(&wch->info, wcl);
 }
 
 s16 getWorldClusterBlock(worldCluster_s* wcl, vect3Di_s p)
@@ -289,17 +269,9 @@ void generateWorldChunkData(worldChunk_s* wch)
 {
 	if(!wch)return;
 
-	int i, j, k;
-	for(i=0; i<CLUSTER_SIZE; i++)
-	{
-		for(k=0; k<CLUSTER_SIZE; k++)
-		{
-			const vect3Di_s p=vect3Di(i+wch->position.x*CLUSTER_SIZE, 0, k+wch->position.z*CLUSTER_SIZE);
-			wch->info[i][k].elevation=getWorldElevation(p);
-		}
-	}
+	generateWorldChunkInfo(wch, &wch->info);
 
-	for(j=0; j<CHUNK_HEIGHT; j++)generateWorldClusterData(&wch->data[j], wch);
+	int j; for(j=0; j<CHUNK_HEIGHT; j++)generateWorldClusterData(&wch->data[j], wch);
 }
 
 void drawWorldChunk(world_s* w, worldChunk_s* wch, camera_s* c)
