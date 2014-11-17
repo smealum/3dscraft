@@ -22,4 +22,5 @@ A first public release is planned for the November 21st-23rd weekend. This demo 
 ### Credits
 
 - code by smea
+- icon and logo by @Forstride
 - various textures stolen from random places; currently default texture pack is an old version of eldpack, by eld.
