@@ -1,4 +1,4 @@
-3dscraft
+3dscraft [![Build Status](http://build.filfatstudios.com:8080/job/WiiCraft/badge/icon)](http://build.filfatstudios.com:8080/job/WiiCraft/)
 ========
 
 ### Description
