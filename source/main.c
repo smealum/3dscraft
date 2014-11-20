@@ -270,7 +270,7 @@ int main(int argc, char** argv)
 
 		gspWaitForEvent(GSPEVENT_VBlank0, true);
 
-		if(keysDown()&KEY_SELECT)saveScreenshot();
+		if(keysDown()&KEY_Y)saveScreenshot();
 
 		// u64 val=svcGetSystemTick();
 		// debugValue[1]=(u32)(svcGetSystemTick()-val);
