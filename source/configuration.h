@@ -3,6 +3,8 @@
 
 #include <3ds.h>
 
+#define CONFIG_3D_SLIDERSTATE (*(volatile float*)0x1FF81080)
+
 typedef struct
 {
 	char* path;

@@ -14,14 +14,13 @@
 #include "text.h"
 #include "configuration.h"
 #include "subscreen.h"
+#include "bmp.h"
 
 #include "test_vsh_shbin.h"
 #include "terrain_bin.h"
 
 #define TICKS_PER_SEC (268123480)
 #define TICKS_PER_VBL (TICKS_PER_SEC/60)
-#define CONFIG_3D_SLIDERSTATE (*(float*)0x1FF81080)
-
 
 DVLB_s* shader;
 u32* texData;
@@ -187,6 +186,7 @@ int main(int argc, char** argv)
 	initChunkPool();
 	initWorld(&world);
 	initSubscreen();
+	initScreenshot();
 	print("generating world...\n");
 
 	initPlayer(&player);
@@ -270,6 +270,8 @@ int main(int argc, char** argv)
 
 		gspWaitForEvent(GSPEVENT_VBlank0, true);
 
+		if(keysDown()&KEY_SELECT)saveScreenshot();
+
 		// u64 val=svcGetSystemTick();
 		// debugValue[1]=(u32)(svcGetSystemTick()-val);
 		// print("%d\n", (int)debugValue[7]);
@@ -282,6 +284,7 @@ int main(int argc, char** argv)
 		// drawBottom(); //DEBUG
 	}
 
+	exitScreenshot();
 	exitSubscreen();
 	flushWorld(&world);
 	exitDispatcher(NULL);
