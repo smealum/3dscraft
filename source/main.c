@@ -283,6 +283,7 @@ int main(int argc, char** argv)
 	}
 
 	exitSubscreen();
+	flushWorld(&world);
 	exitDispatcher(NULL);
 	exitWorld(&world);
 	exitGeneration();

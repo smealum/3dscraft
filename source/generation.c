@@ -50,6 +50,7 @@ void generateWorldCluster(worldChunkInfo_s* wci, worldCluster_s* wcl)
 			for(j=0; j<CLUSTER_SIZE; j++)
 			{
 				if(p.y+j == height)wcl->data[i][j][k]=BLOCK_GRASS;
+				else if(p.y+j < height-3)wcl->data[i][j][k]=BLOCK_STONE;
 				else if(p.y+j < height)wcl->data[i][j][k]=BLOCK_DIRT;
 				else wcl->data[i][j][k]=BLOCK_AIR;
 			}

@@ -16,6 +16,7 @@ typedef struct
 	camera_s camera;
 	cursor_s cursor;
 	float headbob;
+	bool destroy;
 	bool flying;
 	u8 block;
 }player_s;

@@ -313,6 +313,20 @@ void initWorld(world_s* w)
 	w->position=vect3Di(-WORLD_SIZE/2,0,-WORLD_SIZE/2);
 }
 
+void flushWorld(world_s* w)
+{
+	if(!w)return;
+
+	int i, j;
+	for(i=0; i<WORLD_SIZE; i++)
+	{
+		for(j=0; j<WORLD_SIZE; j++)
+		{
+			if(w->data[i][j]){freeChunk(w->data[i][j]); w->data[i][j]=NULL;}
+		}
+	}
+}
+
 void exitWorld(world_s* w)
 {
 	if(!w)return;

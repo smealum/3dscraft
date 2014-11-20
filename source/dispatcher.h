@@ -10,6 +10,7 @@ typedef struct
 {
 	producer_s producers[NUM_PRODUCERS];
 	jobQueue_s requestList;
+	int pendingJobs;
 }dispatcher_s;
 
 void initDispatcher(dispatcher_s* d);

@@ -14,6 +14,8 @@ void initDispatcher(dispatcher_s* d)
 	int i; for(i=0;i<NUM_PRODUCERS;i++)initProducer(&d->producers[i]);
 
 	initJobQueue(&d->requestList);
+
+	d->pendingJobs=0;
 }
 
 void updateDispatcher(dispatcher_s* d)
@@ -35,7 +37,8 @@ void updateDispatcher(dispatcher_s* d)
 
 	// if(tmpQueue.length)print("%d job responses\n",tmpQueue.length);
 
-	job_s* j=NULL; while((j=unqueueJob(&tmpQueue))){finalizeJob(j);freeJob(j);}
+	job_s* j=NULL; while((j=unqueueJob(&tmpQueue))){finalizeJob(j);freeJob(j);d->pendingJobs--;}
+	// print("pending jobs %d\n",d->pendingJobs);
 }
 
 void dispatchJob(dispatcher_s* d, job_s* j)
@@ -44,11 +47,15 @@ void dispatchJob(dispatcher_s* d, job_s* j)
 	if(!d)d=&dispatcher;
 
 	queueJob(&d->requestList, j);
+
+	d->pendingJobs++;
 }
 
 void exitDispatcher(dispatcher_s* d)
 {
 	if(!d)d=&dispatcher;
+
+	while(d->pendingJobs){updateDispatcher(d); gspWaitForEvent(GSPEVENT_VBlank0, true);}
 
 	int i; for(i=0;i<NUM_PRODUCERS;i++)exitProducer(&d->producers[i]);
 }

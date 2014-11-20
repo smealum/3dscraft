@@ -17,6 +17,7 @@ void initPlayer(player_s* p)
 	p->acceleration=vect3Df(0.0f, 0.0f, 0.0f);
 	p->headbob=0.0f;
 	p->flying=false;
+	p->destroy=false;
 	p->block=BLOCK_DIRT;
 
 	initCursor(&p->cursor);
@@ -141,7 +142,7 @@ touchPosition previousTouch;
 
 void controlsPlayer(player_s* p, world_s* w)
 {
-	if(!p)return;
+	if(!p || !w)return;
 
 	const u32 PAD=hidKeysHeld();
 	circlePosition cpad, cstick;
@@ -165,31 +166,29 @@ void controlsPlayer(player_s* p, world_s* w)
 	p->block%=BLOCK_NUM;
 	if(!p->block)p->block++;
 
-	if(hidKeysDown()&KEY_ZL)p->flying^=1;
+	if(hidKeysDown()&KEY_ZL || hidKeysDown()&KEY_DUP)p->flying^=1;
+	if(hidKeysDown()&KEY_SELECT)p->destroy^=1;
 
 	if(!p->flying)
 	{
 		if(hidKeysDown()&KEY_L)p->velocity=vaddf(p->velocity, vect3Df(0.0f, 35.0f, 0.0f)); //jumping acts on velocity directly
-
-		if(w)
-		{
-			const vect3Df_s v=vmulf(vz, -5.0f);
-			bool collided=false;
-			u8 dir;
-			vect3Di_s out=performRayMarch(w, p->position, vaddf(p->position, v), NULL, &collided, &dir);
-			if(collided)
-			{
-				p->cursor.active=true;
-				p->cursor.position=out;
-				p->cursor.direction=dir;
-				if(hidKeysDown()&KEY_R)alterWorldBlock(w, vaddi(out, directionVector[dir]), p->block, true);
-				if(hidKeysDown()&KEY_ZR)alterWorldBlock(w, out, BLOCK_AIR, true);
-			}else p->cursor.active=false;
-		}
 	}else{
 		if(PAD&KEY_L)p->acceleration=vaddf(p->acceleration, vmulf(vy, 500.0f));
 		if(PAD&KEY_R)p->acceleration=vaddf(p->acceleration, vmulf(vy, -500.0f));
 	}
+
+	const vect3Df_s v=vmulf(vz, -5.0f);
+	bool collided=false;
+	u8 dir;
+	vect3Di_s out=performRayMarch(w, p->position, vaddf(p->position, v), NULL, &collided, &dir);
+	if(collided)
+	{
+		p->cursor.active=true;
+		p->cursor.position=out;
+		p->cursor.direction=dir;
+		if((!p->flying && hidKeysDown()&KEY_R) || (hidKeysDown()&KEY_DDOWN))alterWorldBlock(w, p->destroy?out:vaddi(out, directionVector[dir]), p->destroy?BLOCK_AIR:p->block, true);
+		if(hidKeysDown()&KEY_ZR)alterWorldBlock(w, p->destroy?vaddi(out, directionVector[dir]):out, p->destroy?p->block:BLOCK_AIR, true);
+	}else p->cursor.active=false;
 
 	if((keysHeld()&KEY_TOUCH)&&!(keysDown()&KEY_TOUCH))
 	{

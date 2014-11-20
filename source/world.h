@@ -78,6 +78,7 @@ void fixChunk(worldChunk_s* wch);
 bool isChunkBusy(worldChunk_s* wch);
 
 void initWorld(world_s* w);
+void flushWorld(world_s* w);
 void exitWorld(world_s* w);
 void translateWorld(world_s* w, vect3Di_s v);
 void generateWorld(world_s* w);
