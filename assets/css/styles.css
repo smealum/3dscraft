@@ -76,14 +76,17 @@ ul {
 .column-right {
 	float: right;
 }
+.column-100 {
+	width: 100%;
+}
 .column-75 {
-	width: 75%;
+	width: 80%;
 }
 .column-50 {
 	width: 50%;
 }
 .column-25 {
-	width: 25%;
+	width: 20%;
 }
 .offscreen {
 	display: none;
