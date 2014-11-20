@@ -4,7 +4,8 @@
 
 #include "font.h"
 
-#define print(...) sprintf(&superStr[strlen(superStr)], __VA_ARGS__); drawBottom()
+// #define print(...) sprintf(&superStr[strlen(superStr)], __VA_ARGS__); drawBottom()
+#define print(...) 
 
 void drawBottom();
 extern char superStr[];

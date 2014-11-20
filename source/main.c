@@ -13,6 +13,7 @@
 #include "player.h"
 #include "text.h"
 #include "configuration.h"
+#include "subscreen.h"
 
 #include "test_vsh_shbin.h"
 #include "terrain_bin.h"
@@ -157,7 +158,8 @@ int main(int argc, char** argv)
 	memset(debugValue, 0x00, sizeof(debugValue));
 
 	aptOpenSession();
-	Result ret=APT_SetAppCpuTimeLimit(NULL, 30);
+	// Result ret=APT_SetAppCpuTimeLimit(NULL, 30);
+	Result ret=APT_SetAppCpuTimeLimit(NULL, 80);
 	aptCloseSession();
 
 	print("%08X\n",(unsigned int)ret);
@@ -184,6 +186,7 @@ int main(int argc, char** argv)
 	initDispatcher(NULL);
 	initChunkPool();
 	initWorld(&world);
+	initSubscreen();
 	print("generating world...\n");
 
 	initPlayer(&player);
@@ -261,6 +264,7 @@ int main(int argc, char** argv)
 		}
 
 		GX_SetMemoryFill(gxCmdBuf, (u32*)gpuOut, 0x68B0D8FF, (u32*)&gpuOut[0x2EE00], 0x201, (u32*)gpuDOut, 0x00000000, (u32*)&gpuDOut[0x2EE00], 0x201);
+		drawSubscreen(&player);
 		gspWaitForPSC0();
 		gfxSwapBuffersGpu();
 
@@ -278,6 +282,7 @@ int main(int argc, char** argv)
 		// drawBottom(); //DEBUG
 	}
 
+	exitSubscreen();
 	exitDispatcher(NULL);
 	exitWorld(&world);
 	exitGeneration();
