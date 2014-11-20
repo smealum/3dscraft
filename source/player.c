@@ -137,12 +137,16 @@ const vect3Di_s directionVector[]=
 	{0,0,-1},
 };
 
+touchPosition previousTouch;
+
 void controlsPlayer(player_s* p, world_s* w)
 {
 	if(!p)return;
 
 	const u32 PAD=hidKeysHeld();
 	circlePosition cpad, cstick;
+	touchPosition touch;
+	hidTouchRead(&touch);
 	hidCircleRead(&cpad);
 	hidCstickRead(&cstick);
 
@@ -187,11 +191,19 @@ void controlsPlayer(player_s* p, world_s* w)
 		if(PAD&KEY_R)p->acceleration=vaddf(p->acceleration, vmulf(vy, -500.0f));
 	}
 
+	if((keysHeld()&KEY_TOUCH)&&!(keysDown()&KEY_TOUCH))
+	{
+		p->deltaOrientation.x+=-(touch.py-previousTouch.py)*1.5f;
+		p->deltaOrientation.y+=(touch.px-previousTouch.px)*1.5f;
+	}
+
 	cstick.dx=(abs(cstick.dx)<5)?0:cstick.dx;
 	cstick.dy=(abs(cstick.dy)<5)?0:cstick.dy;
 
-	rotateMatrixX((float*)p->camera.orientation, (cstick.dy*0.07f)/0x9c, true);
-	rotateMatrixY((float*)p->camera.orientation, (cstick.dx*0.07f)/0x9c, false);
+	p->deltaOrientation.x+=(cstick.dy*0.07f)/2.6f;
+	p->deltaOrientation.y+=(cstick.dx*0.07f)/2.6f;
+	
+	previousTouch=touch;
 }
 
 extern u32 debugValue[];
@@ -251,7 +263,11 @@ void updatePlayer(player_s* p, world_s* w, float timeDelta)
 		else p->velocity=vect3Df(0.0f, 0.0f, 0.0f);
 	}
 
+	rotateMatrixX((float*)p->camera.orientation, p->deltaOrientation.x*timeDelta, true);
+	rotateMatrixY((float*)p->camera.orientation, p->deltaOrientation.y*timeDelta, false);
+
 	p->acceleration=vect3Df(0.0f, 0.0f, 0.0f);
+	p->deltaOrientation=vect3Df(0.0f, 0.0f, 0.0f);
 
 	//world streaming
 	if(w)

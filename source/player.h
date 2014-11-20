@@ -12,6 +12,7 @@ typedef struct
 	vect3Df_s position;
 	vect3Df_s velocity;
 	vect3Df_s acceleration;
+	vect3Df_s deltaOrientation;
 	camera_s camera;
 	cursor_s cursor;
 	float headbob;
