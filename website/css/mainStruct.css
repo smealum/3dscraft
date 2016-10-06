@@ -1,0 +1,241 @@
+@import url(https://fonts.googleapis.com/css?family=Wendy+One);
+@import url(https://fonts.googleapis.com/css?family=Open+Sans:400,300);
+body:before {
+	content: "";
+	position: fixed;
+	top: -10px;
+	left: 0;
+	width: 100%;
+	height: 15px;
+	-webkit-box-shadow: 0px 0px 25px5px rgba(0,0,0,.8);
+	-moz-box-shadow: 0px 0px 25px rgba(0,0,0,.8);
+	box-shadow: 0px 0px 25px rgba(0,0,0,.8);
+	z-index: 100;
+}
+body {
+  margin: 0;
+  font-family: "Open Sans";
+  font-size: 14px;
+  line-height: 20px;
+  color: white;
+  background: #19c0c2;
+  overflow-x: hidden;
+}
+/* general styles */
+html, body {
+  height: 100%;
+  width: 100%;
+}
+
+/* padded section */
+.pad-section {
+  padding: 50px 0;
+}
+.pad-section img {
+  width: 100%;
+}
+
+/* vertical-centered text */
+.text-vcenter {
+  display: table-cell;
+  text-align: center;
+  vertical-align: middle;
+}
+.text-vcenter h1 {
+  font-size: 4.5em;
+  font-weight: 700;
+  margin: 0;
+  padding: 0;
+}
+
+h1{
+	font-size: 76px !important;
+	font-weight: 300 !important;
+	font-style: none;
+}
+h2{
+	font-size: 54px !important;
+	font-weight: 300 !important;
+	font-style: none;
+}
+a{
+	color: white !important;
+}
+ul { list-style-type: none; text-align: center; }
+
+#SCREENSHOTS{
+  background: #f7f7f7; 
+  display: table;
+  min-height: 200px;
+  position: relative;
+  width: 100%;
+}
+
+#HOME {
+  
+}
+#HOME .info{
+	margin-top: 45px;
+}
+
+#SHOWCASE{
+  background-color: #19c0c2;
+  color: white !important;
+}
+#SHOWCASE *{
+	color: white;
+}
+/* HEADER */
+.navbar{
+	box-shadow: none !important;
+	border-bottom:0px;
+	/* Remove the lines above to add a border & shadow under the navbar, for a less flat feel */
+}
+/* FOOTER */
+.btn-flat { 
+  color: #19c0c2 !important; 
+  background-color: white; 
+  border-color: white;
+  border-radius: 2px;
+}
+.carousel-control *{
+	box-shadow: none !important;
+}
+.carousel-caption img{
+	max-height: 45%;
+	max-width: 45%;
+}
+.btn-flat:hover, 
+.btn-flat:focus, 
+.btn-flat:active, 
+.btn-flat.active, 
+.open .dropdown-toggle.btn-flat { 
+  color: black; 
+  background-color: white; 
+  border-color: white; 
+} 
+.btn-flat:active, 
+.btn-flat.active, 
+.open .dropdown-toggle.btn-flat { 
+  background-image: none; 
+} 
+.btn-flat.disabled, 
+.btn-flat[disabled], 
+fieldset[disabled] .btn-flat, 
+.btn-flat.disabled:hover, 
+.btn-flat[disabled]:hover, 
+fieldset[disabled] .btn-flat:hover, 
+.btn-flat.disabled:focus, 
+.btn-flat[disabled]:focus, 
+fieldset[disabled] .btn-flat:focus, 
+.btn-flat.disabled:active, 
+.btn-flat[disabled]:active, 
+fieldset[disabled] .btn-flat:active, 
+.btn-flat.disabled.active, 
+.btn-flat[disabled].active, 
+fieldset[disabled] .btn-flat.active { 
+  background-color: white; 
+  border-color: white; 
+} 
+ 
+.btn-flat .badge { 
+  color: white; 
+  background-color: white; 
+}
+footer {
+   position:fixed;
+   left: 0px;
+   bottom:0px;
+   height:30px;
+   width:100%;
+   z-index: 999;
+   text-align: left;
+   font-size: 18px;
+   line-height: 30px;
+   margin-top:5px;
+   font-family: "Open Sans", Helvetica, Arial, Arial;
+   font-weight: 300;
+   background: #19c0c2;
+   color: white;
+}
+* html footer {
+   position:absolute;
+   top:expression((0-(footer.offsetHeight)+(document.documentElement.clientHeight ? document.documentElement.clientHeight : document.body.clientHeight)+(ignoreMe = document.documentElement.scrollTop ? document.documentElement.scrollTop : document.body.scrollTop))+'px');
+}
+
+footer .content{
+	margin-top: 0;
+	margin-left: 15px;
+}
+
+footer a{
+	color: white;
+	text-decoration: underline;
+}
+footer a:hover{
+	color: lightgray;
+}
+/* MISC */
+hr{
+	width: 85%;
+	height:3px;
+	border:none;
+	color:white;
+	background-color:white;
+}
+.WayPoint{
+	
+}
+.Product{
+	max-width: 85%;
+	max-height: 35%;
+	z-index: 25;
+}
+.carousel {
+  height: 100%;
+  margin-bottom: 15px;
+}
+.carousel-caption {
+  z-index: 10;
+  color: black;
+  text-shadow: none;
+}
+.carousel-indicators li {
+  background-color: #f7f7f7;
+}
+.carousel-indicators .active {
+  background-color: #19c0c2;
+}
+.carousel .item {
+  height: 450px;
+  background-color: white;
+}
+.carousel-inner > .item > img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  min-width: 100%;
+  height: 500px;
+}
+.carousel-control.left, .carousel-control.right {
+    background-image: none !important;
+	color: white;
+}
+/* TABLETS & MOBILES */
+@media (max-width: 767px) { 
+	#HOME {
+	  margin-top: 20px;
+	}
+	h1{
+		font-size: 46px !important;
+	}
+	h2{
+		font-size: 32px !important;
+	}
+	h3{
+		font-size: 22px !important;
+	}
+	p{
+		font-size: 18px !important;
+	}
+}

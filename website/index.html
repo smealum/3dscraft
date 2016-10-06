@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" manifest="/Manifest.ashx">
+<head runat="server">
+	<!-- SEO -->
+	<meta name="Title" content="3DSCraft" />
+	<meta name="description" content="3DSCraft is a free Minecraft clone for the Nintendo 3DS" />
+    <meta name="keywords" content="3DSCraft, Smealum, 3DS, DSCraft, SSSpwn" />
+	<meta name="AUTHOR" CONTENT="Smealum">
+	<meta name="COPYRIGHT" CONTENT="2014-2015 Smealum">
+	<meta name="google-site-verification" content="-" />
+	<meta name="msvalidate.01" content="-" />
+    <meta charset="utf-8" />
+	
+	<!-- METADATA -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<meta http-equiv="X-UA-Compatible" content="IE=1,chrome=1,safari=edge">
+	<link rel="shortcut icon" type="image/ico" href="favicon.ico" />
+	
+	<!-- STYLESHEETS -->
+	<link href="css/bootstrap.css" rel="stylesheet"/>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap-theme.min.css">
+    <link href="css/mainStruct.css" rel="stylesheet"/>
+	
+	<!-- IN CASE OF IE 9 -->
+	<!--[if lt IE 9]> 
+ 		<script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+		<script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+ 	<![endif]-->
+	
+	<!-- PLATFORM SPECIFIC -->
+		<!-- MICROSOFT -->
+		<meta name="application-name" content="3DSCraft" />
+		<link rel="dns-prefetch" href="http://smealum.net/"/>
+		<link rel="prerender" href="http://smealum.net" />
+		
+		<!-- IE SITE PIN -->
+		<meta name="msapplication-starturl" content="http://smealum.net/3dscraft" />
+		<meta name="msapplication-navbutton-color" content="#1009FFF" />
+		<meta name="msapplication-window" content="width=1024;height=768" />
+		<meta name="msapplication-tooltip" content="Visit 3DSCraft" />
+        <meta content="name=Home;action-uri=./index.html;icon-uri=./favicon.ico" name="msapplication-task" />
+
+
+		<!-- LIVE TILE -->
+		<meta name="msapplication-TileColor" content="#009FFF" />
+		<meta name="msapplication-square70x70logo" content="/LiveTiles/smalltile.png" />
+		<meta name="msapplication-square150x150logo" content="/LiveTiles/mediumtile.png" />
+		<meta name="msapplication-wide310x150logo" content="/LiveTiles/widetile.png" />
+		<meta name="msapplication-square310x310logo" content="/LiveTiles/largetile.png" />
+		
+		<!-- APPLE -->
+		<link rel="apple-touch-icon" href="/img/Apple/touch-icon-iphone.png" /> 
+        <link rel="apple-touch-icon" sizes="76x76" href="/img/Apple/touch-icon-ipad.png" /> 
+        <link rel="apple-touch-icon" sizes="120x120" href="/img/Apple/touch-icon-iphone-retina.png" />
+        <link rel="apple-touch-icon" sizes="152x152" href="/img/Apple/touch-icon-ipad-retina.png" />
+		<link rel="apple-touch-startup-image" href="/img/Apple/startup.png" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="white" />
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-title" content="3DSCraft" />
+		
+		<!-- ANDROID -->
+		<link rel="icon" sizes="128x128" href="/img/Apple/touch-icon-iphone-retina.png" />
+
+    <title>3DSCraft</title>
+</head>
+<body>
+	<div class="WayPoint" id="HOMEwp"></div>
+	<header>
+		<nav class="navbar navbar-default navbar-fixed-top pixelated" role="navigation" style="background: url('img/grass.jpg') repeat-x left top, url('img/dirt.jpg') repeat !important; background-size: 5%, 5% !important;"> 
+		  <div class="container-fluid">
+			<div class="navbar-header">
+			  <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse-main">
+				<span class="sr-only">Toggle navigation</span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+			  </button>
+			  <a class="navbar-brand" style="color:white" href="#">
+			    3DSCraft 
+			  </a>
+
+			</div>
+			<div class="collapse navbar-collapse" id="navbar-collapse-main">
+			  <ul class="nav navbar-nav navbar-right">
+				<li><a data-scroll style="color:white" href="#HOMEwp">HOME</a></li>
+				<li><a data-scroll style="color:white" href="#SCREENSHOTSwp">SCREENSHOTS</a></li>
+				<li><a data-scroll style="color:white" href="#DOWNLOADwp">DOWNLOAD</a></li>
+			  </ul>
+			</div>
+		  </div>
+		</nav>
+	</header>
+	<div id="content">
+		<!-- HOME -->
+		<div id="HOME" class="pad-section" style="background: url('img/stone.jpg') repeat fixed !important; background-size: 5% !important;">
+		  <div class="container">
+			<div class="row">
+			  <div class="col-sm-12 text-center info">
+				<h1 style="color: white;">3DSCraft</h1> <hr />
+				<div class="lead" style="font-weight: 400;">
+					<p>3DSCraft is a voxel game in style of the popular game <a href="http://minecraft.net">"Minecraft"</a> created for the Nintendo 3DS.
+						It is currently in a very early stage and will become more complex in the future.</p>
+					<h2>Features</h2>
+					<ul>
+						<li>Infinity real time generating worlds</li>
+						<li>Full creative mode with a growing amount of Blocks to choose from</li>
+						<li>A touch screen UI</li>
+						<li>With even more</li>
+					</ul>
+					<h2>Credits</h2>
+					<ul>
+						<li>Smea - The main developer</li>
+						<li>Filiph Sandström(@filfat) - The website</li>
+					</ul>
+				</div>
+			  </div>
+			</div>
+		  </div>
+		</div>
+		<!-- /HOME -->
+		<!-- SCREENSHOTS -->
+		<div id="SCREENSHOTS" class="carousel slide" data-ride="carousel" style="background: url('img/stone.jpg') repeat fixed !important; background-size: 5% !important;">
+			<div class="WayPoint" id="SCREENSHOTSwp"></div>
+	      <!-- Indicators -->
+	      <ol class="carousel-indicators" style="">
+	        <li data-target="#SCREENSHOTS" data-slide-to="0" class="active"></li>
+	        <li data-target="#SCREENSHOTS" data-slide-to="1"></li>
+	        <li data-target="#SCREENSHOTS" data-slide-to="2"></li>
+	      </ol>
+	      <div class="carousel-inner" role="listbox">
+	        <div class="item active" style="background: url('img/screenshot.png') repeat fixed center center !important; background-size: cover !important;">
+	          <div class="container">
+	            <div class="carousel-caption">
+	            </div>
+	          </div>
+	        </div>
+	        <div class="item" style="background: url('img/screenshot2.png') repeat fixed center center !important; background-size: cover !important;">
+	          <div class="container">
+	            <div class="carousel-caption">
+	            </div>
+	          </div>
+	        </div>
+	        <div class="item" style="background: url('img/screenshot3.png') repeat fixed center center !important; background-size: cover !important;">
+	          <div class="container">
+	            <div class="carousel-caption">
+	            </div>
+	          </div>
+	        </div>
+	      </div>
+	      <a class="left carousel-control" href="#SCREENSHOTS" role="button" data-slide="prev">
+	        <span class="glyphicon glyphicon-chevron-left"></span>
+	        <span class="sr-only">Previous</span>
+	      </a>
+	      <a class="right carousel-control" href="#SCREENSHOTS" role="button" data-slide="next">
+	        <span class="glyphicon glyphicon-chevron-right"></span>
+	        <span class="sr-only">Next</span>
+	      </a>
+		  <div class="WayPoint" id="DOWNLOADwp"></div>
+	    </div>
+		<!-- /SCREENSHOTS -->
+		
+		<!-- TEAM -->
+		<div id="SHOWCASE" class="pad-section">
+		  <div class="container">
+			<h1 class="text-center">Download</h1> <hr />
+			<div class="row text-center">
+			  <div class="row">
+				  <div class="col-sm-4 col-xs-12">
+					<p><a class="btn btn-lg btn-flat" href="#" role="button">Latest Release</a></p>
+					<p>This is the most stable and recommended build, use this if you want 99% stability! For general bug reporting please use this build as the less stable one might have newly created nasty bugs that will be fixed before release.</p>
+				  </div>
+				  <div class="col-sm-4 col-xs-12">
+					<p><a class="btn btn-lg btn-flat" href="#" role="button">Developer Build</a></p>
+					<p>This build is a lot less stable than the release builds, however developer builds allow you to test out the next release in a somewhat stable way.</p>
+				  </div>
+				  <div class="col-sm-4 col-xs-12">
+					<p><a class="btn btn-lg btn-flat" href="http://build.filfatstudios.com:8080/job/3DSCraft/" role="button">Nigtly Build</a></p>
+					<p>This build is the one that is most likely going to crash, bring ugly bugs to the table and should only be used for testing purpose, however if you look away from all of that so will this build bring you the latest changes and fixes.</p>
+				  </div>
+			  </div>
+			</div>
+		  </div>
+		</div>
+		<!-- /TEAM -->
+
+	</div>
+	<footer>
+		<div class="content">
+			&copy;Smealum 2014-2015; Website designed & developed by <a href="http://www.filfatstudios.com">filfat Studio's</a>
+		</div>
+	</footer>
+	
+	<!-- SCRIPTS  -->
+	<script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
+	<script src="js/smooth-scroll.js"></script>
+	<script>
+    	smoothScroll.init({
+	    speed: 500, // Integer. How fast to complete the scroll in milliseconds
+	    easing: 'easeInOutQuint', // Easing pattern to use
+	    updateURL: false
+	});
+	$(function () {
+	  $('[data-toggle="tooltip"]').tooltip();
+	})
+	$("[rel=tooltip]").tooltip({html:true});
+	</script>
+</body>
+</html>
