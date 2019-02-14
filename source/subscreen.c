@@ -36,6 +36,9 @@ void drawBlockSoft(gfxScreen_t screen, gfx3dSide_t side, u8* blockData, s16 x, s
 		const int bj=(j-y)>>f;
 		for(i=x; i<x+(BLOCK_SIZE<<f); i++)
 		{
+			if (i >= fbWidth) { continue; }
+			if (j >= fbHeight) { continue; }
+
 			const int bi=(i-x)>>f;
 			const int v=((i)+(j)*fbWidth)*3;
 			const int v2=((xOffset+bj)+(yOffset+BLOCK_SIZE-1-bi)*256)*4;
